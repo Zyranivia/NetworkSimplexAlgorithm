@@ -19,7 +19,7 @@ Mittlere Priorität:
 
 Niedrige Priorität:
 - [ ] Mehr Pivot-Algorithmen
-- [ ] Laufzeitoptimierung (vor allem Berechnung von c.flowPerCost)
+- [ ] Laufzeitoptimierung (vor allem Berechnung von c.costPerFlow)
 
 ## Fahrplan
 1. Algorithmus vollenden und testen
