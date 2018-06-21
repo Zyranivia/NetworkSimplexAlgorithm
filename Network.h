@@ -68,6 +68,8 @@ public:
     bool addFlow(std::vector<size_t>& path, intmax_t flow);
     //takes a circle
     bool changeFlow(Circle& c, intmax_t flow);
+    //clears network from all flow
+    void clean();
 
     intmax_t getFlow() {return flow;}
     intmax_t getCost() {return cost;}

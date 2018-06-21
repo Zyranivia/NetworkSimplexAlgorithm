@@ -179,7 +179,7 @@ bool Network::addFlow(std::vector<size_t>& path, intmax_t f) {
     nodes.find(path.front())->second.b_value -= f;
     nodes.find(path.back())->second.b_value += f;
 
-    flow += f;
+    this->flow += f;
     return true;
 }
 
@@ -209,6 +209,26 @@ bool Network::changeFlow(Circle& c, intmax_t f) {
     return true;
 }
 
+//probably not optimized, but not relevant in this context
+void Network::clean() {
+    for (std::pair<const std::tuple<size_t, size_t, bool>, Edge>& keypair : edges) {
+        //only nonresidual edges are regarded
+        if (not keypair.second.isResidual) {continue;}
+
+        intmax_t f = keypair.second.flow;
+        //nothing to do here
+        if (f == 0) {continue;}
+
+        //reset flow, change b_values
+        keypair.second.flow = 0;
+        nodes.find(keypair.second.node0)->second.b_value += f;
+        nodes.find(keypair.second.node1)->second.b_value -= f;
+    }
+    this->flow = 0;
+    this->cost = 0;
+}
+/*
+//inhaltlich falsch, aber unklar, inwiefern die Funktion gebraucht wird
 void Network::unite (const Network& n) {
     size_t translativeFactor = this->largestNodeID + 1;
 
@@ -221,4 +241,4 @@ void Network::unite (const Network& n) {
                           e.second.cost, e.second.capacity));
     }
 }
-
+*/

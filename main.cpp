@@ -33,13 +33,6 @@ int main() {
         }
     }
 
-    int anzahl = 99;
-    Network safety_first = test;
-    for (int i = 0; i < anzahl; i++) {
-        test.unite(safety_first);
-    }
-    std::cout << "kleben done" << std::endl;
-
     Algorithm a = Algorithm(test, pivotMax);
     a.solution();
     //test.print();

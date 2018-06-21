@@ -149,8 +149,12 @@ bool Algorithm::solution (bool modus) {
 
     //if there’s flow on the artifical node left
     //the network is infeasible
-    return n.deleteNode(artificialNode);
-    //TODO n.clean, n.deleteNode(artNode)
+    bool feasible = n.deleteNode(artificialNode);
+    if (not feasible) {
+        n.clean();
+        n.deleteNode(artificialNode);
+    }
+    return feasible;
 }
 
 //returns a (real) circle, if tree + edge is not a tree anymore
@@ -278,6 +282,6 @@ bool Algorithm::optimize() {
     //std::cout << " wird zu " << circles[chosenOneId].getEdges()[0].first << "-" << circles[chosenOneId].getEdges()[0].second << std::endl;
 
     this->iterations += 1;
-    if (iterations % 100 == 0) {std::cout << "!";}
+    //if (iterations % 100 == 0) {std::cout << "!";}
     return true;
 }
