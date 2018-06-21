@@ -213,14 +213,14 @@ bool Network::changeFlow(Circle& c, intmax_t f) {
 void Network::clean() {
     for (std::pair<const std::tuple<size_t, size_t, bool>, Edge>& keypair : edges) {
         //only nonresidual edges are regarded
-        if (not keypair.second.isResidual) {continue;}
+        if (keypair.second.isResidual) {continue;}
 
         intmax_t f = keypair.second.flow;
         //nothing to do here
         if (f == 0) {continue;}
 
         //reset flow, change b_values
-        keypair.second.flow = 0;
+        keypair.second.changeFlow(-f);
         nodes.find(keypair.second.node0)->second.b_value += f;
         nodes.find(keypair.second.node1)->second.b_value -= f;
     }
