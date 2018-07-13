@@ -14,7 +14,7 @@ Hohe Priorität:
 
 Mittlere Priorität:
 - [ ] Null-Initialisierung (statt extrem teure artifical edges)
-- [ ] Network::clean() implementieren
+- [x] Network::clean() implementieren
 - [ ] Network -> txt und zurück implementieren
 
 Niedrige Priorität:
