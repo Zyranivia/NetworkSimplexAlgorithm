@@ -44,7 +44,7 @@ bool Algorithm::solution (bool modus) {
     Node artNode_Tree = Node(artificialNode, 0);
 
     for (size_t source : n.sources) {
-        n.addEdge(Edge(source, artificialNode, maxCost, n.sumSource));
+        n.addEdge(Edge(source, artificialNode, maxCost, n.sumSource + 1));
 
         artNode_Tree.neighbours.insert(source);
         Node source_Tree = Node(source, 0);
@@ -52,7 +52,7 @@ bool Algorithm::solution (bool modus) {
         tree.push_back(source_Tree);
     }
     for (size_t sink : n.sinks) {
-        n.addEdge(Edge(artificialNode, sink, maxCost, n.sumSink));
+        n.addEdge(Edge(artificialNode, sink, maxCost, n.sumSink + 1));
 
         artNode_Tree.neighbours.insert(sink);
         Node sink_Tree = Node(sink, 0);
@@ -132,19 +132,27 @@ bool Algorithm::solution (bool modus) {
         //don’t create circle for residual edge
         if (edge.second.isResidual) {continue;}
 
-        Circle temp = findCircle(edge.second.node0, edge.second.node1, tree);
+        Circle temp = findCircle(edge.second.node0, edge.second.node1, edge.second.isResidual, tree);
         if (temp.size() > 2) {circles.push_back(temp);}
     }
+
+    //add invert edges again
+    //also add circles (trivial ones) for them
+    for (Edge edge : toBeInsertedLaterOn) {
+        n.addEdge(edge);
+        Circle temp = Circle();
+        temp.addEdge(edge.node0, edge.node1, edge.isResidual);
+        temp.addEdge(edge.node1, edge.node0, edge.isResidual);
+        circles.push_back(temp);
+    }
+
+    //std::cout << "Kreise: " << circles.size() << std::endl;
+
     //create degenerateIteration
     degenerateIteration.resize(circles.size());
     for (uintmax_t i = 0; i < degenerateIteration.size(); i++) {degenerateIteration[i] = false;}
 
-    //add invert edges again
-    for (Edge edge : toBeInsertedLaterOn) {
-        n.addEdge(edge);
-    }
-
-    //solve
+    //solve with artificial node
     while (optimize());
 
     //if there’s flow on the artifical node left
@@ -158,7 +166,7 @@ bool Algorithm::solution (bool modus) {
 }
 
 //returns a (real) circle, if tree + edge is not a tree anymore
-Circle Algorithm::findCircle(size_t node0, size_t node1, const std::vector<Node>& tree) {
+Circle Algorithm::findCircle(size_t node0, size_t node1, bool isResidual, const std::vector<Node>& tree) {
 
     //create map nodeId->tree for constant access
     size_t mini = n.largestNodeID, maxi = 0;
@@ -209,8 +217,10 @@ Circle Algorithm::findCircle(size_t node0, size_t node1, const std::vector<Node>
         return c;
     }
 
-    //construct circle to return
-    for (size_t i = 1; i < path.size(); i++) {
+    //add first edge manually, because reverse edge could be existent
+    c.addEdge(node0, node1, isResidual);
+    //construct circle to return from tree edges
+    for (size_t i = 2; i < path.size(); i++) {
         c.addEdge(path[i-1], path[i], n.getEdges().count(std::forward_as_tuple(path[i-1], path[i], true)));
     }
     return c;
@@ -222,6 +232,7 @@ Circle Algorithm::findCircle(size_t node0, size_t node1, const std::vector<Node>
 
 //chooses a circle via pivot function and iterates flow through it
 bool Algorithm::optimize() {
+    //size_t temp = 0;
     for (Circle& c : circles) {
         c.costPerFlow = 0;
         Edge e = n.getEdges().find(std::forward_as_tuple(c.getEdges()[0].first, c.getEdges()[0].second, c.getIsResidual()[0]))->second;
@@ -233,26 +244,42 @@ bool Algorithm::optimize() {
             c.costPerFlow += e.cost;
         }
         c.flow = minFlow;
+        //temp++;
     }
+
+    /*std::cout << std::endl;
+    for (int i = 0; i < circles[4].size(); i++) {
+        std::cout << circles[4].getEdges()[i].first << "-" << circles[4].getEdges()[i].second << " (" <<
+            circles[4].getIsResidual()[i] << ")| ";
+    }
+    std::cout << std::endl;*/
 
     size_t chosenOneId = pivot(circles);
     //degenerate iterations change the tree
     if (chosenOneId == circles.size()) {
-            for (uintmax_t i = 0; i < degenerateIteration.size(); i++) {
+        return false;
+        //TODO could below should not be necessary
+            /*for (uintmax_t i = 0; i < degenerateIteration.size(); i++) {
                 if (circles[i].flow != 0 or degenerateIteration[i]) {continue;}
                 chosenOneId = i;
                 degenerateIteration[i] = true;
                 break;
             }
-            if (chosenOneId == circles.size()) {return false;}
+            if (chosenOneId == circles.size()) {return false;}*/
     }
     //reset degenerateIteration (could be done less often …)
     else {for (uintmax_t i = 0; i < degenerateIteration.size(); i++) {degenerateIteration[i] = false;}}
 
-    /*std::cout << circles[chosenOneId].flow << " --> ";
-    std::cout << circles[chosenOneId].getEdges()[0].first << "-" << circles[chosenOneId].getEdges()[0].second ;*/
+    //std::cout << "(" << chosenOneId << ") " << circles[chosenOneId].flow << " --> ";
+    //std::cout << circles[chosenOneId].getEdges()[0].first << "-" << circles[chosenOneId].getEdges()[0].second;
 
     Circle& chosenOne = circles[chosenOneId];
+
+    /*for (int i = 0; i < chosenOne.size(); i++) {
+        std::cout << chosenOne.getEdges()[i].first << "-" << chosenOne.getEdges()[i].second << " (" << chosenOne.getIsResidual()[0] << ") | ";
+    }
+    std::cout << std::endl;*/
+
     n.changeFlow(chosenOne, chosenOne.flow);
 
     //reorder the circle such that the first edge beginning from the end
@@ -261,6 +288,7 @@ bool Algorithm::optimize() {
     for (size_t i = chosenOne.size() - 1; i < chosenOne.size(); i--) {
         Edge e = n.getEdges().find(std::forward_as_tuple(chosenOne.getEdges()[i].first, chosenOne.getEdges()[i].second,
                                                          chosenOne.getIsResidual()[i]))->second;
+
         //new first edge, same direction
         if (e.flow == 0) {
             chosenOne.rotateBy(i, false);

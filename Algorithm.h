@@ -18,7 +18,7 @@ public:
 
     size_t artificialNode;
 
-private:
+//private:
     intmax_t iterations = 0;
     //collect circles instead of calculating all the time
     std::vector<Circle> circles;
@@ -29,7 +29,7 @@ private:
 
     //it is assumed that for no edge (i,j) in the tree
     //there is an edge (j,i)
-    Circle findCircle(size_t node0, size_t node1, const std::vector<Node>& tree);
+    Circle findCircle(size_t node0, size_t node1, bool isResidual, const std::vector<Node>& tree);
     //false if no optimization was possible
     bool optimize();
 };

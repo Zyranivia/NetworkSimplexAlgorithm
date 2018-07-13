@@ -14,7 +14,7 @@ public:
     void addEdge(size_t node0, size_t node1, bool isResidual);
 
     const std::vector<std::pair<size_t, size_t>>& getEdges();
-    const std::vector<bool>& getIsResidual();
+    const std::vector<char>& getIsResidual();
     size_t size();
 
     //function is needed for Network simplex
@@ -30,7 +30,8 @@ public:
 private:
     size_t length = 0;
     std::vector<std::pair<size_t, size_t>> edges;
-    std::vector<bool> isResidual;
+    //char vector, because bool vector is broken
+    std::vector<char> isResidual;
 };
 
 #endif // CIRCLE_H_INCLUDED
