@@ -9,8 +9,8 @@ Der zweite Teil der BA, sprich Grapherzeugung, ist noch nicht implementiert.
 
 ## To-Do-Liste
 Hohe Priorität:
-- [ ] Problem der degenerierten Iterationen
-- [ ] Kanten (w,v) erlauben, wenn (v,w) schon enthalten ist
+- [x] Problem der degenerierten Iterationen
+- [x] Kanten (w,v) erlauben, wenn (v,w) schon enthalten ist
 
 Mittlere Priorität:
 - [ ] Null-Initialisierung (statt extrem teure artifical edges)
