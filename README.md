@@ -10,7 +10,7 @@ Der zweite Teil der BA, sprich Grapherzeugung, ist bisher rudimentär implementi
 ## To-Do-Liste
 Hohe Priorität:
 - [ ] Null-Initialisierung (statt extrem teure artifical edges)
-- [ ] random-noise Funktion
+- [x] random-noise Funktion
 
 Mittlere Priorität:
 - [ ] Laufzeitoptimierung (vor allem Berechnung von c.costPerFlow)
