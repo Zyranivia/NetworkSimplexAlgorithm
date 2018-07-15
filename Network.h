@@ -43,6 +43,8 @@ public:
     Network(size_t noOfNodes);
     void print();
 
+    void randomNoise(double phi);
+
     //return 0 if there’s a parallel edge
     //adds residual edge
     bool addEdge(Edge e);
@@ -66,6 +68,7 @@ public:
     bool addFlow(std::vector<size_t>& path, intmax_t flow);
     //takes a circle
     bool changeFlow(Circle& c, intmax_t flow);
+
     //clears network from all flow
     void clean();
 

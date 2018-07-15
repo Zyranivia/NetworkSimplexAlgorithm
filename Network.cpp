@@ -1,5 +1,7 @@
 #include <algorithm>
 #include <iostream>
+#include <random>
+#include <time.h>
 
 #include "Network.h"
 
@@ -25,6 +27,29 @@ void Network::print() {
         std::cout << x.second.id << " b: " << x.second.b_value << " | ";
     }
     std::cout << std::endl << "cost: " << cost << " | flow: " << flow << std::endl;
+}
+
+void Network::randomNoise(double phi) {
+    if (phi <= 0) {return;}
+    std::mt19937 rng;
+    rng.seed(static_cast<long unsigned int>(time(0)));
+    std::uniform_real_distribution<double> rand(0, phi);
+
+    for (std::pair<const std::tuple<size_t, size_t, bool>, Edge>& key : edges) {
+        if (key.second.isResidual) {continue;}
+        double eps0 = rand(rng), eps1 = rand(rng);
+        intmax_t addToNode = (intmax_t) (eps0*((double) key.second.capacity));
+        intmax_t addToEdge = addToNode + (intmax_t) (eps1*((double) key.second.capacity));
+
+        nodes.find(key.second.node0)->second.b_value += addToNode;
+        nodes.find(key.second.node1)->second.b_value -= addToNode;
+
+        key.second.capacity += addToEdge;
+        std::tuple<size_t, size_t, bool> keyInvert = invertKey(key.first);
+        Edge& edgeInvert = edges.find(keyInvert)->second;
+        edgeInvert.capacity += addToEdge;
+        edgeInvert.flow = edgeInvert.capacity;
+    }
 }
 
 //returns false if there’s a parallel edge
