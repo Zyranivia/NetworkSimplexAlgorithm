@@ -43,8 +43,6 @@ public:
     Network(size_t noOfNodes);
     void print();
 
-    void unite (const Network& n);
-
     //return 0 if there’s a parallel edge
     //adds residual edge
     bool addEdge(Edge e);
@@ -52,7 +50,7 @@ public:
     //used to add sources and sinks
     size_t addNode(intmax_t b_value = 0);
 
-    size_t getNoOfNodes ();
+    size_t getNoOfNodes () const;
     const std::map<std::tuple<size_t, size_t, bool>, Edge, custComp>& getEdges() const;
     const std::map<size_t, Node, std::less<size_t>>& getNodes() const;
 

@@ -255,20 +255,28 @@ bool Algorithm::optimize() {
     std::cout << std::endl;*/
 
     size_t chosenOneId = pivot(circles);
-    //degenerate iterations change the tree
+    //if there is no negative circle
     if (chosenOneId == circles.size()) {
         return false;
-        //TODO could below should not be necessary
-            /*for (uintmax_t i = 0; i < degenerateIteration.size(); i++) {
+        //TODO below should not be necessary
+        //degenerate iterations change the tree
+        /*degenerated = true;
+            for (uintmax_t i = 0; i < degenerateIteration.size(); i++) {
                 if (circles[i].flow != 0 or degenerateIteration[i]) {continue;}
                 chosenOneId = i;
                 degenerateIteration[i] = true;
                 break;
             }
-            if (chosenOneId == circles.size()) {return false;}*/
+            if (chosenOneId == circles.size()) {return false;}
     }
     //reset degenerateIteration (could be done less often …)
-    else {for (uintmax_t i = 0; i < degenerateIteration.size(); i++) {degenerateIteration[i] = false;}}
+    else {
+        if (degenerated) {
+            //std::cout << "Das hier sollte nicht passieren";
+            for (uintmax_t i = 0; i < degenerateIteration.size(); i++) {degenerateIteration[i] = false;}
+            degenerated = false;
+        }*/
+    }
 
     //std::cout << "(" << chosenOneId << ") " << circles[chosenOneId].flow << " --> ";
     //std::cout << circles[chosenOneId].getEdges()[0].first << "-" << circles[chosenOneId].getEdges()[0].second;

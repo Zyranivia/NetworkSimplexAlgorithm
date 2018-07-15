@@ -27,7 +27,7 @@ void Network::print() {
     std::cout << std::endl << "cost: " << cost << " | flow: " << flow << std::endl;
 }
 
-//returns 0 if there’s a parallel edge
+//returns false if there’s a parallel edge
 bool Network::addEdge(Edge e) {
     size_t node0 = e.node0;
     size_t node1 = e.node1;
@@ -73,7 +73,7 @@ size_t Network::addNode(intmax_t b_value) {
     return largestNodeID;
 }
 
-size_t Network::getNoOfNodes () {
+size_t Network::getNoOfNodes () const {
     return nodes.size();
 }
 

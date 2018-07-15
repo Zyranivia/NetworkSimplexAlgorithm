@@ -24,6 +24,7 @@ public:
     std::vector<Circle> circles;
     //reminder which degenerate iterations already have taken place
     std::vector<bool> degenerateIteration;
+    //bool degenerated = false;
     Network& n;
     size_t (*pivot)(const std::vector<Circle>&);
 
