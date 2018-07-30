@@ -35,11 +35,18 @@ void Network::randomNoise(double phi) {
     rng.seed(static_cast<long unsigned int>(time(0)));
     std::uniform_real_distribution<double> rand(0, phi);
 
+    //find max capacity
+    intmax_t maxCap = 0;
+    for (std::pair<const std::tuple<size_t, size_t, bool>, Edge>& key : edges) {
+        if (key.second.isResidual) {continue;}
+        if (key.second.capacity > maxCap) {maxCap = key.second.capacity;}
+    }
+
     for (std::pair<const std::tuple<size_t, size_t, bool>, Edge>& key : edges) {
         if (key.second.isResidual) {continue;}
         double eps0 = rand(rng), eps1 = rand(rng);
-        intmax_t addToNode = (intmax_t) (eps0*((double) key.second.capacity));
-        intmax_t addToEdge = addToNode + (intmax_t) (eps1*((double) key.second.capacity));
+        intmax_t addToNode = (intmax_t) (eps0*((double) maxCap));
+        intmax_t addToEdge = addToNode + (intmax_t) (eps1*((double) maxCap));
 
         nodes.find(key.second.node0)->second.b_value += addToNode;
         nodes.find(key.second.node1)->second.b_value -= addToNode;
@@ -237,8 +244,12 @@ bool Network::changeFlow(Circle& c, intmax_t f) {
 //probably not optimized, but not relevant in this context
 void Network::clean() {
     for (std::pair<const std::tuple<size_t, size_t, bool>, Edge>& keypair : edges) {
-        //only nonresidual edges are regarded
-        if (keypair.second.isResidual) {continue;}
+        //if edges is residual, only change flow (if necessary)
+        if (keypair.second.isResidual) {
+            intmax_t f = keypair.second.flow;
+            keypair.second.changeFlow(keypair.second.capacity - f);
+            continue;
+        }
 
         intmax_t f = keypair.second.flow;
         //nothing to do here
@@ -252,18 +263,3 @@ void Network::clean() {
     this->flow = 0;
     this->cost = 0;
 }
-/*
-//inhaltlich falsch, aber unklar, inwiefern die Funktion gebraucht wird
-void Network::unite (const Network& n) {
-    size_t translativeFactor = this->largestNodeID + 1;
-
-    for (const std::pair<size_t, Node>& key : n.getNodes()) {
-        this->addNode(key.second.b_value);
-    }
-    for (const std::pair<const std::tuple<size_t, size_t, bool>, Edge>& e : n.getEdges()) {
-        if (e.second.isResidual) {continue;}
-        this->addEdge(Edge(e.second.node0 + translativeFactor, e.second.node1 + translativeFactor,
-                          e.second.cost, e.second.capacity));
-    }
-}
-*/

@@ -27,11 +27,11 @@ RandomGraph::RandomGraph(size_t maxNoNodes, intmax_t maxFlow, intmax_t maxCost) 
     std::vector<intmax_t> b_values(nodes, 0);
     while (sumSources != flow or sumSinks != flow) {
         size_t temp = nodesRng(rng);
-        if (temp <= threshold and sumSources != flow) {
+        if (temp < threshold and sumSources != flow) {
             b_values[temp] += 1;
             sumSources +=1;
         }
-        if (temp > threshold and sumSinks != flow) {
+        if (temp >= threshold and sumSinks != flow) {
             b_values[temp] -= 1;
             sumSinks +=1;
         }

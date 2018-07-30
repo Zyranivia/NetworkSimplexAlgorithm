@@ -22,6 +22,9 @@ intmax_t Algorithm::noOfIter () {
 }
 
 bool Algorithm::solution (bool modus) {
+    //all variables to initial setting
+    circles.clear();
+    iterations = 0;
 
     //high cost edge
     intmax_t maxCost = 0;
@@ -147,10 +150,6 @@ bool Algorithm::solution (bool modus) {
     }
 
     //std::cout << "Kreise: " << circles.size() << std::endl;
-
-    //create degenerateIteration
-    degenerateIteration.resize(circles.size());
-    for (uintmax_t i = 0; i < degenerateIteration.size(); i++) {degenerateIteration[i] = false;}
 
     //solve with artificial node
     while (optimize());

@@ -16,15 +16,14 @@ public:
     bool solution (bool modus = true);
     intmax_t noOfIter ();
 
-    size_t artificialNode;
-
 //private:
     intmax_t iterations = 0;
+private:
     //collect circles instead of calculating all the time
     std::vector<Circle> circles;
-    //reminder which degenerate iterations already have taken place
-    std::vector<bool> degenerateIteration;
-    //bool degenerated = false;
+
+    size_t artificialNode;
+
     Network& n;
     size_t (*pivot)(const std::vector<Circle>&);
 
