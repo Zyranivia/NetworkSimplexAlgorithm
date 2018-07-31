@@ -69,6 +69,8 @@ public:
     //takes a circle
     bool changeFlow(Circle& c, intmax_t flow);
 
+    //toggles all edges
+    void toggleCost();
     //clears network from all flow
     void clean();
 

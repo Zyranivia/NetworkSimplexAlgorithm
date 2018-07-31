@@ -10,12 +10,13 @@
 //of the underlying tree
 class Circle {
 public:
+    void print() const;
     //default constructor for the moment
     void addEdge(size_t node0, size_t node1, bool isResidual);
 
-    const std::vector<std::pair<size_t, size_t>>& getEdges();
-    const std::vector<char>& getIsResidual();
-    size_t size();
+    const std::vector<std::pair<size_t, size_t>>& getEdges() const;
+    const std::vector<char>& getIsResidual() const;
+    size_t size() const;
 
     //function is needed for Network simplex
     //TODO: move it?

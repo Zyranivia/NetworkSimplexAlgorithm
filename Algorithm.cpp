@@ -15,24 +15,99 @@ size_t findNode (size_t node, const std::vector<Node>& vec) {
     return vec.size();
 }
 
+bool feasible (Network& n, size_t artificialNode) {
+    //if there’s flow on the artifical node left
+    //the network is infeasible
+    bool feasible = n.deleteNode(artificialNode);
+    if (not feasible) {
+        n.clean();
+        n.deleteNode(artificialNode);
+    }
+    return feasible;
+}
+
 }
 
 intmax_t Algorithm::noOfIter () {
     return iterations;
 }
 
-bool Algorithm::solution (bool modus) {
-    //all variables to initial setting
+//used with the partial tree constructed around artificialNode
+void Algorithm::createCircles(std::vector<Node> partialTree) {
     circles.clear();
+
+    //old tree won’t have invert edges
+    std::set<std::pair<size_t, size_t>> newTreeEdges;
+    //complete spanning tree
+    //number of edges that have to be added: nodes - partialTree.size()
+    //equals |transit|
+    //algorithm used: Randomgreedy
+    size_t added = 0, toBeAdded = n.getNoOfNodes() - partialTree.size();
+
+    for (const std::pair<const std::tuple<size_t, size_t, bool>, Edge>& keypair : n.getEdges()) {
+        if (keypair.second.isResidual) {continue;}
+        const Edge& e = keypair.second;
+        size_t node = e.node0, neigh = e.node1;
+        //if e + partialTree is still a tree
+        //invert edges to those of a tree might be checked
+        if (findCircle(node, neigh, e.isResidual, partialTree, newTreeEdges).size() < 2) {
+
+            //add edge to tree, nodes too, if not already in it
+            size_t nodePos = findNode(node, partialTree);
+            if (nodePos == partialTree.size()) {partialTree.push_back(Node(node, 0));}
+            //in either case nodePos is now exact
+            partialTree[nodePos].neighbours.insert(neigh);
+
+            size_t neighPos = findNode(neigh, partialTree);
+            if (neighPos == partialTree.size()) {partialTree.push_back(Node(neigh, 0));}
+            //in either case nodePos is now exact
+            partialTree[neighPos].neighbours.insert(node);
+
+            //keep track of added edges
+            newTreeEdges.insert(std::make_pair(node, neigh));
+
+            //if there are invert edges of those of the tree, create a trivial circle
+            if (n.getEdges().count(std::forward_as_tuple(neigh, node, false)) != 0) {
+                Circle temp = Circle();
+                temp.addEdge(neigh, node, false);
+                temp.addEdge(node, neigh, false);
+                circles.push_back(temp);
+            }
+            //std::cout << node << "-" << neigh << " added" << std::endl;
+            added++;
+        }
+        if (added == toBeAdded) {break;}
+    }
+    //std::cout << "creating circles" << std::endl;
+
+    //create std::vector<Circle> circles
+    //e or e_invert in tree means c.size() <= 2
+    //trivial circles have already been taken care of
+    for (const std::pair<const std::tuple<size_t, size_t, bool>, Edge>& edge : n.getEdges()) {
+        //don’t create circle for residual edge
+        if (edge.second.isResidual) {continue;}
+
+        Circle temp = findCircle(edge.second.node0, edge.second.node1, edge.second.isResidual, partialTree, newTreeEdges);
+        if (temp.size() > 2) {circles.push_back(temp);}
+    }
+}
+
+//true for low cost, false for high cost
+bool Algorithm::solution (bool modus) {
+    //initialize iterations
     iterations = 0;
 
     //high cost edge
     intmax_t maxCost = 0;
-    for (const std::pair<const std::tuple<size_t, size_t, bool>, Edge>& edge : n.getEdges()) {
-        if (edge.second.cost > maxCost) {
-            maxCost = edge.second.cost;
-         }
+    if (modus == false) {
+        for (const std::pair<const std::tuple<size_t, size_t, bool>, Edge>& edge : n.getEdges()) {
+            if (edge.second.cost > maxCost) {
+                maxCost = edge.second.cost;
+             }
+        }
     }
+    //toggle all edges
+    else {n.toggleCost();}
 
     maxCost = maxCost*n.getNoOfNodes() + 1;
 
@@ -82,90 +157,63 @@ bool Algorithm::solution (bool modus) {
 
     tree.push_back(artNode_Tree);
 
-    std::vector<std::pair<size_t, size_t>> problematicEdges;
-    //complete spanning tree
-    //number of edges that have to be added: |transit|
-    //algorithm used: Dijkstra
-    size_t added = 0;
-    std::vector<size_t> nodeStack = n.sources;
-
-    //not optimized yet, nodes which are several times
-    //in the stack will be checked out several times
-    while (not nodeStack.empty()) {
-        size_t node = nodeStack.back();
-        nodeStack.pop_back();
-
-        //iterate through all outgoing edges of node
-        for (size_t neigh : n.getNodes().find(node)->second.neighbours) {
-            if (n.getEdges().count(std::forward_as_tuple(node, neigh, false)) == 0) {continue;}
-            if (findNode(neigh, tree) != tree.size()) {continue;}
-
-            //edge node-neighbour gets added to tree
-            tree.push_back(Node(neigh, 0));
-            tree[findNode(node, tree)].neighbours.insert(neigh);
-            tree.back().neighbours.insert(node);
-
-            nodeStack.push_back(neigh);
-            added++;
-
-            //std::cout << node << "-" << neigh << " added\n";
-
-            //if there are invert edges of those of the tree, delete them later on
-            //as findCircle won't work otherwise
-            if (n.getEdges().count(std::forward_as_tuple(neigh, node, false)) != 0) {
-                problematicEdges.push_back(std::make_pair(neigh, node));
-            }
-
-            if (added == n.transit.size()) {break;}
-        }
-        if (added == n.transit.size()) {break;}
-    }
-
-    //delete invert edges
-    std::vector<Edge> toBeInsertedLaterOn;
-    toBeInsertedLaterOn.reserve(problematicEdges.size());
-    for (std::pair<size_t, size_t>& probEdge : problematicEdges) {
-        toBeInsertedLaterOn.push_back(n.getEdges().find(std::forward_as_tuple(probEdge.first, probEdge.second, false))->second);
-        n.deleteEdge(probEdge.first, probEdge.second);
-    }
-
-    //create std::vector<Circle> circles
-    //TODO check whether e in tree really means c.size() == 2
-    for (const std::pair<const std::tuple<size_t, size_t, bool>, Edge>& edge : n.getEdges()) {
-        //don’t create circle for residual edge
-        if (edge.second.isResidual) {continue;}
-
-        Circle temp = findCircle(edge.second.node0, edge.second.node1, edge.second.isResidual, tree);
-        if (temp.size() > 2) {circles.push_back(temp);}
-    }
-
-    //add invert edges again
-    //also add circles (trivial ones) for them
-    for (Edge edge : toBeInsertedLaterOn) {
-        n.addEdge(edge);
-        Circle temp = Circle();
-        temp.addEdge(edge.node0, edge.node1, edge.isResidual);
-        temp.addEdge(edge.node1, edge.node0, edge.isResidual);
-        circles.push_back(temp);
-    }
-
-    //std::cout << "Kreise: " << circles.size() << std::endl;
+    //complete tree and create circles
+    createCircles(tree);
 
     //solve with artificial node
     while (optimize());
 
-    //if there’s flow on the artifical node left
-    //the network is infeasible
-    bool feasible = n.deleteNode(artificialNode);
-    if (not feasible) {
-        n.clean();
-        n.deleteNode(artificialNode);
+    //n.print();
+    //in this case a solution only proves feasibility
+    if (modus == true) {
+        //first of all, toggle back
+        n.toggleCost();
+        if (feasible(n, artificialNode)) {
+            //iterate < n times until artificialNode is a leaf
+            for (std::vector<Circle>::iterator it = circles.begin(); it != circles.end(); it++) {
+                //find edge over artificial node if existent
+                size_t i = 1;
+                for (; i < it->size(); i++) {
+                    if (it->getEdges()[i].first == artificialNode or it->getEdges()[i].second == artificialNode) {break;}
+                }
+                if (i < it->size()) {
+                    const Edge& e = n.getEdges().find(std::forward_as_tuple(it->getEdges()[i].first, it->getEdges()[i].second,
+                                                         it->getIsResidual()[i]))->second;
+
+                    //since n is feasible, one of the both cases occures
+                    //new first edge, same direction
+                    if (e.flow == 0) {it->rotateBy(i, false);}
+                    //new first edge, but reversed direction
+                    else {it->rotateBy(i, true);}
+
+                    //new first edge can’t be included by any circle before it
+                    //TODO better prove this
+                    for (std::vector<Circle>::iterator otherCircle = it + 1; otherCircle != circles.end(); otherCircle++) {
+                        otherCircle->update(*it);
+                    }
+
+                    iterations++;
+                }
+            }
+
+            //now remove all circles beginning at the artificial node
+            circles.erase(std::remove_if(circles.begin(), circles.end(), [this](const Circle& c)
+                                                                        {return c.getEdges()[0].first == artificialNode or
+                                                                                c.getEdges()[0].second == artificialNode;}
+                                        ), circles.end());
+
+            while (optimize());
+
+            return true;
+        }
+        else {return false;}
     }
-    return feasible;
+    else {return feasible(n, artificialNode);}
 }
 
 //returns a (real) circle, if tree + edge is not a tree anymore
-Circle Algorithm::findCircle(size_t node0, size_t node1, bool isResidual, const std::vector<Node>& tree) {
+Circle Algorithm::findCircle(size_t node0, size_t node1, bool isResidual, const std::vector<Node>& tree, const std::set<std::pair<size_t, size_t>>& treeEdges) {
+    if (tree.empty()) {return Circle();}
 
     //create map nodeId->tree for constant access
     size_t mini = n.largestNodeID, maxi = 0;
@@ -180,7 +228,7 @@ Circle Algorithm::findCircle(size_t node0, size_t node1, bool isResidual, const 
     }
 
     //check whether node0 and node1 are in the tree
-    if (node0 < mini or node1 < mini or node0 > maxi or node0 > maxi
+    if (node0 < mini or node1 < mini or node0 > maxi or node1 > maxi
         or mapping[node0 - mini] == -1 or mapping[node1 - mini] == -1) {
             return Circle();
     }
@@ -220,7 +268,11 @@ Circle Algorithm::findCircle(size_t node0, size_t node1, bool isResidual, const 
     c.addEdge(node0, node1, isResidual);
     //construct circle to return from tree edges
     for (size_t i = 2; i < path.size(); i++) {
-        c.addEdge(path[i-1], path[i], n.getEdges().count(std::forward_as_tuple(path[i-1], path[i], true)));
+        //if direction is unique, it is calculated
+        bool direction = n.getEdges().count(std::forward_as_tuple(path[i-1], path[i], true));
+        //otherwise it is always true and has to be changed in case
+        if (treeEdges.count(std::make_pair(path[i-1], path[i]))) {direction = false;}
+        c.addEdge(path[i-1], path[i], direction);
     }
     return c;
 }
@@ -255,27 +307,7 @@ bool Algorithm::optimize() {
 
     size_t chosenOneId = pivot(circles);
     //if there is no negative circle
-    if (chosenOneId == circles.size()) {
-        return false;
-        //TODO below should not be necessary
-        //degenerate iterations change the tree
-        /*degenerated = true;
-            for (uintmax_t i = 0; i < degenerateIteration.size(); i++) {
-                if (circles[i].flow != 0 or degenerateIteration[i]) {continue;}
-                chosenOneId = i;
-                degenerateIteration[i] = true;
-                break;
-            }
-            if (chosenOneId == circles.size()) {return false;}
-    }
-    //reset degenerateIteration (could be done less often …)
-    else {
-        if (degenerated) {
-            //std::cout << "Das hier sollte nicht passieren";
-            for (uintmax_t i = 0; i < degenerateIteration.size(); i++) {degenerateIteration[i] = false;}
-            degenerated = false;
-        }*/
-    }
+    if (chosenOneId == circles.size()) {return false;}
 
     //std::cout << "(" << chosenOneId << ") " << circles[chosenOneId].flow << " --> ";
     //std::cout << circles[chosenOneId].getEdges()[0].first << "-" << circles[chosenOneId].getEdges()[0].second;
@@ -293,7 +325,7 @@ bool Algorithm::optimize() {
     //which has full or zero flow is now the first edge and therefore not
     //part of the tree anymore. In the first case the circle is reversed
     for (size_t i = chosenOne.size() - 1; i < chosenOne.size(); i--) {
-        Edge e = n.getEdges().find(std::forward_as_tuple(chosenOne.getEdges()[i].first, chosenOne.getEdges()[i].second,
+        const Edge& e = n.getEdges().find(std::forward_as_tuple(chosenOne.getEdges()[i].first, chosenOne.getEdges()[i].second,
                                                          chosenOne.getIsResidual()[i]))->second;
 
         //new first edge, same direction

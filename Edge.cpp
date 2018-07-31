@@ -33,3 +33,15 @@ void Edge::invert () {
     flow = capacity - flow;
     isResidual = not isResidual;
 }
+
+void Edge::toggleCost() {
+    if (isToggled) {
+        cost = toggledCost;
+        toggledCost = 0;
+    }
+    else {
+        toggledCost = cost;
+        cost = 0;
+    }
+    isToggled = not isToggled;
+}

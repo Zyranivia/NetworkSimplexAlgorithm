@@ -1,4 +1,5 @@
 #include <iostream>
+#include <Windows.h>
 
 #include "Network.h"
 #include "Edge.h"
@@ -8,7 +9,7 @@
 
 //TODO private/public noch mal überdenken
 //TODO make all(?) sets unordered
-//TODO Network != Network.solve.clean
+//TODO Network != Network.solve().clean()
 //warum auch immer
 
 bool isConnected(const Network& n) {
@@ -35,39 +36,87 @@ bool isConnected(const Network& n) {
 }
 
 int main() {
+    uintmax_t itTrue = 0, itFalse = 0, sumNodes = 0;
 
-    Network test = RandomGraph(200, 100, 20).getNetwork();
+    for (int i = 0; i < 200; i++) {
+        Network test = RandomGraph(200, 100, 50).getNetwork();
+        Network temp = test;
+        Algorithm rand = Algorithm (test, pivotRandom);
+        sumNodes += test.getNoOfNodes();
+
+        //test.print();
+
+        rand.solution(true);
+        std::cout << "\nRandom\nIterationen: " << rand.noOfIter();
+        std::cout << "\nKosten: " << test.getCost() << " Flow: " << test.getFlow() << std::endl;
+        itTrue += rand.noOfIter();
+        intmax_t sol = test.getCost();
+        test.clean();
+
+        rand.solution(false);
+        std::cout << "\nRandom\nIterationen: " << rand.noOfIter();
+        std::cout << "\nKosten: " << test.getCost() << " Flow: " << test.getFlow() << std::endl;
+        itFalse += rand.noOfIter();
+
+        if (test.getCost() != sol) {
+            test.clean();
+            test.print();
+            rand.solution(true);
+            test.print();
+
+            test.clean();
+            rand.solution(false);
+            test.print();
+            return 0;
+        }
+        //sleep one and a half second
+        Sleep(1500);
+    }
+    std::cout << std::endl << "No cost approach: " << itTrue/(double) sumNodes << std::endl;
+    std::cout << std::endl << "High cost approach: " << itFalse/(double) sumNodes << std::endl;
     //test.print();
-    std::cout << "connected? " << isConnected(test) << std::endl;
+    /*std::cout << "connected? " << isConnected(test) << std::endl;
     std::cout << "Number of nodes: " << test.getNoOfNodes() << std::endl;
     std::cout << "Number of edges: " << test.getEdges().size() << std::endl;
 
     //copy, since Network::clean() seems to be buggy somehow
     Network t2 = test, t3 = test;
+    Network tn2 = testNoise, tn3 = testNoise;
     Algorithm maxRev = Algorithm(test, pivotMaxRev),
+              maxRevN = Algorithm(testNoise, pivotMaxRev),
               maxVal = Algorithm(t2, pivotMaxVal),
-              rand = Algorithm(t3, pivotRandom);
+              maxValN = Algorithm(tn2, pivotMaxVal),
+              rand = Algorithm(t3, pivotRandom),
+              randN = Algorithm(tn3, pivotRandom);
 
     maxRev.solution();
     //test.print();
     std::cout << "Max Revenue\nIterationen: " << maxRev.noOfIter();
     std::cout << "\nKosten: " << test.getCost() << " Flow: " << test.getFlow() << std::endl;
     //test.clean();
+    maxRevN.solution();
+    std::cout << "Max Revenue randomisiert\nIterationen: " << maxRevN.noOfIter();
+    std::cout << "\nKosten: " << testNoise.getCost() << " Flow: " << testNoise.getFlow() << std::endl << std::endl;
 
     maxVal.solution();
     //test.print();
     std::cout << "Max Value\nIterationen: " << maxVal.noOfIter();
     std::cout << "\nKosten: " << t2.getCost() << " Flow: " << t2.getFlow() << std::endl;
     //test.clean();
+    maxValN.solution();
+    std::cout << "Max Value randomisiert\nIterationen: " << maxValN.noOfIter();
+    std::cout << "\nKosten: " << tn2.getCost() << " Flow: " << tn2.getFlow() << std::endl << std::endl;*/
 
-    rand.solution();
+    /*rand.solution();
     //test.print();
     std::cout << "Random\nIterationen: " << rand.noOfIter();
     std::cout << "\nKosten: " << t3.getCost() << " Flow: " << t3.getFlow() << std::endl;
     //test.clean();
-}
+    randN.solution();
+    std::cout << "Random randomisiert\nIterationen: " << randN.noOfIter();
+    std::cout << "\nKosten: " << tn3.getCost() << " Flow: " << tn3.getFlow() << std::endl << std::endl;*/
 
-/*Network test = Network(4);
+    /*Network test = Network(4);
     std::vector<intmax_t> b_value = {3, 10, 1, -2, -1, -5, -2, -4};
 
     std::vector<size_t> from = {0, 4, 5, 5, 6, 3, 2, 2, 1, 1, 0, 1, 0, 1, 0, 1, 1, 3, 10,9, 8};
@@ -78,15 +127,14 @@ int main() {
 
 
     /*Network test = Network(0);
-    std::vector<intmax_t> b_value = {2, 2, 0, 0, 0,-1,-3};
+    std::vector<intmax_t> b_value = {1, 2,-1,-2, 0};
 
-    //HERE Testgraph reinschreiben, entgegengesetzte Kanten implementieren
-    std::vector<size_t> from = {0, 1, 1, 2, 2, 2, 3, 4, 4, 4, 5, 6};
-    std::vector<size_t> to   = {2, 3, 2, 1, 4, 5, 4, 3, 2, 6, 4, 4};
-    std::vector<intmax_t> co = {2, 2, 0, 1, 6, 0, 0,10, 0, 0,10, 0};
-    std::vector<intmax_t> ca = {5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5};*/
+    std::vector<size_t> from = {0, 0, 0, 0, 1, 1, 1, 2, 4};
+    std::vector<size_t> to   = {1, 2, 3, 4, 0, 2, 4, 3, 3};
+    std::vector<intmax_t> ca = {1, 1, 1, 2, 1, 1, 2, 2, 2};
+    std::vector<intmax_t> co = {7, 5, 2, 1, 4, 3, 5, 4, 5};
 
-    /*for (intmax_t b : b_value) {
+    for (intmax_t b : b_value) {
         test.addNode(b);
     }
 
@@ -94,8 +142,18 @@ int main() {
         if (not test.addEdge(Edge(from[i], to[i], co[i], ca[i]))) {
             std::cout << "ya failed";
         }
-    }*/
+    }
 
+    Algorithm rand = Algorithm (test, pivotMaxVal);
+
+    //rand.solution(false);
+    //test.print();
+
+    test.clean();
+    rand.solution(true);
+    test.print();*/
+
+}
 /*
 //=== Circle.update() Test
     Circle left, right;

@@ -18,9 +18,8 @@ void Network::print() {
     std::cout << std::endl;
     for (auto const x : edges) {
         if (not x.second.isResidual) {
-            std::cout << x.second.node0 << "-" << x.second.node1 /*<< "|"
-                << x.second.node0 << "-" << x.second.node1 */<< " f: " << x.second.flow <<
-                " ca: " << x.second.capacity << std::endl;
+            std::cout << x.second.node0 << "-" << x.second.node1 << " f: " << x.second.flow <<
+                " ca: " << x.second.capacity << " co: " << x.second.cost << std::endl;
         }
     }
     for (auto const x : nodes) {
@@ -262,4 +261,16 @@ void Network::clean() {
     }
     this->flow = 0;
     this->cost = 0;
+}
+
+void Network::toggleCost() {
+    intmax_t newCost = 0;
+    for (std::pair<const std::tuple<size_t, size_t, bool>, Edge>& keypair : edges) {
+        Edge& e = keypair.second;
+        e.toggleCost();
+        if (not e.isResidual) {
+            newCost += e.flow*e.cost;
+        }
+    }
+    cost = newCost;
 }

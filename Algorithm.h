@@ -27,11 +27,15 @@ private:
     Network& n;
     size_t (*pivot)(const std::vector<Circle>&);
 
-    //it is assumed that for no edge (i,j) in the tree
-    //there is an edge (j,i)
-    Circle findCircle(size_t node0, size_t node1, bool isResidual, const std::vector<Node>& tree);
     //false if no optimization was possible
     bool optimize();
+
+    //takes (maybe empty) tree, maximizes it and creates circles;
+    void createCircles(std::vector<Node> partialTree);
+
+    //it is assumed that for no edge (i,j) in the tree
+    //there is an edge (j,i)
+    Circle findCircle(size_t node0, size_t node1, bool isResidual, const std::vector<Node>& tree, const std::set<std::pair<size_t, size_t>>& treeEdges);
 };
 
 #endif // ALGORITHM_H_INCLUDED

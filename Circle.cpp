@@ -1,8 +1,14 @@
 #include <algorithm>
+#include <iostream>
 
 #include "Circle.h"
 
-#include <iostream>
+void Circle::print() const{
+    for (size_t i = 0; i < size(); i++) {
+        std::cout << edges[i].first << "-" << edges[i].second << " (" << (bool) isResidual[i] << ") | ";
+    }
+    std::cout << std::endl;
+}
 
 void Circle::addEdge(size_t node0, size_t node1, bool _isResidual) {
     edges.push_back(std::make_pair(node0, node1));
@@ -113,14 +119,14 @@ void Circle::rotateBy (size_t index, bool toReverse) {
     }
 }
 
-const std::vector<std::pair<size_t, size_t>>& Circle::getEdges() {
+const std::vector<std::pair<size_t, size_t>>& Circle::getEdges() const{
     return edges;
 }
 
-const std::vector<char>& Circle::getIsResidual() {
+const std::vector<char>& Circle::getIsResidual() const{
     return isResidual;
 }
 
-size_t Circle::size() {
+size_t Circle::size() const{
     return length;
 }

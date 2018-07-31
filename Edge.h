@@ -15,14 +15,16 @@ public:
     bool changeFlowPossible (intmax_t value);
     //returns true when flow change was successful
     bool changeFlow (intmax_t value);
+    //toggles cost betweeen itself and 0
+    void toggleCost ();
 
     //turn edge into residual edge and vice versa
     void invert ();
 
 //private:
     size_t node0, node1;
-    intmax_t cost, capacity, flow;
-    bool isResidual;
+    intmax_t cost, capacity, flow, toggledCost;
+    bool isResidual, isToggled = false;
 
 };
 
