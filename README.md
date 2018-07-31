@@ -13,7 +13,7 @@ Hohe Priorität:
 - [x] random-noise Funktion
 
 Mittlere Priorität:
-- [ ] Null-Initialisierung (statt extrem teure artifical edges)
+- [x] Null-Initialisierung (statt extrem teure artifical edges)
 - [x] Fehler in Network::clean() finden und beseitigen
 - [ ] Network -> txt und zurück implementieren
 
@@ -22,7 +22,12 @@ Niedrige Priorität:
 
 ## Fahrplan
 1. Algorithmus vollenden und testen
-   - Veränderungen durch verschiedene Initialisierungen und Pivot-Algorithmen klassifizieren
+   - Veränderungen durch verschiedene Initialisierungen und Pivot-Algorithmen klassifizieren ✓   
 2. random-noise-Funktion implementieren und Auswirkungen betrachten
    - neue Funktion überlegen, sollten die Auswirkungen nicht überzeugen
 3. schlechte Instanzen finden
+
+## Erste Ergebnisse
+### Ergebnisse über 200 Iterationen von Randomgraph (200,100,50):
+- MaxRev_LC 3.5 | MaxRev_HC 2.5 | MaxVal_LC 6.3 | MaxVal_HC 2.0 | Random_LC 12 | Random_HC 11.4
+- Erkenntnis: MaxVal_LC entspricht auf der ersten Hälfte Random (mit halb so schlechten Ergebnissen)
