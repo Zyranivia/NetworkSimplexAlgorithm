@@ -35,7 +35,7 @@ void Network::randomNoise(double phi) {
     std::uniform_real_distribution<double> rand(0, phi);
 
     //find max capacity
-    intmax_t maxCap = 0;
+    intmax_t maxCap = 1;
     for (std::pair<const std::tuple<size_t, size_t, bool>, Edge>& key : edges) {
         if (key.second.isResidual) {continue;}
         if (key.second.capacity > maxCap) {maxCap = key.second.capacity;}
@@ -47,8 +47,8 @@ void Network::randomNoise(double phi) {
         intmax_t addToNode = (intmax_t) (eps0*((double) maxCap));
         intmax_t addToEdge = addToNode + (intmax_t) (eps1*((double) maxCap));
 
-        nodes.find(key.second.node0)->second.b_value += addToNode;
-        nodes.find(key.second.node1)->second.b_value -= addToNode;
+        changeBvalue(key.second.node0, addToNode);
+        changeBvalue(key.second.node1, -addToNode);
 
         key.second.capacity += addToEdge;
         std::tuple<size_t, size_t, bool> keyInvert = invertKey(key.first);
@@ -108,12 +108,41 @@ size_t Network::getNoOfNodes () const {
     return nodes.size();
 }
 
+size_t Network::getNoOfEdges () const {
+    //without residual edges
+    return edges.size()/2;
+}
+
 const std::map<std::tuple<size_t, size_t, bool>, Edge, custComp>& Network::getEdges() const {
     return edges;
 }
 
 const std::map<size_t, Node, std::less<size_t>>& Network::getNodes() const {
     return nodes;
+}
+
+size_t Network::getNode(size_t index) {
+    size_t i = 0;
+    for (const std::pair<const size_t, Node>& keyPair : nodes) {
+        if (i == index) {return keyPair.first;}
+        i++;
+    }
+    //should  never occur
+    std::cout << "ERROR Network::getNode" << std::endl;
+    return 0;
+}
+
+Edge Network::getEdge(size_t index) {
+    size_t i = 0;
+    for (const std::pair<const std::tuple<size_t, size_t, bool>, Edge>& keyPair : edges) {
+        //skip residual edges
+        if (keyPair.second.isResidual) {continue;}
+        if (i == index) {return keyPair.second;}
+        i++;
+    }
+    //should  never occur
+    std::cout << "ERROR Network::getEdge" << std::endl;
+    return edges.begin()->second;
 }
 
 //fails and returns 0 if there’s flow left
@@ -158,8 +187,8 @@ bool Network::deleteNode(size_t n) {
 
     //delete node
     if (b > 0) {sources.erase(std::remove(sources.begin(), sources.end(), n), sources.end()); sumSource -= b;}
-    if (b == 0) {transit.erase(std::remove(sources.begin(), sources.end(), n), sources.end());}
-    if (b < 0) {sinks.erase(std::remove(sources.begin(), sources.end(), n), sources.end()); sumSink += b;}
+    if (b == 0) {transit.erase(std::remove(transit.begin(), transit.end(), n), transit.end());}
+    if (b < 0) {sinks.erase(std::remove(sinks.begin(), sinks.end(), n), sinks.end()); sumSink += b;}
 
     nodes.erase(n);
     return true;
@@ -207,8 +236,8 @@ bool Network::addFlow(std::vector<size_t>& path, intmax_t f) {
     }
 
     //change b_values of source and sink
-    nodes.find(path.front())->second.b_value -= f;
-    nodes.find(path.back())->second.b_value += f;
+    changeBvalue(path.front(), -f);
+    changeBvalue(path.back(), f);
 
     this->flow += f;
     return true;
@@ -256,8 +285,8 @@ void Network::clean() {
 
         //reset flow, change b_values
         keypair.second.changeFlow(-f);
-        nodes.find(keypair.second.node0)->second.b_value += f;
-        nodes.find(keypair.second.node1)->second.b_value -= f;
+        changeBvalue(keypair.second.node0, f);
+        changeBvalue(keypair.second.node1, -f);
     }
     this->flow = 0;
     this->cost = 0;
@@ -273,4 +302,28 @@ void Network::toggleCost() {
         }
     }
     cost = newCost;
+}
+
+bool Network::changeBvalue(size_t a, intmax_t b) {
+    std::map<size_t, Node, std::less<size_t>>::iterator it = nodes.find(a);
+    if (it == nodes.end()) {return false;}
+
+    intmax_t oldB = it->second.b_value;
+    intmax_t newB = oldB + b;
+    it->second.b_value += b;
+    //update sums and nodesets
+    //not most efficient, but clear
+    size_t id = it->second.id;
+
+    //"delete" old node
+    if (oldB > 0) {sources.erase(std::remove(sources.begin(), sources.end(), id), sources.end()); sumSource -= oldB;}
+    if (oldB == 0) {transit.erase(std::remove(transit.begin(), transit.end(), id), transit.end());}
+    if (oldB < 0) {sinks.erase(std::remove(sinks.begin(), sinks.end(), id), sinks.end()); sumSink += oldB;}
+
+    //insert "new" node
+    if (newB > 0) {sources.push_back(id); sumSource += newB;}
+    if (newB == 0) {transit.push_back(id);}
+    if (newB < 0) {sinks.push_back(id); sumSink -= newB;}
+
+    return true;
 }

@@ -28,7 +28,7 @@ bool feasible (Network& n, size_t artificialNode) {
 
 }
 
-intmax_t Algorithm::noOfIter () {
+intmax_t Algorithm::getNoOfIter () {
     return iterations;
 }
 
@@ -78,7 +78,6 @@ void Algorithm::createCircles(std::vector<Node> partialTree) {
         }
         if (added == toBeAdded) {break;}
     }
-    //std::cout << "creating circles" << std::endl;
 
     //create std::vector<Circle> circles
     //e or e_invert in tree means c.size() <= 2
@@ -138,10 +137,14 @@ bool Algorithm::solution (bool modus) {
         tree.push_back(sink_Tree);
     }
 
+    //copy sources and sinks, since with changed flow b_values will change
+    //TODO streamline that
+    std::vector<size_t> sourcesCopy = n.sources, sinksCopy = n.sinks;
+
     //get that flow started
     //sumSources == sumSinks
-    std::vector<size_t>::iterator itSource = n.sources.begin(), itSink = n.sinks.begin();
-    while (itSource != n.sources.end()) {
+    std::vector<size_t>::iterator itSource = sourcesCopy.begin(), itSink = sinksCopy.begin();
+    while (itSource != sourcesCopy.end()) {
         if (std::abs(n.getNodes().find(*itSource)->second.b_value) <= std::abs(n.getNodes().find(*itSink)->second.b_value)) {
             std::vector<size_t> temp = {*itSource, artificialNode, *itSink};
             n.addFlow(temp, std::abs(n.getNodes().find(*itSource)->second.b_value));
@@ -163,7 +166,6 @@ bool Algorithm::solution (bool modus) {
     //solve with artificial node
     while (optimize());
 
-    //n.print();
     //in this case a solution only proves feasibility
     if (modus == true) {
         //first of all, toggle back
@@ -177,12 +179,11 @@ bool Algorithm::solution (bool modus) {
                     if (it->getEdges()[i].first == artificialNode or it->getEdges()[i].second == artificialNode) {break;}
                 }
                 if (i < it->size()) {
-                    const Edge& e = n.getEdges().find(std::forward_as_tuple(it->getEdges()[i].first, it->getEdges()[i].second,
-                                                         it->getIsResidual()[i]))->second;
-
                     //since n is feasible, one of the both cases occures
+
+                    //not residual <==> flow == 0
                     //new first edge, same direction
-                    if (e.flow == 0) {it->rotateBy(i, false);}
+                    if (not it->getIsResidual()[i]) {it->rotateBy(i, false);}
                     //new first edge, but reversed direction
                     else {it->rotateBy(i, true);}
 
@@ -258,8 +259,7 @@ Circle Algorithm::findCircle(size_t node0, size_t node1, bool isResidual, const 
 
     Circle c;
 
-    //TODO je nach konstruktor kommt unten
-    //das richtige raus, daher redundant
+    //TODO is this redundant?
     if (path.size() == 1) {
         return c;
     }
@@ -279,11 +279,10 @@ Circle Algorithm::findCircle(size_t node0, size_t node1, bool isResidual, const 
 
 //TODO optimize calculation of flow/cost for circle somehow
 //probably in update
-//NOOO circles gotta know their underlying graph
+//make a bool whether a circle was changed
 
 //chooses a circle via pivot function and iterates flow through it
 bool Algorithm::optimize() {
-    //size_t temp = 0;
     for (Circle& c : circles) {
         c.costPerFlow = 0;
         Edge e = n.getEdges().find(std::forward_as_tuple(c.getEdges()[0].first, c.getEdges()[0].second, c.getIsResidual()[0]))->second;
@@ -295,15 +294,7 @@ bool Algorithm::optimize() {
             c.costPerFlow += e.cost;
         }
         c.flow = minFlow;
-        //temp++;
     }
-
-    /*std::cout << std::endl;
-    for (int i = 0; i < circles[4].size(); i++) {
-        std::cout << circles[4].getEdges()[i].first << "-" << circles[4].getEdges()[i].second << " (" <<
-            circles[4].getIsResidual()[i] << ")| ";
-    }
-    std::cout << std::endl;*/
 
     size_t chosenOneId = pivot(circles);
     //if there is no negative circle
@@ -313,11 +304,6 @@ bool Algorithm::optimize() {
     //std::cout << circles[chosenOneId].getEdges()[0].first << "-" << circles[chosenOneId].getEdges()[0].second;
 
     Circle& chosenOne = circles[chosenOneId];
-
-    /*for (int i = 0; i < chosenOne.size(); i++) {
-        std::cout << chosenOne.getEdges()[i].first << "-" << chosenOne.getEdges()[i].second << " (" << chosenOne.getIsResidual()[0] << ") | ";
-    }
-    std::cout << std::endl;*/
 
     n.changeFlow(chosenOne, chosenOne.flow);
 
@@ -349,6 +335,5 @@ bool Algorithm::optimize() {
     //std::cout << " wird zu " << circles[chosenOneId].getEdges()[0].first << "-" << circles[chosenOneId].getEdges()[0].second << std::endl;
 
     this->iterations += 1;
-    //if (iterations % 100 == 0) {std::cout << "!";}
     return true;
 }

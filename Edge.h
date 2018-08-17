@@ -8,6 +8,8 @@
 class Edge {
 
 public:
+    //empty (invalid) initialization
+    Edge () : node0 (0), node1 (0)  {};
     //edges are initialized with a flow of zero
     Edge (size_t node0, size_t node1, intmax_t cost, intmax_t capacity, bool isResidual = false);
 

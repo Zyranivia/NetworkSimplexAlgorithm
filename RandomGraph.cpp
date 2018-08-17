@@ -1,8 +1,13 @@
 #include <random>
 #include <time.h>
 #include <algorithm>
+#include <numeric>
 
 #include "RandomGraph.h"
+
+#include <iostream>
+#include "Algorithm.h"
+#include "PivotAlgorithms.h"
 
 Network RandomGraph::getNetwork() {
     return n;
@@ -83,6 +88,235 @@ RandomGraph::RandomGraph(size_t maxNoNodes, intmax_t maxFlow, intmax_t maxCost) 
                 if ((not direction) and n.addEdge(Edge(temp, i, costRng(rng), cap)))  {sum += cap;}
                 iterations++;
             }
+        }
+    }
+}
+
+//allows for deletion and insertion of nodes
+void RandomGraph::evolve (size_t steps) {
+    std::mt19937 rng;
+    rng.seed(static_cast<long unsigned int>(time(0)));
+
+    std::uniform_real_distribution<> choiceOfOperation(0., 1.);
+
+    Network opt = Network(0);
+    double opt_value = 0;
+    //operations and their likelyhood
+    std::vector<double> likelyhood = {0.08, 0.02, 0, 0, 0.1, 0.4, 0.4};
+    for (size_t i = 0; i < steps; i++) {
+        double rand = choiceOfOperation(rng);
+        size_t op = 0;
+        for (size_t j = 0; j < likelyhood.size(); j++) {
+            if (rand < likelyhood[j]) {op = j; break;}
+            else {rand -= likelyhood[j];}
+        }
+
+        if (n.getNoOfEdges() == 0) {op = 0;}
+        if (n.getNoOfNodes() < 2) {op = 2;}
+
+        //modify n
+        switch (op) {
+            //add edge
+            case 0 :
+                {std::uniform_int_distribution<intmax_t> randNode (0, n.getNoOfNodes()-1);
+                intmax_t nodeA = n.getNode(randNode(rng)), nodeB = n.getNode(randNode(rng));
+                std::uniform_int_distribution<intmax_t> fakeRan (100, 1000);
+                n.addEdge(Edge(nodeA, nodeB, fakeRan(rng), fakeRan(rng)));
+                }break;
+            //remove edge
+            case 1 :
+                {std::uniform_int_distribution<intmax_t> randEdge (0, n.getNoOfEdges()-1);
+                Edge e = n.getEdge(randEdge(rng));
+                n.deleteEdge(e.node0, e.node1);
+                }break;
+            //add node
+            case 2 :
+                n.addNode(0);
+                break;
+            //remove node
+            case 3 :
+                {std::uniform_int_distribution<intmax_t> randNode (0, n.getNoOfNodes()-1);
+                n.deleteNode(n.getNode(randNode(rng)));
+                }break;
+            //change b_value
+            case 4 :
+                {std::uniform_int_distribution<intmax_t> randNode (0, n.getNoOfNodes()-1);
+                intmax_t nodeA = n.getNode(randNode(rng)), nodeB = n.getNode(randNode(rng));
+                std::uniform_int_distribution<intmax_t> fakeRan (50, 200);
+                intmax_t b = fakeRan(rng);
+                n.changeBvalue(nodeA, b);
+                n.changeBvalue(nodeB, -b);
+                }break;
+            //change cost of edge
+            case 5 :
+                {std::uniform_int_distribution<intmax_t> randEdge (0, n.getNoOfEdges()-1);
+                Edge e = n.getEdge(randEdge(rng));
+                n.deleteEdge(e.node0, e.node1);
+                std::uniform_int_distribution<intmax_t> newCost(100, 2*e.cost + 100);
+                e.cost = newCost(rng);
+                n.addEdge(e);
+                }break;
+            //change capacity of edge
+            case 6 :
+                {std::uniform_int_distribution<intmax_t> randEdge (0, n.getNoOfEdges()-1);
+                Edge e = n.getEdge(randEdge(rng));
+                n.deleteEdge(e.node0, e.node1);
+                std::uniform_int_distribution<intmax_t> newCap(100, 2*e.capacity + 100);
+                e.capacity = newCap(rng);
+                n.addEdge(e);
+                }break;
+        }
+
+        //evaluate n
+        intmax_t itNum = 0;
+        int phiIt = 0;
+        for (; phiIt < 1; phiIt++) {
+            Network changed = n;
+            //changed.randomNoise(0.1);
+            Algorithm alg = Algorithm (changed, pivotMaxRev);
+            alg.solution();
+            itNum += alg.getNoOfIter();
+        }
+        double temp = itNum / (double) (phiIt*n.getNoOfNodes());
+        //std::cout << "temp: " << temp << std::endl;
+        n.clean();
+        if (temp > opt_value) {opt = n; opt_value = temp;}
+    }
+
+    n = opt;
+}
+
+void RandomGraph::smartEvolve (size_t steps, std::vector<double> distribution) {
+    std::mt19937 rng;
+    rng.seed(static_cast<long unsigned int>(time(0)));
+    //rng.seed(static_cast<long unsigned int>(76832163798));
+    std::uniform_int_distribution<intmax_t> randNode (0, n.getNoOfNodes()-1);
+
+    size_t opt_pos = 0;
+    double opt_value = 0;
+
+    //last entry of distribution is case 5 — undoing steps
+    distribution.push_back(0);
+    for (size_t i = 0; i < steps; i++) {
+        double sum = std::accumulate(distribution.begin(), distribution.end(), 0.);
+        std::uniform_real_distribution<> choiceOfOperation(0., sum);
+
+        double rand = choiceOfOperation(rng);
+        size_t op = 0;
+        //choose operation in regards to distribution
+        for (size_t j = 0; j < distribution.size(); j++) {
+            if (rand < distribution[j]) {op = j; break;}
+            else {rand -= distribution[j];}
+        }
+
+        //if there are no edges yet, just insert one
+        if (n.getNoOfEdges() == 0) {op = 0;}
+
+        //if an Edge goes from node a to node a, it won’t be inserted and
+        //Network::addEdge() returns false
+        switch (op) {
+            //add edge
+            case 0 :
+                {intmax_t nodeA = n.getNode(randNode(rng)), nodeB = n.getNode(randNode(rng));
+                std::uniform_int_distribution<intmax_t> fakeRan (1, 10);
+                Edge newE = Edge(nodeA, nodeB, fakeRan(rng), fakeRan(rng));
+                if (n.addEdge(newE)) {
+                    takenActions.push_back(Action(Edge(), newE));
+                }
+                }break;
+            //remove edge
+            case 1 :
+                {std::uniform_int_distribution<intmax_t> randEdge (0, n.getNoOfEdges()-1);
+                Edge oldE = n.getEdge(randEdge(rng));
+                if (n.deleteEdge(oldE.node0, oldE.node1)) {
+                    takenActions.push_back(Action(oldE, Edge()));
+                }
+                }break;
+            //change b_value
+            case 2 :
+                {intmax_t nodeA = n.getNode(randNode(rng)), nodeB = n.getNode(randNode(rng));
+                //not much of a random here right now
+                std::uniform_int_distribution<intmax_t> fakeRan (1,
+                    2/* + std::abs(n.getNodes().find(n.getNode(randNode(rng)))->second.b_value)*/);
+                intmax_t b = fakeRan(rng);
+                if (n.changeBvalue(nodeA, b) and n.changeBvalue(nodeB, -b)) {
+                    takenActions.push_back(Action(std::forward_as_tuple(nodeA, nodeB, b)));
+                }
+                }break;
+            //change cost of edge
+            case 3 :
+                {std::uniform_int_distribution<intmax_t> randEdge (0, n.getNoOfEdges()-1);
+                Edge oldE = n.getEdge(randEdge(rng));
+                std::uniform_int_distribution<intmax_t> newCost(1, 10 + 2*n.getEdge(randEdge(rng)).cost);
+                Edge newE = oldE;
+                newE.cost = newCost(rng);
+                if (n.deleteEdge(oldE.node0, oldE.node1) and n.addEdge(newE)) {
+                    takenActions.push_back(Action(oldE, newE));
+                }
+                }break;
+            //change capacity of edge
+            case 4 :
+                {std::uniform_int_distribution<intmax_t> randEdge (0, n.getNoOfEdges()-1);
+                Edge oldE = n.getEdge(randEdge(rng));
+                std::uniform_int_distribution<intmax_t> newCap(1, 10 + 2*n.getEdge(randEdge(rng)).capacity);
+                Edge newE = oldE;
+                newE.capacity = newCap(rng);
+                if (n.deleteEdge(oldE.node0, oldE.node1) and n.addEdge(newE)) {
+                    takenActions.push_back(Action(oldE, newE));
+                }
+                }break;
+            //undo last steps
+            case 5 :
+                {
+                    std::uniform_int_distribution<intmax_t> stepsTakenBack(0, takenActions.size() - opt_pos);
+                    size_t k = stepsTakenBack(rng);
+                    for (size_t j = 0; j < k; j++) {
+                        Action lastAction = takenActions.back();
+                        takenActions.pop_back();
+                        if (lastAction.edgeCase) {
+                            n.deleteEdge(lastAction.newE.node0, lastAction.newE.node1);
+                            n.addEdge(lastAction.oldE);
+                        }
+                        else {
+                            const std::tuple<size_t, size_t, intmax_t> temp = lastAction.b_change;
+                            n.changeBvalue(std::get<0>(temp), - std::get<2>(temp));
+                            n.changeBvalue(std::get<1>(temp), std::get<2>(temp));
+                        }
+                    }
+                }break;
+        }
+
+        //evaluate n
+        intmax_t itNum = 0;
+        int phiIt = 0;
+        for (; phiIt < 1; phiIt++) {
+            Network changed = n;
+            //changed.randomNoise(0.1);
+            Algorithm alg = Algorithm (changed, pivotMaxRev);
+            alg.solution();
+            itNum += alg.getNoOfIter();
+        }
+        double temp = itNum / (double) (phiIt*n.getNoOfNodes());
+        //std::cout << "temp: " << temp << std::endl;
+        n.clean();
+        if (temp > opt_value) {opt_pos = takenActions.size(); opt_value = temp;}
+
+        distribution.back() = (opt_value == 0 ? 0 : (1 - temp/opt_value));
+    }
+
+    std::cout << takenActions.size() << " and " << opt_pos << " with " << opt_value << std::endl;
+    //recreate optimal network
+    n = Network(n.getNoOfNodes());
+    for (size_t i = 0; i < opt_pos; i++) {
+        Action& a = takenActions[i];
+        if (a.edgeCase) {
+            n.deleteEdge(a.oldE.node0, a.oldE.node1);
+            n.addEdge(a.newE);
+        }
+        else {
+            const std::tuple<size_t, size_t, intmax_t> temp = a.b_change;
+            n.changeBvalue(std::get<0>(temp), std::get<2>(temp));
+            n.changeBvalue(std::get<1>(temp), - std::get<2>(temp));
         }
     }
 }

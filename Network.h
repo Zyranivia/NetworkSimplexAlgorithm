@@ -43,6 +43,7 @@ public:
     Network(size_t noOfNodes);
     void print();
 
+    //adds randomized values to all capacities
     void randomNoise(double phi);
 
     //return 0 if there’s a parallel edge
@@ -51,8 +52,11 @@ public:
     //returns nodeID
     //used to add sources and sinks
     size_t addNode(intmax_t b_value = 0);
+    //changes b_value
+    bool changeBvalue(size_t a, intmax_t b);
 
     size_t getNoOfNodes () const;
+    size_t getNoOfEdges () const;
     const std::map<std::tuple<size_t, size_t, bool>, Edge, custComp>& getEdges() const;
     const std::map<size_t, Node, std::less<size_t>>& getNodes() const;
 
@@ -73,6 +77,12 @@ public:
     void toggleCost();
     //clears network from all flow
     void clean();
+
+    //following both functions are used to get a random entry
+    //gets the real NodeId of the nth node
+    size_t getNode(size_t index);
+    //gets the nth Edge
+    Edge getEdge(size_t index);
 
     intmax_t getFlow() {return flow;}
     intmax_t getCost() {return cost;}

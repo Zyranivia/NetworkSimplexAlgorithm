@@ -12,20 +12,19 @@ public:
 
     //returns 0 if n cannot be solved
     //false for high cost edge initialization
-    //TODO: not implemented yet …
     bool solution (bool modus = true);
-    intmax_t noOfIter ();
 
-//private:
-    intmax_t iterations = 0;
+    intmax_t getNoOfIter ();
+
 private:
-    //collect circles instead of calculating all the time
-    std::vector<Circle> circles;
-
-    size_t artificialNode;
+    intmax_t iterations = 0;
 
     Network& n;
     size_t (*pivot)(const std::vector<Circle>&);
+
+    size_t artificialNode;
+    //collect circles instead of calculating all the time
+    std::vector<Circle> circles;
 
     //false if no optimization was possible
     bool optimize();
