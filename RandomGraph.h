@@ -17,19 +17,21 @@ struct Action {
 class RandomGraph {
 
 public:
-    RandomGraph (Network _n) : n(_n) {};
+    RandomGraph (Network _n) : n(_n), networkSave(_n) {};
     //create an somehow evenly distributed network
     RandomGraph (size_t maxNoNodes, intmax_t maxFlow, intmax_t maxCost);
     Network getNetwork();
 
-    //just random moves and the optimum under all networks
+    //just random moves and saves the optimum under all networks
     void evolve (size_t steps);
     //somewhat more sophisticated
     void smartEvolve (size_t steps, std::vector<double> distribution);
 
 private:
-    Network n = Network(0);
+    Network n = Network(0), networkSave = Network(0);
     std::vector<Action> takenActions;
+
+    std::pair<size_t, size_t> randomMissingEdge();
 };
 
 #endif // RANDOMGRAPH_H_INCLUDED

@@ -90,6 +90,7 @@ RandomGraph::RandomGraph(size_t maxNoNodes, intmax_t maxFlow, intmax_t maxCost) 
             }
         }
     }
+    networkSave = n;
 }
 
 //allows for deletion and insertion of nodes
@@ -184,6 +185,7 @@ void RandomGraph::evolve (size_t steps) {
     }
 
     n = opt;
+    networkSave = n;
 }
 
 void RandomGraph::smartEvolve (size_t steps, std::vector<double> distribution) {
@@ -198,6 +200,24 @@ void RandomGraph::smartEvolve (size_t steps, std::vector<double> distribution) {
     //last entry of distribution is case 5 — undoing steps
     distribution.push_back(0);
     for (size_t i = 0; i < steps; i++) {
+        //evaluate n
+        intmax_t itNum = 0;
+        int phiIt = 0;
+        for (; phiIt < 1; phiIt++) {
+            Network changed = n;
+            //changed.randomNoise(0.1);
+            Algorithm alg = Algorithm (changed, pivotMaxRev);
+            alg.solution(true);
+            itNum += alg.getNoOfIter();
+        }
+        double temp = itNum / (double) (phiIt*n.getNoOfNodes());
+        //std::cout << "temp: " << temp << std::endl;
+        n.clean();
+        if (temp > opt_value) {opt_pos = takenActions.size(); opt_value = temp;}
+
+        distribution.back() = (opt_value == 0 ? 0 : (1 - temp/opt_value));
+
+        //choice of operation
         double sum = std::accumulate(distribution.begin(), distribution.end(), 0.);
         std::uniform_real_distribution<> choiceOfOperation(0., sum);
 
@@ -217,9 +237,11 @@ void RandomGraph::smartEvolve (size_t steps, std::vector<double> distribution) {
         switch (op) {
             //add edge
             case 0 :
-                {intmax_t nodeA = n.getNode(randNode(rng)), nodeB = n.getNode(randNode(rng));
+                {//don’t do anything if n is already complete
+                if (n.getNoOfEdges() == n.getNoOfNodes()*(n.getNoOfNodes() - 1)) {break;}
+                std::pair<size_t, size_t> e = randomMissingEdge();
                 std::uniform_int_distribution<intmax_t> fakeRan (1, 10);
-                Edge newE = Edge(nodeA, nodeB, fakeRan(rng), fakeRan(rng));
+                Edge newE = Edge(e.first, e.second, fakeRan(rng), fakeRan(rng));
                 if (n.addEdge(newE)) {
                     takenActions.push_back(Action(Edge(), newE));
                 }
@@ -267,46 +289,29 @@ void RandomGraph::smartEvolve (size_t steps, std::vector<double> distribution) {
                 }break;
             //undo last steps
             case 5 :
-                {
-                    std::uniform_int_distribution<intmax_t> stepsTakenBack(0, takenActions.size() - opt_pos);
-                    size_t k = stepsTakenBack(rng);
-                    for (size_t j = 0; j < k; j++) {
-                        Action lastAction = takenActions.back();
-                        takenActions.pop_back();
-                        if (lastAction.edgeCase) {
-                            n.deleteEdge(lastAction.newE.node0, lastAction.newE.node1);
-                            n.addEdge(lastAction.oldE);
-                        }
-                        else {
-                            const std::tuple<size_t, size_t, intmax_t> temp = lastAction.b_change;
-                            n.changeBvalue(std::get<0>(temp), - std::get<2>(temp));
-                            n.changeBvalue(std::get<1>(temp), std::get<2>(temp));
-                        }
+                {std::uniform_int_distribution<intmax_t> stepsTakenBack(0, takenActions.size() - opt_pos);
+                size_t k = stepsTakenBack(rng);
+                for (size_t j = 0; j < k; j++) {
+                    Action lastAction = takenActions.back();
+                    takenActions.pop_back();
+                    if (lastAction.edgeCase) {
+                        n.deleteEdge(lastAction.newE.node0, lastAction.newE.node1);
+                        n.addEdge(lastAction.oldE);
                     }
-                }break;
+                    else {
+                        const std::tuple<size_t, size_t, intmax_t> temp = lastAction.b_change;
+                        n.changeBvalue(std::get<0>(temp), - std::get<2>(temp));
+                        n.changeBvalue(std::get<1>(temp), std::get<2>(temp));
+                    }
+                }
+            }break;
         }
-
-        //evaluate n
-        intmax_t itNum = 0;
-        int phiIt = 0;
-        for (; phiIt < 1; phiIt++) {
-            Network changed = n;
-            //changed.randomNoise(0.1);
-            Algorithm alg = Algorithm (changed, pivotMaxRev);
-            alg.solution();
-            itNum += alg.getNoOfIter();
-        }
-        double temp = itNum / (double) (phiIt*n.getNoOfNodes());
-        //std::cout << "temp: " << temp << std::endl;
-        n.clean();
-        if (temp > opt_value) {opt_pos = takenActions.size(); opt_value = temp;}
-
-        distribution.back() = (opt_value == 0 ? 0 : (1 - temp/opt_value));
     }
 
-    std::cout << takenActions.size() << " and " << opt_pos << " with " << opt_value << std::endl;
+    //std::cout << "nodes: " << n.getNoOfNodes() << " | iterations: " << opt_value*n.getNoOfNodes() <<
+    //            " | factor: " << opt_value << std::endl;
     //recreate optimal network
-    n = Network(n.getNoOfNodes());
+    n = networkSave;
     for (size_t i = 0; i < opt_pos; i++) {
         Action& a = takenActions[i];
         if (a.edgeCase) {
@@ -319,4 +324,28 @@ void RandomGraph::smartEvolve (size_t steps, std::vector<double> distribution) {
             n.changeBvalue(std::get<1>(temp), - std::get<2>(temp));
         }
     }
+
+    networkSave = n;
+}
+
+std::pair<size_t, size_t> RandomGraph::randomMissingEdge() {
+    size_t nodes = n.getNoOfNodes();
+    std::vector<size_t> nodes0, nodes1;
+    for (size_t i = 0; i < nodes; i++) {
+        nodes0.push_back(n.getNode(i));
+    }
+    nodes1 = nodes0;
+    std::random_shuffle(nodes0.begin(), nodes0.end());
+    std::random_shuffle(nodes1.begin(), nodes1.end());
+
+    for (size_t node0 : nodes0) {
+        for (size_t node1 : nodes1) {
+            if (n.getEdges().count(std::forward_as_tuple(node0, node1, false)) == 0) {
+                return std::make_pair(node0, node1);
+            }
+        }
+    }
+    //shouldn’t happen
+    std::cout << "ERROR randomMissingEdge" << std::endl;
+    return std::make_pair(0, 0);
 }

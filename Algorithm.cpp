@@ -259,7 +259,7 @@ Circle Algorithm::findCircle(size_t node0, size_t node1, bool isResidual, const 
 
     Circle c;
 
-    //TODO is this redundant?
+    //return empty circle if there was found none
     if (path.size() == 1) {
         return c;
     }
