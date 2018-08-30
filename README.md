@@ -5,16 +5,16 @@ Coding the network simplex algorithm and finding bad instances
 Die Network-Klasse händelt den Graphen über die Klasse Edge und die interne Klasse Node.
 Die Algorithm-Klasse implementiert den Network-Simplex-Algorithmus und nutzt dazu Circle-Klasse, um mögliche Iterationen abzuspeichern.
 Des Weiteren bekommt der Algorithmus eine Funktion aus Pivotalgorithms.h zugewiesen.
-Der zweite Teil der BA, sprich Grapherzeugung, ist bisher rudimentär implementiert. Es können momentan zufällige, „gleichverteilte“ Graphen erzeugt werden, als nächstes wird ein evolutionärer Ansatz umgesetzt.
+Erste Ansätze des zweiten Teil der BA, sprich Grapherzeugung, sind implementiert. Es können momentan zufällige, „gleichverteilte“ Graphen erzeugt werden und eine Art evolutionärer Ansatz existiert.
+
+Veränderungen am Code werden in nächster Zeit nur wenige zu beobachten sein, ich sitze gerade an der Niederschrift.
 
 ## To-Do-Liste
 Hohe Priorität:
-- [ ] evolutionärer Ansatz
-- [x] random-noise Funktion
+- [ ] evolutionärer Ansatz verbessern
+- [ ] exponentielle Instanz unter randomNoise begutachten
 
 Mittlere Priorität:
-- [x] Null-Initialisierung (statt extrem teure artifical edges)
-- [x] Fehler in Network::clean() finden und beseitigen
 - [ ] Network -> txt und zurück implementieren
 
 Niedrige Priorität:
@@ -31,3 +31,7 @@ Niedrige Priorität:
 ### Ergebnisse über 200 Iterationen von Randomgraph (200,100,50):
 - MaxRev_LC 3.5 | MaxRev_HC 2.5 | MaxVal_LC 6.3 | MaxVal_HC 2.0 | Random_LC 12 | Random_HC 11.4
 - Erkenntnis: MaxVal_LC entspricht auf der ersten Hälfte Random (mit halb so schlechten Ergebnissen)
+
+### Ergebnisse von smartevolve
+Für bis zu fünf Knoten vermutlich optimal, danach alles andere als überzeugend. Verbesserungsideen sind existent, aber es steht zu befürchten, dass der Ansatz als Ganzes höchstens komplexer funktioniert.
+
