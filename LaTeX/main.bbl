@@ -9,4 +9,13 @@ N.~Zadeh, ``A bad network problem for the simplex method and other minimum cost
   flow algorithms,'' {\em Mathematical Programming}, vol.~5, no.~1,
   pp.~255--266, 1973.
 
+\bibitem{erf1}
+G.~B. Dantzig, ``Application of the simplex method to a transportation
+  problem,'' in {\em Activity Analysis of Production and Allocation} (T.~C.
+  Koopmans, ed.), ch.~XXIII, pp.~359--373, New~York: Wiley, 1951.
+
+\bibitem{erf2}
+A.~Orden, ``The transhipment problem,'' {\em Management Science}, vol.~2,
+  no.~3, pp.~276--285, 1956.
+
 \end{thebibliography}

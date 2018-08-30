@@ -1,4 +1,4 @@
-This is pdfTeX, Version 3.14159265-2.6-1.40.15 (MiKTeX 2.9) (preloaded format=pdflatex 2015.5.4)  29 AUG 2018 17:52
+This is pdfTeX, Version 3.14159265-2.6-1.40.15 (MiKTeX 2.9) (preloaded format=pdflatex 2015.5.4)  30 AUG 2018 16:40
 entering extended mode
 **main.tex
 (main.tex
@@ -481,6 +481,14 @@ Package: amsthm 2015/03/04 v2.20.2
 )
 \c@thm=\count114
 
+("C:\Program Files\MiKTeX\Installation\tex\latex\enumitem\enumitem.sty"
+Package: enumitem 2011/09/28 v3.5.2 Customized lists
+\labelindent=\skip54
+\enit@outerparindent=\dimen125
+\enit@toks=\toks28
+\enit@inbox=\box28
+\enitdp@description=\count115
+)
 ("C:\Program Files\MiKTeX\Installation\tex\latex\babel\babel.sty"
 Package: babel 2014/09/25 3.9l The Babel package
 
@@ -498,8 +506,8 @@ Language: ngermanb 2013/12/13 v2.7 German support for babel (new orthography)
 
 ("C:\Program Files\MiKTeX\Installation\tex\latex\babel\babel.def"
 File: babel.def 2014/09/25 3.9l Babel common definitions
-\babel@savecnt=\count115
-\U@D=\dimen125
+\babel@savecnt=\count116
+\U@D=\dimen126
 )
 \l@naustrian = a dialect from \language\l@ngerman 
 \l@nswissgerman = a dialect from \language\l@ngerman 
@@ -510,15 +518,15 @@ Package: csquotes 2015/04/15 v5.1e context-sensitive quotations (JAW)
 
 ("C:\Program Files\MiKTeX\Installation\tex\latex\etoolbox\etoolbox.sty"
 Package: etoolbox 2015/03/19 v2.1d e-TeX tools for LaTeX (JAW)
-\etb@tempcnta=\count116
+\etb@tempcnta=\count117
 )
-\csq@reset=\count117
-\csq@gtype=\count118
-\csq@glevel=\count119
-\csq@qlevel=\count120
-\csq@maxlvl=\count121
-\csq@tshold=\count122
-\csq@ltx@everypar=\toks28
+\csq@reset=\count118
+\csq@gtype=\count119
+\csq@glevel=\count120
+\csq@qlevel=\count121
+\csq@maxlvl=\count122
+\csq@tshold=\count123
+\csq@ltx@everypar=\toks29
 
 ("C:\Program Files\MiKTeX\Installation\tex\latex\csquotes\csquotes.def"
 File: csquotes.def 2015/04/15 v5.1e csquotes generic definitions (JAW)
@@ -534,12 +542,12 @@ Package: anyfontsize 2007/11/22 anyfontsize.sty by pts
 )
 ("C:\Program Files\MiKTeX\Installation\tex\latex\microtype\microtype.sty"
 Package: microtype 2013/05/23 v2.5a Micro-typographical refinements (RS)
-\MT@toks=\toks29
-\MT@count=\count123
+\MT@toks=\toks30
+\MT@count=\count124
 LaTeX Info: Redefining \textls on input line 766.
-\MT@outer@kern=\dimen126
+\MT@outer@kern=\dimen127
 LaTeX Info: Redefining \textmicrotypecontext on input line 1285.
-\MT@listname@count=\count124
+\MT@listname@count=\count125
 
 ("C:\Program Files\MiKTeX\Installation\tex\latex\microtype\microtype-pdftex.def
 "
@@ -547,7 +555,7 @@ File: microtype-pdftex.def 2013/05/23 v2.5a Definitions specific to pdftex (RS)
 
 LaTeX Info: Redefining \lsstyle on input line 915.
 LaTeX Info: Redefining \lslig on input line 915.
-\MT@outer@space=\skip54
+\MT@outer@space=\skip55
 )
 Package microtype Info: Loading configuration file microtype.cfg.
  ("C:\Program Files\MiKTeX\Installation\tex\latex\microtype\microtype.cfg"
@@ -559,20 +567,20 @@ Package csquotes Info: Adjusting default style.
 Package csquotes Info: Redefining alias 'default' -> 'ngerman'.
 
 (main.aux)
-LaTeX Font Info:    Checking defaults for OML/cmm/m/it on input line 28.
-LaTeX Font Info:    ... okay on input line 28.
-LaTeX Font Info:    Checking defaults for T1/cmr/m/n on input line 28.
-LaTeX Font Info:    ... okay on input line 28.
-LaTeX Font Info:    Checking defaults for OT1/cmr/m/n on input line 28.
-LaTeX Font Info:    ... okay on input line 28.
-LaTeX Font Info:    Checking defaults for OMS/cmsy/m/n on input line 28.
-LaTeX Font Info:    ... okay on input line 28.
-LaTeX Font Info:    Checking defaults for OMX/cmex/m/n on input line 28.
-LaTeX Font Info:    ... okay on input line 28.
-LaTeX Font Info:    Checking defaults for U/cmr/m/n on input line 28.
-LaTeX Font Info:    ... okay on input line 28.
-LaTeX Font Info:    Checking defaults for PD1/pdf/m/n on input line 28.
-LaTeX Font Info:    ... okay on input line 28.
+LaTeX Font Info:    Checking defaults for OML/cmm/m/it on input line 31.
+LaTeX Font Info:    ... okay on input line 31.
+LaTeX Font Info:    Checking defaults for T1/cmr/m/n on input line 31.
+LaTeX Font Info:    ... okay on input line 31.
+LaTeX Font Info:    Checking defaults for OT1/cmr/m/n on input line 31.
+LaTeX Font Info:    ... okay on input line 31.
+LaTeX Font Info:    Checking defaults for OMS/cmsy/m/n on input line 31.
+LaTeX Font Info:    ... okay on input line 31.
+LaTeX Font Info:    Checking defaults for OMX/cmex/m/n on input line 31.
+LaTeX Font Info:    ... okay on input line 31.
+LaTeX Font Info:    Checking defaults for U/cmr/m/n on input line 31.
+LaTeX Font Info:    ... okay on input line 31.
+LaTeX Font Info:    Checking defaults for PD1/pdf/m/n on input line 31.
+LaTeX Font Info:    ... okay on input line 31.
 
 ("C:\Program Files\MiKTeX\Installation\tex\latex\graphics\graphicx.sty"
 Package: graphicx 2014/10/28 v1.0g Enhanced LaTeX Graphics (DPC,SPQR)
@@ -590,41 +598,41 @@ Package graphics Info: Driver file: pdftex.def on input line 94.
 
 ("C:\Program Files\MiKTeX\Installation\tex\latex\pdftex-def\pdftex.def"
 File: pdftex.def 2011/05/27 v0.06d Graphics/color for pdfTeX
-\Gread@gobject=\count125
+\Gread@gobject=\count126
 
 ("C:\Program Files\MiKTeX\Installation\tex\context\base\supp-pdf.mkii"
 [Loading MPS to PDF converter (version 2006.09.02).]
-\scratchcounter=\count126
-\scratchdimen=\dimen127
-\scratchbox=\box28
-\nofMPsegments=\count127
-\nofMParguments=\count128
-\everyMPshowfont=\toks30
-\MPscratchCnt=\count129
-\MPscratchDim=\dimen128
-\MPnumerator=\count130
-\makeMPintoPDFobject=\count131
-\everyMPtoPDFconversion=\toks31
+\scratchcounter=\count127
+\scratchdimen=\dimen128
+\scratchbox=\box29
+\nofMPsegments=\count128
+\nofMParguments=\count129
+\everyMPshowfont=\toks31
+\MPscratchCnt=\count130
+\MPscratchDim=\dimen129
+\MPnumerator=\count131
+\makeMPintoPDFobject=\count132
+\everyMPtoPDFconversion=\toks32
 )))
-\Gin@req@height=\dimen129
-\Gin@req@width=\dimen130
+\Gin@req@height=\dimen130
+\Gin@req@width=\dimen131
 )
-\AtBeginShipoutBox=\box29
-Package hyperref Info: Link coloring OFF on input line 28.
+\AtBeginShipoutBox=\box30
+Package hyperref Info: Link coloring OFF on input line 31.
  ("C:\Program Files\MiKTeX\Installation\tex\latex\hyperref\nameref.sty"
 Package: nameref 2012/10/27 v2.43 Cross-referencing by name of section
 
 ("C:\Program Files\MiKTeX\Installation\tex\generic\oberdiek\gettitlestring.sty"
 Package: gettitlestring 2010/12/03 v1.4 Cleanup title references (HO)
 )
-\c@section@level=\count132
+\c@section@level=\count133
 )
-LaTeX Info: Redefining \ref on input line 28.
-LaTeX Info: Redefining \pageref on input line 28.
-LaTeX Info: Redefining \nameref on input line 28.
+LaTeX Info: Redefining \ref on input line 31.
+LaTeX Info: Redefining \pageref on input line 31.
+LaTeX Info: Redefining \nameref on input line 31.
  (main.out) (main.out)
 \@outlinefile=\write3
-LaTeX Info: Redefining \microtypecontext on input line 28.
+LaTeX Info: Redefining \microtypecontext on input line 31.
 Package microtype Info: Generating PDF output.
 Package microtype Info: Character protrusion enabled (level 2).
 Package microtype Info: Using default protrusion set `alltext'.
@@ -640,7 +648,7 @@ Package microtype Info: Redefining babel's language switching commands.
 File: mt-cmr.cfg 2013/05/19 v2.2 microtype config. file: Computer Modern Roman 
 (RS)
 )
-LaTeX Font Info:    Try loading font information for U+msa on input line 30.
+LaTeX Font Info:    Try loading font information for U+msa on input line 33.
 
 ("C:\Program Files\MiKTeX\Installation\tex\latex\amsfonts\umsa.fd"
 File: umsa.fd 2013/01/14 v3.01 AMS symbols A
@@ -648,7 +656,7 @@ File: umsa.fd 2013/01/14 v3.01 AMS symbols A
 ("C:\Program Files\MiKTeX\Installation\tex\latex\microtype\mt-msa.cfg"
 File: mt-msa.cfg 2006/02/04 v1.1 microtype config. file: AMS symbols (a) (RS)
 )
-LaTeX Font Info:    Try loading font information for U+msb on input line 30.
+LaTeX Font Info:    Try loading font information for U+msb on input line 33.
 
 ("C:\Program Files\MiKTeX\Installation\tex\latex\amsfonts\umsb.fd"
 File: umsb.fd 2013/01/14 v3.01 AMS symbols B
@@ -680,24 +688,24 @@ Kapitel 4.
 (main.bbl [7
 
 ])
-Package atveryend Info: Empty hook `BeforeClearDocument' on input line 74.
+Package atveryend Info: Empty hook `BeforeClearDocument' on input line 94.
  [8
 
 ]
-Package atveryend Info: Empty hook `AfterLastShipout' on input line 74.
+Package atveryend Info: Empty hook `AfterLastShipout' on input line 94.
  (main.aux)
-Package atveryend Info: Executing hook `AtVeryEndDocument' on input line 74.
-Package atveryend Info: Executing hook `AtEndAfterFileList' on input line 74.
+Package atveryend Info: Executing hook `AtVeryEndDocument' on input line 94.
+Package atveryend Info: Executing hook `AtEndAfterFileList' on input line 94.
 Package rerunfilecheck Info: File `main.out' has not changed.
 (rerunfilecheck)             Checksum: 5506FC265B7D277F80D7BCACE3933B48;473.
-Package atveryend Info: Empty hook `AtVeryVeryEnd' on input line 74.
+Package atveryend Info: Empty hook `AtVeryVeryEnd' on input line 94.
  ) 
 Here is how much of TeX's memory you used:
- 9633 strings out of 493671
- 143244 string characters out of 3140206
- 279780 words of memory out of 3000000
- 12785 multiletter control sequences out of 15000+200000
- 20095 words of font info for 67 fonts, out of 3000000 for 9000
+ 9943 strings out of 493671
+ 148288 string characters out of 3140206
+ 288002 words of memory out of 3000000
+ 13064 multiletter control sequences out of 15000+200000
+ 20848 words of font info for 78 fonts, out of 3000000 for 9000
  1025 hyphenation exceptions out of 8191
  33i,6n,35p,933b,418s stack positions out of 5000i,500n,10000p,200000b,50000s
 {C:/Program Files/MiKTeX/Installation/fonts/enc/dvips/cm-super/cm-super-t1.en
@@ -706,21 +714,22 @@ fb><C:/Program Files/MiKTeX/Installation/fonts/type1/public/amsfonts/cm/cmmi10.
 pfb><C:/Program Files/MiKTeX/Installation/fonts/type1/public/amsfonts/cm/cmmi7.
 pfb><C:/Program Files/MiKTeX/Installation/fonts/type1/public/amsfonts/cm/cmr10.
 pfb><C:/Program Files/MiKTeX/Installation/fonts/type1/public/amsfonts/cm/cmr7.p
-fb><C:/Program Files/MiKTeX/Installation/fonts/type1/public/amsfonts/cm/cmsy7.p
-fb><C:/Program Files/MiKTeX/Installation/fonts/type1/public/amsfonts/symbols/ms
-bm10.pfb><C:/Program Files/MiKTeX/Installation/fonts/type1/public/cm-super/sfbx
-1000.pfb><C:/Program Files/MiKTeX/Installation/fonts/type1/public/cm-super/sfbx
-1200.pfb><C:/Program Files/MiKTeX/Installation/fonts/type1/public/cm-super/sfbx
-1440.pfb><C:/Program Files/MiKTeX/Installation/fonts/type1/public/cm-super/sfbx
-2074.pfb><C:/Program Files/MiKTeX/Installation/fonts/type1/public/cm-super/sfbx
-2488.pfb><C:/Program Files/MiKTeX/Installation/fonts/type1/public/cm-super/sfrm
-1000.pfb><C:/Program Files/MiKTeX/Installation/fonts/type1/public/cm-super/sfrm
-1200.pfb><C:/Program Files/MiKTeX/Installation/fonts/type1/public/cm-super/sfrm
-1728.pfb><C:/Program Files/MiKTeX/Installation/fonts/type1/public/cm-super/sfti
-1000.pfb>
-Output written on main.pdf (8 pages, 217261 bytes).
+fb><C:/Program Files/MiKTeX/Installation/fonts/type1/public/amsfonts/cm/cmsy10.
+pfb><C:/Program Files/MiKTeX/Installation/fonts/type1/public/amsfonts/cm/cmsy7.
+pfb><C:/Program Files/MiKTeX/Installation/fonts/type1/public/amsfonts/symbols/m
+sbm10.pfb><C:/Program Files/MiKTeX/Installation/fonts/type1/public/cm-super/sfb
+x1000.pfb><C:/Program Files/MiKTeX/Installation/fonts/type1/public/cm-super/sfb
+x1200.pfb><C:/Program Files/MiKTeX/Installation/fonts/type1/public/cm-super/sfb
+x1440.pfb><C:/Program Files/MiKTeX/Installation/fonts/type1/public/cm-super/sfb
+x2074.pfb><C:/Program Files/MiKTeX/Installation/fonts/type1/public/cm-super/sfb
+x2488.pfb><C:/Program Files/MiKTeX/Installation/fonts/type1/public/cm-super/sfr
+m1000.pfb><C:/Program Files/MiKTeX/Installation/fonts/type1/public/cm-super/sfr
+m1200.pfb><C:/Program Files/MiKTeX/Installation/fonts/type1/public/cm-super/sfr
+m1728.pfb><C:/Program Files/MiKTeX/Installation/fonts/type1/public/cm-super/sft
+i1000.pfb>
+Output written on main.pdf (8 pages, 245336 bytes).
 PDF statistics:
- 164 PDF objects out of 1000 (max. 8388607)
- 25 named destinations out of 1000 (max. 500000)
+ 176 PDF objects out of 1000 (max. 8388607)
+ 30 named destinations out of 1000 (max. 500000)
  18497 words of extra memory for PDF output out of 20736 (max. 10000000)
 
