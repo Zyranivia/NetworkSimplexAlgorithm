@@ -1,0 +1,74 @@
+\documentclass[a4paper,twoside]{report}
+\author{Max~Kanold}
+\title{Experimentelle Ergebnisse zum Network-Simplex-Algorithmus}
+
+\usepackage[utf8]{inputenc}
+\usepackage[T1]{fontenc}
+
+\usepackage{mathtools}
+
+\usepackage[hidelinks]{hyperref}
+% or colorlinks
+
+\usepackage{amssymb,amsthm}
+
+\theoremstyle{plain}
+\newtheorem{thm}{Theorem}
+
+\theoremstyle{definition}
+\newtheorem{defn}[thm]{Definition}
+
+\usepackage[ngerman]{babel}
+\usepackage{csquotes}
+\usepackage{anyfontsize}
+\usepackage[babel]{microtype}
+
+
+
+\begin{document}
+\maketitle
+\tableofcontents
+
+\newpage
+\chapter{Einführung}
+Bla. Zum Beispiel in Kapitel \ref{prog} habe ich programmiert.
+
+\newpage
+\chapter{Network-Simplex-Algorithmus}
+Das Simplex-Verfahren, zu welchem eine Einführung in \cite{NSAbook} gefunden werden kann, löst Lineare Programme in der Praxis sehr schnell, obwohl die Worst-Case-Laufzeit nicht polynomiell ist. Jedes Netzwerkproblem lässt sich als Lineares Programm darstellen und somit durch das Simplex-Verfahren lösen, durch die konkrete Struktur solcher Probleme genügt jedoch der vereinfachte Network-Simplex-Algorithmus. Auch für diesen gibt es exponentielle Instanzen (siehe \cite{Exponential}), in der Praxis wird er trotzdem vielfach verwendet.
+
+\section{Min-Cost-Flow-Problem}
+\begin{defn}Ein \textbf{Netzwerk} $(G,u,c,b)$ und so weiter.\end{defn}
+Sind die Kapazitäten unbeschränkt, ist das Problem als \emph{Transportproblem} bekannt.
+
+Für diese Bachelorarbeit wurde angenommen, dass $u$ und $c$ auf $\mathbb{N}$ sowie $b$ auf $\mathbb{Z}$ abbildet, um Gleitkommazahlungenauigkeit zu vermeiden. Durch eine entsprechende Skalierung des Problems können die Funktionen nach $\mathbb{R}$ hinreichend genug angenähert werden. Zusätzlich wird davon ausgegangen, dass $\sum_{v\in V(G)} b(v) = 0$ ist, Angebot und Nachfrage also ausgeglichen sind. Des Weiteren sind in der konkreten Implementierung keine parallelen Kanten vorgesehen.
+
+\begin{defn}Eine Lösung TODO \textbf{Min-Cost-Flow-Problem} sucht für ein gegebenes Netzwerk $(G,u,c,b)$ eine \end{defn}
+
+
+\section{Algorithmus}
+
+\section{Umsetzung} \label{prog}
+Hier beginnt mein schönes Werk \ldots
+
+\subsection{Spezielle Konstrukte}
+\ldots und hier endet es.
+
+\subsubsection{Die Klasse Circle}
+Kreise halt.\cite{NSAbook}
+
+\subsubsection{Der Rest halt}
+Kleinkram.
+
+\newpage
+\chapter{Experimentelle Ergebnisse}
+Alle scheiße.
+
+\newpage
+\chapter{Ausblick}
+La la la.
+
+\bibliography{bibliography}{}
+\bibliographystyle{ieeetr}
+
+\end{document}
