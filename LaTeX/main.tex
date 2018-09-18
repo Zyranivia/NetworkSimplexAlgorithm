@@ -1,24 +1,16 @@
-\documentclass[a4paper,twoside]{report}
+\documentclass[a4paper,twoside,ngerman]{report}
 \author{Max~Kanold}
 \title{Experimentelle Ergebnisse zum Network-Simplex-Algorithmus}
 
 \usepackage[utf8]{inputenc}
 \usepackage[T1]{fontenc}
 
+\usepackage{pgf, tikz}
+\usetikzlibrary{arrows, automata}
+
 \usepackage{mathtools}
 
-\usepackage[hidelinks]{hyperref}
-% or colorlinks
-
 \usepackage{amssymb,amsthm}
-
-\theoremstyle{plain}
-\newtheorem{thm}{Theorem}
-
-\theoremstyle{definition}
-\newtheorem{defn}[thm]{Definition}
-
-\newtheorem*{anm}{Anmerkung}
 
 \usepackage[shortlabels]{enumitem}
 
@@ -27,6 +19,21 @@
 \usepackage{anyfontsize}
 \usepackage[babel]{microtype}
 
+\usepackage[hidelinks]{hyperref}
+% or colorlinks
+\usepackage{cleveref}
+
+\theoremstyle{plain}
+\newtheorem{thm}{Theorem}
+\newtheorem{lem}[thm]{Lemma}
+
+\theoremstyle{definition}
+\newtheorem{defn}[thm]{Definition}
+
+\newtheorem*{anm}{Anmerkung}
+
+\crefname{lem}{Lemma}{Lemmata}
+\crefname{defn}{Definition}{Definitionen}
 
 \begin{document}
 \maketitle
@@ -34,25 +41,26 @@
 
 \newpage
 \chapter{Einführung}
-Bla. Zum Beispiel in Kapitel \ref{prog} habe ich programmiert.
+Bla. Zum Beispiel in \cref{prog} habe ich programmiert.
 
 \newpage
 \chapter{Network-Simplex-Algorithmus}
-Das Simplex-Verfahren, zu welchem eine Einführung in \cite{NSAbook} gefunden werden kann, löst Lineare Programme in der Praxis sehr schnell, obwohl die Worst-Case-Laufzeit nicht polynomiell ist. Jedes Netzwerkproblem lässt sich als Lineares Programm darstellen und somit durch das Simplex-Verfahren lösen, durch die konkrete Struktur solcher Probleme genügt jedoch der vereinfachte Network-Simplex-Algorithmus. Auch für diesen gibt es exponentielle Instanzen (siehe \cite{Exponential}), in der Praxis wird er trotzdem vielfach verwendet.
+Das Simplex-Verfahren, zu welchem eine Einführung in \cite{NSAbook} gefunden werden kann, löst Lineare Programme in der Praxis sehr schnell, obwohl die Worst-Case-Laufzeit nicht polynomiell ist. Jedes Netzwerkproblem lässt sich als Lineares Programm darstellen und somit durch das Simplex-Verfahren lösen, durch die konkrete Struktur solcher Probleme genügt jedoch der vereinfachte Network-Simplex-Algorithmus. Auch für diesen gibt es exponentielle Instanzen (siehe \cite{Exponential}), in der Praxis wird er trotzdem vielfach verwendet.\\
+TODO gibt es?
 
 \section{Min-Cost-Flow-Problem}
 \begin{defn}Ein \textbf{Netzwerk} ist ein Tupel $(G,b,c,u)$, wobei $G = (V,E)$ ein gerichteter Graph, $b : V\rightarrow\mathbb{R}$ eine b-Wert-Funktion, $c : E\rightarrow\mathbb{R}$ eine Kostenfunktion und $u : E\rightarrow\mathbb{R}_{\geq 0}$ eine Kapazitätsfunktion seien.\end{defn}
 \begin{anm}Knoten mit positiven b-Wert werden als Quellen, solche mit negativen als Senken bezeichnet.\\
 Ein ungerichteter Graph kann durch das Verwandeln jeder Kante $\{v,w\}$ in zwei Kanten $(v,w)$ und $(w,v)$ zu einem gerichteten modifiziert werden.\end{anm}
 
-\begin{defn}Ein \textbf{maximaler Fluss} auf einem Netzwerk $(G=(V,E),b,c,u)$ ist eine Abbildung $f : E\rightarrow\mathbb{R}_{\geq 0}$, die folgende Eigenschaften erfüllt:
+\begin{defn}\label{DefMaxFlow}Ein \textbf{maximaler Fluss} auf einem Netzwerk $(G=(V,E),b,c,u)$ ist eine Abbildung $f : E\rightarrow\mathbb{R}_{\geq 0}$, die folgende Eigenschaften erfüllt:
 \begin{enumerate}[(i)]
 \item $\forall e\in E : f(e)\leq u(e) $
-\item $\forall v\in V : \sum_{(w,v)\in E} f((w,v)) - \sum_{(v,w)\in E} f((v,w)) + b(v) = 0$
+\item $\forall v\in V : \sum_{(w,v)\in E} f((w,v)) - \sum_{(v,w)\in E} f((v,w)) + b(v) = 0$\label{DefMaxFlowII}
 \end{enumerate}
 Der \textbf{Wert} von $f$ ist
-$v(f) = \frac{1}{2}\cdot\sum_{v\in V} |b(v)|$,\\
-die \textbf{Kosten} von $f$ sind
+$v(f) = \frac{1}{2}\cdot\sum_{v\in V} |b(v)|$\\
+und die \textbf{Kosten} von $f$ sind
 $c(f) = \sum_{e\in E} f(e)\cdot c(e)$.
 \end{defn}
 
@@ -63,10 +71,41 @@ Für diese Bachelorarbeit wurde angenommen, dass $u$ und $c$ auf $\mathbb{N}$ so
 \section{Algorithmus}
 \cite[Dantzig, 1951]{erf1} und \cite[Orden, 1956]{erf2} vereinfachten das Simplex-Verfahren zum Netzwerk-Simplex-Algorithmus; die folgende Beschreibung orientiert sich zuerst an \cite[S. 291\,ff.]{NSAbook} zur Lösung des Transportproblems, danach wird der Algorithmus anhand von TODO auf den allgemeinen, durch Kapazitäten beschränkten Fall erweitert.
 
+\begin{defn}Der einem gerichteten Graphen $G=(V,E)$ \textbf{zugrundeliegende ungerichtete Graph} $G'=(V,E')$ ist definiert durch:\\
+\begin{equation*}\{v,w\}\in E' \iff (v,w) \in E \lor (w,v) \in E\end{equation*} \end{defn}
+\begin{anm}Nach dieser Definition gibt es keine Bijektion zwischen gerichteten und den zugrundeliegenden ungerichteten Graphen; dafür vermeidet man parallele Kanten.\end{anm}
 \begin{defn}Ein \textbf{Baum} $T$ ist ein ungerichteter, zusammenhängender und kreisfreier Graph.\\
 Ein Teilgraph $T=(V',E')$ eines ungerichteten Graphen $G=(V,E)$ heißt \textbf{aufspannender Baum}, wenn T ein Baum und $V'=V$ ist.\end{defn}
-\begin{anm}Sprechen wir bei einem gerichteten Graphen $G$ über einen aufspannenden Baum, so bezieht sich das stets auf einen aufspannenden Baum des $G$ zugrundeliegenden ungerichteten Graphen.\end{anm}
+\begin{anm}Sprechen wir bei einem gerichteten Graphen $G$ über einen aufspannenden Baum, so bezieht sich das stets auf einen Teilgraphen $T$ von $G$, dessen zugrundeliegender ungerichteter Graph ein aufspannender Teilbaum des $G$ zugrundeliegenden ungerichteten Graphen ist.\end{anm}
 
+\begin{defn}Sei $N=(G,b,c,u)$ ein Netzwerk. Ein aufspannender Baum $T$ von $G$ und ein maximaler Fluss $f$ auf $N$ bilden eine \textbf{zulässige Baumlösung} $(T,f)$, wenn $\forall e\in E(G)\backslash E(T): f(e) = 0$.\end{defn}
+
+\begin{lem}Jede zulässige Baumlösung $(T,f)$ ist eindeutig durch den aufspannenden Baum $T$ definiert.\end{lem}
+\begin{proof}Sei $(T=(V,E),f)$ eine zulässige Baumlösung eines Netzwerkes. Für jedes Blatt von $l\in V$ sei $e_l\in E$ die eindeutige Kante in $T$ zwischen den Knoten $k$ und $l$. Für alle Blätter $l$ ist der Wert von $f(e_l)$ nach \cref{DefMaxFlow} \cref{DefMaxFlowII} eindeutig.
+	
+Wir entfernen nun alle mit Fluss belegten Kanten $e_l$ sowie die nun isolierten Knoten $l$ und aktualisieren den b-Wert von $k$. Der dabei entstehende Graph $T'=(V'\subseteq V,E'\subseteq E)$ bleibt weiterhin ein spannender Baum und $f_{|E'}$ ein maximaler Fluss. Durch Iteration ist $f$ wohldefiniert und eindeutig.\end{proof}
+
+Wie TODO veranschaulicht, gibt es maximale Flüsse, zu denen wir keine zulässige Baumlösung finden können. Auch wenn wir uns auf die maximalen Flüsse beschränken, zu denen es zulässige Baumlösungen gibt, gilt die Gegenrichtung nach TODO nicht.
+
+\begin{figure}[!h]\centering
+\begin{tikzpicture} [align=center]
+\path (0, 0) node[circle, draw, text width=0.4cm] (v0) {$-2$}
+ 	  (3, 0) node[circle, draw, text width=0.4cm] (v1) {$0$}
+	  (1.5, 1.5) node[circle, draw, text width=0.4cm] (v2) {$2$};
+	  
+\draw[->] (v0) -- node [sloped, anchor=center, below] {\tiny 1 | 1} (v1);
+\draw[->] (v0) -- node [sloped, anchor=center, above] {\tiny 1 | 2} (v2);
+\draw[->] (v1) -- node [sloped, anchor=center, above] {\tiny 1 | 1} (v2);
+\draw[->, very thick] (4,0.75) -- (5,0.75);
+\path (6, 0) node (v3) {$-2$}
+	  (9, 0) node (v4) {$0$}
+	  (7.5, 1.5) node (v5) {$2$};
+\end{tikzpicture}
+\end{figure}
+
+Unser Ziel wird es sein, die Lösungssuche auf aufspannende Bäume zu reduzieren, deren zulässige Baumlösung monoton günstiger wird. Nachfolgendes Lemma beweist, dass es zu einem günstigsten Fluss $f$ eine zulässige Baumlösung $(T',f')$ gibt, deren Kosten ebenfalls minimal sind.
+
+\begin{lem}Sei $f$ ein maximaler Fluss. Es existiert ein maximaler Fluss $f'$, sodass $c(f')\leq c(f)$ ist und eine zulässige Baumlösung $(T',f')$ existiert.\end{lem}
 
 
 
