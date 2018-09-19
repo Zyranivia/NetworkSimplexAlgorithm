@@ -26,6 +26,7 @@
 \theoremstyle{plain}
 \newtheorem{thm}{Theorem}
 \newtheorem{lem}[thm]{Lemma}
+\newtheorem{kor}[thm]{Korollar}
 
 \theoremstyle{definition}
 \newtheorem{defn}[thm]{Definition}
@@ -34,6 +35,7 @@
 
 \crefname{lem}{Lemma}{Lemmata}
 \crefname{defn}{Definition}{Definitionen}
+\crefname{kor}{Korollar}{Korollare}
 
 \begin{document}
 \maketitle
@@ -49,7 +51,7 @@ Das Simplex-Verfahren, zu welchem eine Einführung in \cite{NSAbook} gefunden we
 TODO gibt es?
 
 \section{Min-Cost-Flow-Problem}
-\begin{defn}Ein \textbf{Netzwerk} ist ein Tupel $(G,b,c,u)$, wobei $G = (V,E)$ ein gerichteter Graph, $b : V\rightarrow\mathbb{R}$ eine b-Wert-Funktion, $c : E\rightarrow\mathbb{R}$ eine Kostenfunktion und $u : E\rightarrow\mathbb{R}_{\geq 0}$ eine Kapazitätsfunktion seien.\end{defn}
+\begin{defn}Ein \textbf{Netzwerk} ist ein Tupel $(G,b,c,u)$, wobei $G = (V,E)$ ein gerichteter Graph, $b : V\rightarrow\mathbb{R}$ eine b-Wert-Funktion, $c : E\rightarrow\mathbb{R}$ eine Kostenfunktion und $u : E\rightarrow\mathbb{R}_{\geq 0}\cup \infty$ eine Kapazitätsfunktion seien.\end{defn}
 \begin{anm}Knoten mit positiven b-Wert werden als Quellen, solche mit negativen als Senken bezeichnet.\\
 Ein ungerichteter Graph kann durch das Verwandeln jeder Kante $\{v,w\}$ in zwei Kanten $(v,w)$ und $(w,v)$ zu einem gerichteten modifiziert werden.\end{anm}
 
@@ -66,7 +68,9 @@ $c(f) = \sum_{e\in E} f(e)\cdot c(e)$.
 
 Beim \emph{Min-Cost-Flow-Problem} wird unter allen maximalen Flüssen einer mit minimalen Kosten gesucht. Sind die Kapazitäten unbeschränkt, so wird es als \emph{Transportproblem} bezeichnet.
 
-Für diese Bachelorarbeit wurde angenommen, dass $u$ und $c$ auf $\mathbb{N}$ sowie $b$ auf $\mathbb{Z}$ abbildet, um Gleitkommazahlungenauigkeit zu vermeiden. Durch eine entsprechende Skalierung des Problems können die Funktionen nach $\mathbb{R}_{\geq 0}$ bzw. $\mathbb{R}$ hinreichend genug angenähert werden. Zusätzlich wird davon ausgegangen, dass $\sum_{v\in V(G)} b(v) = 0$ ist, Angebot und Nachfrage also ausgeglichen sind. Des Weiteren ist in der konkreten Implementierung $E$ keine Multimenge; es sind keine parallelen Kanten vorgesehen.
+In dieser Bachelorarbeit wird angenommen, dass $u$ und $c$ auf $\mathbb{N}$ sowie $b$ auf $\mathbb{Z}$ abbildet, um Gleitkommazahlungenauigkeit zu vermeiden. Durch eine entsprechende Skalierung des Problems können die Funktionen nach $\mathbb{R}_{\geq 0}$ bzw. $\mathbb{R}$ hinreichend genug angenähert werden. Durch die eingeschränkte Kostenfunktion hat kein maximaler Fluss negative Kosten; es gibt keine unbeschränkten Instanzen. Unbeschränkte Kapazitäten können somit o.\,B.\,d.\,A. durch $\frac{1}{2}\cdot\sum_{v\in V} |b(v)| + 1$ approximiert werden.
+
+Zusätzlich wird davon ausgegangen, dass $\sum_{v\in V(G)} b(v) = 0$ ist, Angebot und Nachfrage also ausgeglichen sind. Des Weiteren ist in der konkreten Implementierung $E$ keine Multimenge; es sind keine parallelen Kanten vorgesehen.
 
 \section{Algorithmus}
 \cite[Dantzig, 1951]{erf1} und \cite[Orden, 1956]{erf2} vereinfachten das Simplex-Verfahren zum Netzwerk-Simplex-Algorithmus; die folgende Beschreibung orientiert sich zuerst an \cite[S. 291\,ff.]{NSAbook} zur Lösung des Transportproblems, danach wird der Algorithmus anhand von TODO auf den allgemeinen, durch Kapazitäten beschränkten Fall erweitert.
@@ -74,16 +78,16 @@ Für diese Bachelorarbeit wurde angenommen, dass $u$ und $c$ auf $\mathbb{N}$ so
 \begin{defn}Der einem gerichteten Graphen $G=(V,E)$ \textbf{zugrundeliegende ungerichtete Graph} $G'=(V,E')$ ist definiert durch:\\
 \begin{equation*}\{v,w\}\in E' \iff (v,w) \in E \lor (w,v) \in E\end{equation*} \end{defn}
 \begin{anm}Nach dieser Definition gibt es keine Bijektion zwischen gerichteten und den zugrundeliegenden ungerichteten Graphen; dafür vermeidet man parallele Kanten.\end{anm}
-\begin{defn}Ein \textbf{Baum} $T$ ist ein ungerichteter, zusammenhängender und kreisfreier Graph.\\
+\begin{defn}Ein \textbf{Baum} $T$ ist ein ungerichteter, zusammenhängender und kreisfreier Graph. Ein \textbf{Wald} ist ein Graph, bei dem jede Zusammenhangskomponente ein Baum ist.\\
 Ein Teilgraph $T=(V',E')$ eines ungerichteten Graphen $G=(V,E)$ heißt \textbf{aufspannender Baum}, wenn T ein Baum und $V'=V$ ist.\end{defn}
-\begin{anm}Sprechen wir bei einem gerichteten Graphen $G$ über einen aufspannenden Baum, so bezieht sich das stets auf einen Teilgraphen $T$ von $G$, dessen zugrundeliegender ungerichteter Graph ein aufspannender Teilbaum des $G$ zugrundeliegenden ungerichteten Graphen ist.\end{anm}
+\begin{anm}Sprechen wir bei einem gerichteten Graphen $G$ über einen Wald bzw. (aufspannenden) Baum, so bezieht sich das stets auf einen Teilgraphen $T$ von $G$, dessen zugrundeliegender ungerichteter Graph ein Wald bzw. (aufspannender) Baum des $G$ zugrundeliegenden ungerichteten Graphen ist.\end{anm}
 
 \begin{defn}Sei $N=(G,b,c,u)$ ein Netzwerk. Ein aufspannender Baum $T$ von $G$ und ein maximaler Fluss $f$ auf $N$ bilden eine \textbf{zulässige Baumlösung} $(T,f)$, wenn $\forall e\in E(G)\backslash E(T): f(e) = 0$.\end{defn}
 
 \begin{lem}Jede zulässige Baumlösung $(T,f)$ ist eindeutig durch den aufspannenden Baum $T$ definiert.\end{lem}
 \begin{proof}Sei $(T=(V,E),f)$ eine zulässige Baumlösung eines Netzwerkes. Für jedes Blatt von $l\in V$ sei $e_l\in E$ die eindeutige Kante in $T$ zwischen den Knoten $k$ und $l$. Für alle Blätter $l$ ist der Wert von $f(e_l)$ nach \cref{DefMaxFlow} \cref{DefMaxFlowII} eindeutig.
 	
-Wir entfernen nun alle mit Fluss belegten Kanten $e_l$ sowie die nun isolierten Knoten $l$ und aktualisieren den b-Wert von $k$. Der dabei entstehende Graph $T'=(V'\subseteq V,E'\subseteq E)$ bleibt weiterhin ein spannender Baum und $f_{|E'}$ ein maximaler Fluss. Durch Iteration ist $f$ wohldefiniert und eindeutig.\end{proof}
+Wir entfernen nun alle mit Fluss belegten Kanten $e_l$ sowie die nun isolierten Knoten $l$ und aktualisieren den b-Wert von $k$. Der dabei entstehende Graph $T'=(V'\subseteq V,E'\subseteq E)$ bleibt weiterhin ein aufspannender Baum und $f_{|E'}$ ein maximaler Fluss. Durch Iteration ist $f$ wohldefiniert und eindeutig.\end{proof}
 
 Wie TODO veranschaulicht, gibt es maximale Flüsse, zu denen wir keine zulässige Baumlösung finden können. Auch wenn wir uns auf die maximalen Flüsse beschränken, zu denen es zulässige Baumlösungen gibt, gilt die Gegenrichtung nach TODO nicht.
 
@@ -103,9 +107,30 @@ Wie TODO veranschaulicht, gibt es maximale Flüsse, zu denen wir keine zulässig
 \end{tikzpicture}
 \end{figure}
 
-Unser Ziel wird es sein, die Lösungssuche auf aufspannende Bäume zu reduzieren, deren zulässige Baumlösung monoton günstiger wird. Nachfolgendes Lemma beweist, dass es zu einem günstigsten Fluss $f$ eine zulässige Baumlösung $(T',f')$ gibt, deren Kosten ebenfalls minimal sind.
+Wie wir in \cref{minCostFlow} zeigen werden, existiert eine zulässige Baumlösung $(T,f)$, sodass $c(f)$ minimal ist. Die dem Algorithmus zugrundeliegende Idee ist es, über zulässige Baumlösungen mit sinkenden Kosten zu iterieren, bis diese minimal sind. Der Übergang basiert dabei auf dem Augmentieren negativer Kreise, eine Methode, für die das Konzept des Residualgraphen hilfreich ist.
 
-\begin{lem}Sei $f$ ein maximaler Fluss. Es existiert ein maximaler Fluss $f'$, sodass $c(f')\leq c(f)$ ist und eine zulässige Baumlösung $(T',f')$ existiert.\end{lem}
+\begin{defn}Sei $N=(G=(V,E),b,c,u)$ ein Netzwerk mit einem maximalen Fluss $f$. Die \textbf{Residualkante} $\bar{e}$ einer Kante $e=(v,w)\in E$ verläuft von $w$ nach $v$. Sei $\bar{E}=\{\bar{e}|e\in E\}$ die Menge aller Residualkanten. Die \textit{Residualkapazität} $u_f:\bar{E}\rightarrow\mathbb{Z}$ ist bestimmt durch $u_f(\bar{e})=u(e)-f(e)$, die \textit{Residualkosten} $c_f:\bar{E}\rightarrow\mathbb{Z}$ durch $c_f(\bar{e})=-c(e)$.
+
+Der \textbf{Residualgraph} $R$ ist ein Tupel $R_{N,f}=(\bar{G}=(V,E\amalg\bar{E}),\bar{f},b,\bar{c},\bar{u})$ mit dem gerichteten Multigraphen $\bar{G}$ aus der bisherigen Knotenmenge und der disjunkten Vereinigung von Kanten und Residualkanten, dem maximalen Fluss $\bar{f}$ mit $\forall e\in E:\bar{f}(e)=f(e)$ und $\forall \bar{e}\in\bar{E}:\bar{f}(\bar{e})=0$, der b-Wert-Funktion $b$ wie gehabt, der Kostenfunktion $\bar{c}=c\amalg c_f:E\amalg\bar{E}\rightarrow\mathbb{Z}$ und der Kapazitätsfunktion $\bar{u}=u\amalg u_f:E\amalg\bar{E}\rightarrow\mathbb{Z}$. 
+\end{defn}
+
+Augmentieren wir in einem Residualgraphen $R_{N,f}$ einen gerichteten Kreis $C\subseteq E\amalg\bar{E}$, erhöhen also für alle Kanten $e\in C$ den Fluss um einen festen Betrag $\tau\in\mathbb{N}$, ohne die Kapazitätsschranken zu verletzen, erhalten wir einen neuen maximalen Fluss $f'$ in $N$. Sind die Kosten des Kreises negativ, also $c(C)=\sum_{e\in C} \bar{c}(e) < 0$, verbilligen sich die Kosten des neuen maximalen Flusses $f'$ um $\tau\cdot c(C)$.
+
+\begin{lem}Augmentiert man um Kreis maximal, ist $C_f$ kein Kreis mehr.
+\end{lem}
+\begin{proof}
+\end{proof}
+
+Mithilfe des Konzeptes und Lemma können wir nun thm und damit kor zeigen.
+
+\begin{thm}Sei $f$ ein maximaler Fluss. Es existiert ein maximaler Fluss $\hat{f}$, sodass $c(\hat{f})\leq c(f)$ ist und eine zulässige Baumlösung $(\hat{T},\hat{f})$ existiert.\end{thm}
+\begin{proof}Sei $f$ ein maximaler Fluss für ein Netzwerk $(G=(V,E),b,c,u)$ und $G_f=(V,E'=\{e\in E | f(e) \neq 0\})$ der Graph aller durchflossenen Kanten. Wir werden $f$ zu einem maximalen Fluss $\hat{f}$ umwandeln, sodass $G_{\hat{f}}$ ein Wald ist. Für $\hat{f}$ finden wir dann leicht eine zulässige Baumlösung. Wenn wir für alle maximalen Zwischenflüsse $f=f_0,f_1,f_2,\ldots,f_n=\hat{f}$ sicherstellen, dass $c(f_{i+1})\leq c(f_i)$ ist, gilt auch $c(\hat{f})\leq c(f)$.
+
+Betrachte einen maximalen Fluss $f_i$. Wenn $G_{f_i}$ ein Wald ist, sind wir fertig. Ansonsten gibt es Kreis -> Lemma iterieren.
+\end{proof}
+
+\begin{kor}\label{minCostFlow}Es existiert ein maximaler Fluss $f$ mit minimalen Kosten und einer zulässigen Baumlösung $(T,f)$.\qed\end{kor}
+
 
 
 
