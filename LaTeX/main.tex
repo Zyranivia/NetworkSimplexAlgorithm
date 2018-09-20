@@ -68,7 +68,7 @@ $c(f) = \sum_{e\in E} f(e)\cdot c(e)$.
 
 Beim \emph{Min-Cost-Flow-Problem} wird unter allen maximalen Flüssen einer mit minimalen Kosten gesucht. Sind die Kapazitäten unbeschränkt, so wird es als \emph{Transportproblem} bezeichnet.
 
-In dieser Bachelorarbeit wird angenommen, dass $u$ und $c$ auf $\mathbb{N}$ sowie $b$ auf $\mathbb{Z}$ abbildet, um Gleitkommazahlungenauigkeit zu vermeiden. Durch eine entsprechende Skalierung des Problems können die Funktionen nach $\mathbb{R}_{\geq 0}$ bzw. $\mathbb{R}$ hinreichend genug angenähert werden. Durch die eingeschränkte Kostenfunktion hat kein maximaler Fluss negative Kosten; es gibt keine unbeschränkten Instanzen. Unbeschränkte Kapazitäten können somit o.\,B.\,d.\,A. durch $\frac{1}{2}\cdot\sum_{v\in V} |b(v)| + 1$ approximiert werden.
+In dieser Bachelorarbeit wird angenommen, dass $u$ und $c$ auf $\mathbb{N}$ sowie $b$ auf $\mathbb{Z}$ abbildet, um Gleitkommazahlungenauigkeit beim Programmieren zu vermeiden. Durch eine entsprechende Skalierung des Problems können die Funktionen nach $\mathbb{R}_{\geq 0}$ bzw. $\mathbb{R}$ hinreichend genug angenähert werden. Durch die eingeschränkte Kostenfunktion hat kein maximaler Fluss negative Kosten; es gibt keine unbeschränkten Instanzen. Unbeschränkte Kapazitäten können somit o.\,B.\,d.\,A. durch $\frac{1}{2}\cdot\sum_{v\in V} |b(v)| + 1$ approximiert werden.
 
 Zusätzlich wird davon ausgegangen, dass $\sum_{v\in V(G)} b(v) = 0$ ist, Angebot und Nachfrage also ausgeglichen sind. Des Weiteren ist in der konkreten Implementierung $E$ keine Multimenge; es sind keine parallelen Kanten vorgesehen.
 
@@ -107,16 +107,20 @@ Wie TODO veranschaulicht, gibt es maximale Flüsse, zu denen wir keine zulässig
 \end{tikzpicture}
 \end{figure}
 
-Wie wir in \cref{minCostFlow} zeigen werden, existiert eine zulässige Baumlösung $(T,f)$, sodass $c(f)$ minimal ist. Die dem Algorithmus zugrundeliegende Idee ist es, über zulässige Baumlösungen mit sinkenden Kosten zu iterieren, bis diese minimal sind. Der Übergang basiert dabei auf dem Augmentieren negativer Kreise, eine Methode, für die das Konzept des Residualgraphen hilfreich ist.
+Wie wir in \cref{minCostFlow} zeigen werden, existiert eine zulässige Baumlösung $(T,f)$, sodass $c(f)$ minimal ist. Die dem Algorithmus zugrundeliegende Idee ist es, über die Bäume zulässiger Baumlösungen mit sinkenden Kosten zu iterieren, bis diese minimal sind. Der Übergang basiert dabei auf dem Augmentieren negativer Kreise, eine Methode, für die das Konzept des Residualgraphen hilfreich ist.
 
 \begin{defn}Sei $N=(G=(V,E),b,c,u)$ ein Netzwerk mit einem maximalen Fluss $f$. Die \textbf{Residualkante} $\bar{e}$ einer Kante $e=(v,w)\in E$ verläuft von $w$ nach $v$. Sei $\bar{E}=\{\bar{e}|e\in E\}$ die Menge aller Residualkanten. Die \textit{Residualkapazität} $u_f:\bar{E}\rightarrow\mathbb{Z}$ ist bestimmt durch $u_f(\bar{e})=u(e)-f(e)$, die \textit{Residualkosten} $c_f:\bar{E}\rightarrow\mathbb{Z}$ durch $c_f(\bar{e})=-c(e)$.
 
-Der \textbf{Residualgraph} $R$ ist ein Tupel $R_{N,f}=(\bar{G}=(V,E\amalg\bar{E}),\bar{f},b,\bar{c},\bar{u})$ mit dem gerichteten Multigraphen $\bar{G}$ aus der bisherigen Knotenmenge und der disjunkten Vereinigung von Kanten und Residualkanten, dem maximalen Fluss $\bar{f}$ mit $\forall e\in E:\bar{f}(e)=f(e)$ und $\forall \bar{e}\in\bar{E}:\bar{f}(\bar{e})=0$, der b-Wert-Funktion $b$ wie gehabt, der Kostenfunktion $\bar{c}=c\amalg c_f:E\amalg\bar{E}\rightarrow\mathbb{Z}$ und der Kapazitätsfunktion $\bar{u}=u\amalg u_f:E\amalg\bar{E}\rightarrow\mathbb{Z}$. 
+Der \textbf{Residualgraph} $R$ ist ein Tupel $R_{N,f}=(\bar{G}=(V,E\amalg\bar{E}),\bar{f},b,\bar{c},\bar{u})$ mit dem gerichteten Multigraphen $\bar{G}$ aus der bisherigen Knotenmenge und der disjunkten Vereinigung von Kanten und Residualkanten, dem maximalen Fluss $\bar{f}$ mit $\bar{f}(e)=f(e)$ für alle $e\in E$ und $\bar{f}(\bar{e})=0$ für alle $\bar{e}\in\bar{E}$, der b-Wert-Funktion $b$ wie gehabt, der Kostenfunktion $\bar{c}=c\amalg c_f:E\amalg\bar{E}\rightarrow\mathbb{Z}$ und der Kapazitätsfunktion $\bar{u}=u\amalg u_f:E\amalg\bar{E}\rightarrow\mathbb{Z}$. 
 \end{defn}
 
-Augmentieren wir in einem Residualgraphen $R_{N,f}$ einen gerichteten Kreis $C\subseteq E\amalg\bar{E}$, erhöhen also für alle Kanten $e\in C$ den Fluss um einen festen Betrag $\tau\in\mathbb{N}$, ohne die Kapazitätsschranken zu verletzen, erhalten wir einen neuen maximalen Fluss $f'$ in $N$. Sind die Kosten des Kreises negativ, also $c(C)=\sum_{e\in C} \bar{c}(e) < 0$, verbilligen sich die Kosten des neuen maximalen Flusses $f'$ um $\tau\cdot c(C)$.
+Erhöht man in einem Residualgraphen $R_{N,f}$ den Fluss einer Residualkante $\bar{e}$ um $0\leq\delta\leq u_f(\bar{e})$, so entspricht das der Flussreduktion der dazugehörigen Kante $e$ in $N$ um $\delta$. Nach obiger Definition ist sichergestellt, dass $0\leq f(e)-\delta\leq u(e)$.
 
-\begin{lem}Augmentiert man um Kreis maximal, ist $C_f$ kein Kreis mehr.
+Augmentieren wir in einem Residualgraphen $R_{N,f}$ einen gerichteten Kreis $C\subseteq E\amalg\bar{E}$, erhöhen also für alle Kanten $e\in C$ den Fluss um einen festen Betrag $\delta\in\mathbb{N}$, ohne die Kapazitätsschranken zu verletzen, erhalten wir einen neuen maximalen Fluss $f'$ in $N$. Seine Kosten betragen $c(f')=c(f) + \delta\cdot(\sum_{e\in C} \bar{c}(e))$.
+
+TODO Kosten eines Kreises definieren?
+
+\begin{lem}Sei $R_{N,f}$ ein Residualgraph und $C$ ein Kreis in $R_{N,f}$ mit negativen Kosten. Der größte Wert $\delta$, um den $C$ augmentiert werden kann, ist endlich, und nach der Augmentierung um $\delta$ zum neuen maximalen Fluss $f'$ existiert eine Residualkante $\bar{e}\in C$, sodass die korrespondierende Kante $e$ einen Fluss von $f'(e)=0$ besitzt. 
 \end{lem}
 \begin{proof}
 \end{proof}
@@ -129,7 +133,7 @@ Mithilfe des Konzeptes und Lemma können wir nun thm und damit kor zeigen.
 Betrachte einen maximalen Fluss $f_i$. Wenn $G_{f_i}$ ein Wald ist, sind wir fertig. Ansonsten gibt es Kreis -> Lemma iterieren.
 \end{proof}
 
-\begin{kor}\label{minCostFlow}Es existiert ein maximaler Fluss $f$ mit minimalen Kosten und einer zulässigen Baumlösung $(T,f)$.\qed\end{kor}
+\begin{kor}\label{minCostFlow}Für ein Netzwerk $N$ existiert eine zulässige Baumlösung $(T,f)$, sodass der maximale Fluss $f$ minimale Kosten hat.\qed\end{kor}
 
 
 
