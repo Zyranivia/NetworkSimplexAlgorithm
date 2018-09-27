@@ -50,6 +50,8 @@
 
 \newpage
 \chapter{Einführung}
+TODO unbeschränkt/beschränkt je einzelne Kapitel, Einführungstexte umsortieren.
+
 Bla. Zum Beispiel in \cref{prog} habe ich programmiert.
 
 \newpage
@@ -75,7 +77,7 @@ $c(f) = \sum_{e\in E} f(e)\cdot c(e)$.
 
 Beim \emph{Min-Cost-Flow-Problem} wird unter allen maximalen Flüssen einer mit minimalen Kosten gesucht. Sind die Kapazitäten unbeschränkt, so wird es als \emph{Transportproblem} bezeichnet.
 
-In dieser Bachelorarbeit wird angenommen, dass $u$ und $c$ auf $\mathbb{N}$ sowie $b$ auf $\mathbb{Z}$ abbildet, um Gleitkommazahlungenauigkeit beim Programmieren zu vermeiden. Durch eine entsprechende Skalierung des Problems können die Funktionen nach $\mathbb{R}_{\geq 0}$ bzw. $\mathbb{R}$ hinreichend genug angenähert werden. Durch die eingeschränkte Kostenfunktion hat kein maximaler Fluss negative Kosten; es gibt keine unbeschränkten Instanzen. Unbeschränkte Kapazitäten können somit \obda durch $\frac{1}{2}\cdot\sum_{v\in V} |b(v)| + 1$ abgeschätzt werden.
+In dieser Bachelorarbeit wird angenommen, dass $G$ zusammenhängend ist, andernfalls betrachte man jede Zusammenhangskomponente einzeln. Wir nehmen weiterhin an, dass $u$ und $c$ auf $\mathbb{N}$ sowie $b$ auf $\mathbb{Z}$ abbildet, um Gleitkommazahlungenauigkeit beim Programmieren zu vermeiden. Durch eine entsprechende Skalierung des Problems können die Funktionen nach $\mathbb{R}_{\geq 0}$ bzw. $\mathbb{R}$ hinreichend genug angenähert werden. Durch die eingeschränkte Kostenfunktion hat kein maximaler Fluss negative Kosten; es gibt keine unbeschränkten Instanzen. Unbeschränkte Kapazitäten können somit \obda durch $\frac{1}{2}\cdot\sum_{v\in V} |b(v)| + 1$ abgeschätzt werden.
 
 Zusätzlich wird davon ausgegangen, dass $\sum_{v\in V(G)} b(v) = 0$ ist, Angebot und Nachfrage also ausgeglichen sind. Des Weiteren ist in der konkreten Implementierung $E$ keine Multimenge; es sind keine parallelen Kanten vorgesehen.
 
@@ -151,7 +153,7 @@ Betrachte einen maximalen Fluss $f_i$. Wenn $G_{f_i}$ ein Wald ist, gilt $\hat{f
 \item[Fall 1:] $c(C_1)=0$\\
 	Mindestens einer der beiden Kreise enthält eine Residualkante, sei dies \obda $C_1$. Augmentiere nun $C_1$ analog zum Beweis von \cref{negKreis} größtmöglich zu einem maximalen Fluss $f_{i+1}$. Damit ist $C\nsubseteq G_{f_{i+1}}$ und $c(f_{i+1}) = c(f_i)$.
 \item[Fall 2:] $c(C_1)\neq0$\\
-	\Obda sei $c(C_1)<0$. Nach \cref{negKreis} erhalten wir einen maximalen Fluss $f_{i+1}=f'$, sodass $C\nsubseteq G_{f_{i+1}}$ und $c(f_{i+1}) = c(f_i) + \delta\cdot c(C_1)\leq c(f_i)$.
+	\Obda sei $c(C_1)<0$. Nach \cref{negKreis} erhalten wir einen maximalen Fluss $f_{i+1}=f'$, sodass $C\nsubseteq G_{f_{i+1}}$ und $c(f_{i+1}) = c(f_i) + \delta\cdot c(C_1)<c(f_i)$.
 \end{description}
 
 Damit ist $G_{f_{i+1}}\subsetneq G_{f_i}$ sowie $c(f_{i+1})\leq c(f_i)$. Nach endlich vielen Iterationen erhalten wir somit $\hat{f}$.
@@ -159,8 +161,33 @@ Damit ist $G_{f_{i+1}}\subsetneq G_{f_i}$ sowie $c(f_{i+1})\leq c(f_i)$. Nach en
 
 \begin{kor}\label{minCostFlow}Für ein Netzwerk $N$ existiert eine zulässige Baumlösung $(T,f)$, sodass der maximale Fluss $f$ minimale Kosten hat.\qed\end{kor}
 
+\begin{nota}Sei $N=(G,b,c,u)$ ein Netzwerk, $T$ ein aufspannender Baum von $G$ und $e\in E(G)\backslash E(T)$ eine weitere Kante. Mit $C_{T,e}$ bezeichnen wir den eindeutigen Teilgraph von $T\cup\{e\}$, dessen zugrundeliegender Graph ein Kreis ist, und mit  $\bar{C}_{T,e}$ den eindeutigen gerichteten Kreis in $R_{N,f}$ zu $C_{T,e}$, der $e$ enthält.\end{nota}
+
+Sei $N=(G,b,c,u)$ ein beliebiges Netzwerk. Wie beim Simplex-Algorithmus gibt es beim Netzwerk-Simplex-Algorithmus zwei Phasen. In der ersten wird eine initiale zulässige Baumlösung $(T_0,f_0)$ auf $N$ erzeugt; die beiden etablierten Vorgehensweisen werden in \cref{init} beschrieben. Die Problematik einer Instanz ohne Lösung wird ebenfalls dort behandelt. Die zweite Phase iteriert folgende Vorgehensweise:
+
+Betrachte Iteration $i$ mit zulässiger Baumlösung $(T_i,f_i)$. Wähle einen negativen Kreis $\bar{C}_{T,e}$. Existiert kein solcher, beende den Algorithmus. Andernfalls augmentiere $\bar{C}_{T,e}$ größtmöglich zum maximalen Fluss $f_{i+1}$; jetzt existiert nach \cref{negKreis} eine Kante $e\neq e'\in C_{T,e}$ mit $f_{i+1}(e')=0$. Die neue zulässige Baumlösung sei dann $(T_{i+1}=T_i\backslash\{e'\}\cup\{e\},f_{i+1})$. Die verschiedenen Möglichkeiten zur Wahl von $e$ und TODO wirklich? $e'$ werden in \cref{pivot} und \cref{deg} näher beleuchtet.
+
+Wir werden nun beweisen, dass der Algorithmus eine optimale Lösung des Transportproblems gefunden hat, wenn Phase 2 in Ermangelung einer geeigneten Kante $e$ beendet wird.
+\begin{nota}Sei $N=(G,b,c,u)$ ein Netzwerk mit einem maximalen Fluss $f$, $T$ ein aufspannender Baum von $G$ und $v\neq w\in V(G)$ zwei beliebige verschiedene Knoten. Mit $v\xrightarrow{T}w$ bezeichnen wir den eindeutigen gerichteten Weg von $v$ nach $w$ in $R_{N,f}$, der nur über Kanten $e\in E(T)$ oder deren Residualkanten $\bar{e}$ verläuft. Insbesondere ist dieser Weg unabhängig von $f$ und für die Kosten gilt $c(w\xrightarrow{T}v) = -c(v\xrightarrow{T}w)$.\end{nota}
+\begin{thm}Sei $N$ ein Netzwerk mit einer zulässigen Baumlösung $(T,f)$. Existiert kein negativer Kreis $\bar{C}_{T,e}$, so ist $f$ eine optimale Lösung.\end{thm}
+\begin{proof}Wir werden zeigen, dass ein negativer Kreis $\bar{C}_{T,e}$ existiert, wenn die betrachtete zulässige Baumlösung $(T,f)$ nicht optimal ist.
+	
+Sei $N=(G,b,c,u)$ ein Netzwerk mit einer optimalen zulässigen Baumlösung $(\hat{T},\hat{f})$ und einer zulässigen Baumlösung $(T,f)$, sodass $c(f)>c(\hat{f})$. Da $\hat{f}$ günstiger ist, existieren zwei verschiedene Knoten $x\neq y\in E(G)$, deren Weg $\hat{w}:=x\xrightarrow{\hat{T}}y$ günstiger ist als $w:=x\xrightarrow{T}y$. Der geschlossene Kantenzug $W:=x\xrightarrow{\hat{T}}y\xrightarrow{T}x$ besitzt damit Kosten $c(W)=c(\hat{w})-c(w)<0$. Zunächst sorgen wir dafür, dass aus dem geschlossenen Kantenzug mit negativen Kosten ein negativer Kreis wird.
+
+$W$ kann in kantendisjunkte Kreise $C_1,\ldots,C_k$ zerlegt werden, womit auch die Kosten $c(W)=\sum_{i=1}^{k}c(C_i)$ aufgeteilt werden. Für jeden Kreis $C_i$ gibt es zwei Knoten $x_i\neq y_i$ mit $C_i=x_i\xrightarrow{\hat{T}}y_i\xrightarrow{T}x_i$. Da $c(W)<0$, existiert ein Kreis $C_j$ mit negativen Kosten. Wir werden im Folgenden nur noch $C_j$ betrachten, also können wir $C:=C_j$, $x:=x_j$ und $y:=y_j$ setzen.
 
 
+\end{proof}
+
+\subsection{Pivotalgorithmen}\label{pivot}
+Obv.
+
+\subsection{Degenerierte Iterationen}\label{deg}
+Cycling und Stalling
+
+\subsection{Initialisierung} \label{init}
+Geht nicht früher, weil LC degenerierte Iterationen braucht.
+Außerdem unlösbare Instanzen.
 
 \section{Implementation} \label{prog}
 Hier beginnt mein schönes Werk \ldots
