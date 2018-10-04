@@ -40,6 +40,7 @@
 \newtheorem*{anm}{Anmerkung}
 \newtheorem*{nota}{Notation}
 
+\crefname{thm}{Theorem}{Theoreme}
 \crefname{lem}{Lemma}{Lemmata}
 \crefname{defn}{Definition}{Definitionen}
 \crefname{kor}{Korollar}{Korollare}
@@ -53,18 +54,17 @@
 
 \newpage
 \chapter{Einführung}
-TODO unbeschränkt/beschränkt je einzelne Kapitel, Einführungstexte umsortieren.
+Das Simplex-Verfahren, zu welchem eine Einführung in \cite{NSAbook} gefunden werden kann, löst Lineare Programme in der Praxis sehr schnell, obwohl die Worst-Case-Laufzeit nicht polynomiell ist. Jedes Netzwerkproblem lässt sich als Lineares Programm darstellen und somit durch das Simplex-Verfahren lösen, durch die konkrete Struktur solcher Probleme genügt jedoch der von \cite[Dantzig, 1951]{erf1} und \cite[Orden, 1956]{erf2} vereinfachte Network-Simplex-Algorithmus. Auch für diesen gibt es exponentielle Instanzen (siehe \cref{ch:lit}), in der Praxis wird er trotzdem vielfach verwendet.
+
+TODO Legende für Graphen einführen
 
 TODO Laufzeit definieren: Iterationsanzahl, obwohl in der Praxis Pivot relevant
 
-Bla. Zum Beispiel in \cref{ch:prog} habe ich programmiert.
-
 \newpage
-\chapter{Network-Simplex-Algorithmus}
-Das Simplex-Verfahren, zu welchem eine Einführung in \cite{NSAbook} gefunden werden kann, löst Lineare Programme in der Praxis sehr schnell, obwohl die Worst-Case-Laufzeit nicht polynomiell ist. Jedes Netzwerkproblem lässt sich als Lineares Programm darstellen und somit durch das Simplex-Verfahren lösen, durch die konkrete Struktur solcher Probleme genügt jedoch der vereinfachte Network-Simplex-Algorithmus. Auch für diesen gibt es exponentielle Instanzen (siehe \cite{Exponential}), in der Praxis wird er trotzdem vielfach verwendet.\\
-TODO gibt es?
+\chapter{Netzwerk-Simplex-Algorithmus}
+Zunächst führen wir in \cref{ch:MCF} das Transportproblem und dessen Verallgemeinerung auf beschränkte Kapazitäten ein. Gleichzeitig geben wir die Einschränkungen an, auf denen insbesondere der Programmierteil dieser Bachelorarbeit fußt. Die Beschreibung des Netzwerk-Simplex-Algorithmus in \cref{ch:alg} orientiert sich zuerst an \cite[S. 291\,ff.]{NSAbook} zur Lösung des Transportproblems, danach wird in \cref{ch:alg2} der Algorithmus anhand von \cite[S. 353\,ff.]{NSAbook} auf den allgemeinen Fall erweitert.
 
-\section{Min-Cost-Flow-Problem}
+\section{Min-Cost-Flow-Problem}\label{ch:MCF}
 \begin{defn}Ein \textbf{Netzwerk} ist ein Tupel $(G,b,c,u)$, wobei $G = (V,E)$ ein gerichteter Graph, $b : V\rightarrow\mathbb{R}$ eine b-Wert-Funktion, $c : E\rightarrow\mathbb{R}$ eine Kostenfunktion und $u : E\rightarrow\mathbb{R}_{\geq 0}\cup \infty$ eine Kapazitätsfunktion seien.\end{defn}
 \begin{anm}Knoten mit positiven b-Wert werden als Quellen, solche mit negativen als Senken bezeichnet.\\
 Ein ungerichteter Graph kann durch das Verwandeln jeder Kante $\{v,w\}$ in zwei Kanten $(v,w)$ und $(w,v)$ zu einem gerichteten modifiziert werden.\end{anm}
@@ -86,23 +86,20 @@ In dieser Bachelorarbeit wird angenommen, dass $b$ auf $\mathbb{Z}$ sowie $c$ un
 
 Zusätzlich wird davon ausgegangen, dass $\sum_{v\in V(G)} b(v) = 0$ ist, Angebot und Nachfrage also ausgeglichen sind. Des Weiteren ist in der konkreten Implementierung $E$ keine Multimenge; es sind keine parallelen Kanten vorgesehen. Alle Netzwerke werden als zusammenhängend angenommen, da die Zusammenhangskomponenten einer Instanz einzeln gelöst werden können. Der programmierte Algorithmus verlangt keinen Zusammenhang.
 
-\section{Algorithmus}
-\cite[Dantzig, 1951]{erf1} und \cite[Orden, 1956]{erf2} vereinfachten das Simplex-Verfahren zum Netzwerk-Simplex-Algorithmus; die folgende Beschreibung orientiert sich zuerst an \cite[S. 291\,ff.]{NSAbook} zur Lösung des Transportproblems, danach wird der Algorithmus anhand von \cite[S. 353\,ff.]{NSAbook} auf den allgemeinen, durch Kapazitäten beschränkten Fall erweitert.
+\section{Der grundlegende Algorithmus}\label{ch:alg}
+Um die Funktionsweise des Netzwerk-Simplex-Algorithmus zu definieren, benötigen wir zuerst einige grundlegende Definitionen der Graphentheorie. Im Nachfolgenden sind nur die wichtigsten in Kürze aufgeführt, für eine vollständige Einführung sei der geneigte Leser auf \cite{Alma} verwiesen.
 
 \begin{defn}Der einem gerichteten Graphen $G=(V,E)$ \textbf{zugrundeliegende ungerichtete Graph} $G'=(V,E')$ ist definiert durch:
 \begin{equation*}\{v,w\}\in E' \iff (v,w) \in E \lor (w,v) \in E\end{equation*} \end{defn}
 \begin{anm}Nach dieser Definition gibt es keine Bijektion zwischen gerichteten und den zugrundeliegenden ungerichteten Graphen; dafür vermeidet man parallele Kanten.\end{anm}
 
-\begin{defn}Ein \textbf{Kreis} $C$ ist ein TODO ungerichtet, gerichtet, Kosten, negativer Kreis\end{defn}
-
-
 \begin{defn}Ein \textbf{Baum} $T$ ist ein ungerichteter, zusammenhängender und kreisfreier Graph. Ein \textbf{Wald} ist ein Graph, bei dem jede Zusammenhangskomponente ein Baum ist.\\
 Ein Teilgraph $T=(V',E')$ eines ungerichteten Graphen $G=(V,E)$ heißt \textbf{aufspannender Baum}, wenn T ein Baum und $V'=V$ ist.\end{defn}
 \begin{anm}Sprechen wir bei einem gerichteten Graphen $G$ über einen Wald bzw. (aufspannenden) Baum, so bezieht sich das stets auf einen Teilgraphen $T$ von $G$, dessen zugrundeliegender ungerichteter Graph ein Wald bzw. (aufspannender) Baum des $G$ zugrundeliegenden ungerichteten Graphen ist.\end{anm}
 
-\begin{defn}Sei $N=(G,b,c,u)$ ein Instanz des Transportproblems. Ein aufspannender Baum $T$ von $G$ und ein maximaler Fluss $f$ auf $N$ bilden eine \textbf{zulässige Baumlösung} $(T,f)$, wenn $\forall e\in E(G)\backslash E(T): f(e) = 0$.\end{defn}
+\begin{defn}Sei $N=(G,b,c,u)$ eine Instanz des Transportproblems. Ein aufspannender Baum $T$ von $G$ und ein maximaler Fluss $f$ auf $N$ bilden eine \textbf{zulässige Baumlösung} $(T,f)$, wenn $\forall e\in E(G)\backslash E(T): f(e) = 0$.\end{defn}
 
-\begin{lem}Jede zulässige Baumlösung $(T,f)$ ist eindeutig durch den aufspannenden Baum $T$ definiert.\end{lem}
+\begin{lem}\label{TreeUnique}Jede zulässige Baumlösung $(T,f)$ ist eindeutig durch den aufspannenden Baum $T$ definiert.\end{lem}
 \begin{proof}Sei $(T=(V,E),f)$ eine zulässige Baumlösung einer Instanz des Transportproblems. Für jedes Blatt von $l\in V$ sei $e_l\in E$ die eindeutige Kante in $T$ zwischen den Knoten $k$ und $l$. Für alle Blätter $l$ ist der Wert von $f(e_l)$ nach \cref{DefMaxFlow} \cref{DefMaxFlowII} eindeutig.
 	
 Wir entfernen nun alle mit Fluss belegten Kanten $e_l$ sowie die nun isolierten Knoten $l$ und aktualisieren den b-Wert von $k$. Der dabei entstehende Graph $T'=(V'\subseteq V,E'\subseteq E)$ bleibt weiterhin ein aufspannender Baum und $f_{|E'}$ ein maximaler Fluss. Durch Iteration ist $f$ wohldefiniert und eindeutig.\end{proof}
@@ -152,7 +149,7 @@ Sei nun $\delta:=\min_{e\in C}\{\bar{u}(e)-\bar{f}(e)\}$ größtmöglich gewähl
 
 Dank \cref{negKreis} wissen wir, dass nach maximaler Augmentierung eines negativen Kreises $C$ alle seine durchflossenen Kanten $C_f$ einen Wald bilden. Damit können wir nun zeigen, dass eine zulässige Baumlösung $(T,f)$ mit einem maximalen Fluss $f$ minimaler Kosten existiert.
 
-\begin{thm}Sei $N$ eine Instanz des Transportproblems mit einem maximalen Fluss $f$. Es existiert ein maximaler Fluss $\hat{f}$, sodass $c(\hat{f})\leq c(f)$ ist und eine zulässige Baumlösung $(\hat{T},\hat{f})$ existiert.\end{thm}
+\begin{thm}\label{BLex}Sei $N$ eine Instanz des Transportproblems mit einem maximalen Fluss $f$. Es existiert ein maximaler Fluss $\hat{f}$, sodass $c(\hat{f})\leq c(f)$ ist und eine zulässige Baumlösung $(\hat{T},\hat{f})$ existiert.\end{thm}
 \begin{proof}Sei $N=(G,b,c,u)$ ein Instanz des Transportproblems mit maximalen Fluss $f$. Wir werden $f$ zu einem maximalen Fluss $\hat{f}$ umwandeln, sodass $G_{\hat{f}}$ ein Wald ist. Für $\hat{f}$ finden wir dann leicht eine zulässige Baumlösung. Wenn wir für die endlich vielen maximalen Zwischenflüsse $f=f_0,f_1,f_2,\ldots,f_n=\hat{f}$ sicherstellen, dass $c(f_{i+1})\leq c(f_i)$ ist, gilt auch $c(\hat{f})\leq c(f)$.
 
 Betrachte einen maximalen Fluss $f_i$. Wenn $G_{f_i}$ ein Wald ist, setzen wir $\hat{f}:=f_i$ und sind fertig. Ansonsten gibt es einen ungerichteten Kreis $C$ in $G_{f_i}$. Betrachte die beiden dazugehörigen, gerichteten, kantendisjunkten Kreise $C_1$ und $C_2$ in $R_{N,f_i}$. Nach \cref{defRes} gilt $c(C_1)=-c(C_2)$.
@@ -172,7 +169,7 @@ Damit ist $G_{f_{i+1}}\subsetneq G_{f_i}$ sowie $c(f_{i+1})\leq c(f_i)$. Nach en
 
 Sei $N=(G,b,c,u)$ eine Instanz des Transportproblems. Wie beim Simplex-Algorithmus gibt es beim Netzwerk-Simplex-Algorithmus zwei Phasen. In der ersten wird eine initiale zulässige Baumlösung $(T_0,f_0)$ auf $N$ erzeugt; die beiden etablierten Vorgehensweisen werden in \cref{ch:init} beschrieben. Die Problematik einer Instanz ohne Lösung wird ebenfalls dort behandelt. Die zweite Phase iteriert folgende Vorgehensweise:
 
-Betrachte Iteration $i$ mit zulässiger Baumlösung $(T_i,f_i)$. Wähle einen negativen Kreis $\bar{C}_{T,e}$. Existiert kein solcher, beende den Algorithmus. Andernfalls augmentiere $\bar{C}_{T,e}$ größtmöglich zum maximalen Fluss $f_{i+1}$; jetzt existiert nach \cref{negKreis} eine Kante $e\neq e'\in C_{T,e}$ mit $f_{i+1}(e')=0$. Die neue zulässige Baumlösung sei dann $(T_{i+1}=T_i\backslash\{e'\}\cup\{e\},f_{i+1})$. Die verschiedenen Möglichkeiten zur Wahl von $e$ und TODO wirklich? $e'$ werden in \cref{ch:pivot} und \cref{ch:deg} näher beleuchtet.
+Betrachte Iteration $i$ mit zulässiger Baumlösung $(T_i,f_i)$. Wähle einen negativen Kreis $\bar{C}_{T,e}$. Existiert kein solcher, beende den Algorithmus. Andernfalls augmentiere $\bar{C}_{T,e}$ größtmöglich zum maximalen Fluss $f_{i+1}$; jetzt existiert nach \cref{negKreis} eine Kante $e\neq e'\in C_{T,e}$ mit $f_{i+1}(e')=0$. Die neue zulässige Baumlösung sei dann $(T_{i+1}=T_i\backslash\{e'\}\cup\{e\},f_{i+1})$. Die verschiedenen Möglichkeiten zur Wahl von $e$ und $e'$ werden in \cref{ch:pivot} und \cref{ch:deg} näher beleuchtet.
 
 Wir werden nun beweisen, dass der Algorithmus eine optimale Lösung des Transportproblems gefunden hat, wenn Phase 2 in Ermangelung einer geeigneten Kante $e$ beendet wird.
 
@@ -193,7 +190,7 @@ Betrachte einen Iterationsschritt mit negativen Kreis $C$, definiert durch die K
 
 Da der Wegteil in $C$, der über $\hat{T}$ geht, nach jeder Iteration um eins kleiner wird, finden wir nach endlich vielen Iterationen einen negativen Kreis $\bar{C}_{T,e}$.\end{proof}
 
-\begin{kor}Sei $N$ eine Instanz des Transportproblems mit einer zulässigen Initialbaumlösung $(T_0,f_0)$. Determiniert der Netzwerk-Simplex-Algorithmus, so ist er korrekt.\end{kor}
+\begin{kor}\label{korrekt}Sei $N$ eine Instanz des Transportproblems mit einer zulässigen Initialbaumlösung $(T_0,f_0)$. Determiniert der Netzwerk-Simplex-Algorithmus, so ist er korrekt.\end{kor}
 
 Bislang haben wir nicht gezeigt, dass der Algorithmus immer terminiert. Dies wäre offensichtlich, wenn bei jeder Iteration von $(T,f)$ zu $(T',f')$ die Kosten sinken würden, also $c(f')<c(f)$ wäre. Es gibt jedoch sogenannte \emph{degenerierte Iterationen}, in denen ein negativer Kreis $\bar{C}_{T,e}$ um $\delta=0$ augmentiert wird. Entfernt man danach eine Kante $e\neq e'\in C_{T,e}$, verändert sich nur der Baum. Der nächste Abschnitt beschäftigt sich damit, wie sichergestellt werden kann, dass der Algorithmus zumindest jeden Baum höchstens einmal betrachtet.
 
@@ -207,11 +204,11 @@ Degenerierte Iterationen entstehen, wenn bei einer zulässigen Baumlösung $(T,f
 
 \cite[Cunningham, 1976]{cycling} führte eine Methode ein, mit der Cycling verhindert werden kann, ohne dass die Wahl der hinzugefügten Kante $e$ eingeschränkt wird. Dafür benötigen wir folgende Definition:
 
-\begin{defn}Sei $N=(G,b,c,u)$ eine Instanz des Transportproblems. Ein aufspannender Baum $T$ von $G$, ein maximaler Fluss $f$ auf $N$ und ein Wurzelknoten $r\in V(T)=V(G)$ bilden eine \textbf{stark zulässige Baumlösung} $(T,f)_r$, wenn $(T,f)$ eine zulässige Baumlösung ist und zusätzlich jede Kante $e=(v,w)\in E(T)$ mit $f(e)=0$ von der Wurzel weggerichtet ist, also $e$ im Weg $r\xrightarrow{T}w$ enthalten.\end{defn}
+\begin{defn}Sei $N=(G,b,c,u)$ eine Instanz des Transportproblems. Ein aufspannender Baum $T$ von $G$, ein maximaler Fluss $f$ auf $N$ und ein Wurzelknoten $r\in V(T)=V(G)$ bilden eine \textbf{stark zulässige Baumlösung} $(T,f)_r$, wenn $(T,f)$ eine zulässige Baumlösung ist und zusätzlich jede Kante $e=(v,w)\in E(T)$ mit $f(e)=0$ von der Wurzel weggerichtet, also $e$ im Weg $r\xrightarrow{T}w$ enthalten ist.\end{defn}
 
 TODO erklären, was genau passiert. Tendenziell nicht beweisen.
 
-Die Laufzeit des Netzwerk-Simplex-Algorithmus ist bislang ungeklärt. Für bestimmte Varianten wurden exponentielle Instanzen gefunden, die auf \emph{Stalling} basieren, also einer exponentiellen Anzahl degenerierter Iterationen. Mit diesen werden wir uns in \cref{ch:exp} näher befassen. Meine eigene, experimentelle Suche nach schlechten Instanzen findet sich in \cref{ch:erg}. Zunächst vervollständigen wir den Algorithmus um die Wahl des negativen Kreises $\bar{C}_{T,e}$ und die Erzeugung einer initialen Baumlösung.
+Die Laufzeit des Netzwerk-Simplex-Algorithmus ist bislang ungeklärt. Für bestimmte Varianten wurden exponentielle Instanzen gefunden, die auf \emph{Stalling} basieren, also einer exponentiellen Anzahl degenerierter Iterationen. Mit diesen werden wir uns in \cref{ch:lit} näher befassen. Meine eigene, experimentelle Suche nach schlechten Instanzen findet sich in \cref{ch:erg}. Zunächst vervollständigen wir den Algorithmus um die Wahl des negativen Kreises $\bar{C}_{T,e}$ und die Erzeugung einer initialen Baumlösung.
 
 \subsection{Pivotalgorithmen}\label{ch:pivot}
 Sei $N=(G,b,c,u)$ ein Netzwerk mit zulässiger Baumlösung $(T,f)$. Algorithmen, die aus der Menge $\bar{C}_T=\{\bar{C}_{T,e}| c(\bar{C}_{T,e})<0)\}$ aller möglichen Iterationen eine auswählen, heißen \emph{Pivotalgorithmen}. In der Praxis wird der Pivotalgorithmus nur auf einer Teilmenge von $\bar{C}_T$ ausgeführt, um Rechenzeit zu sparen. In dieser Bachelorarbeit werden nur drei naheliegende, einfache Pivotalgorithmen betrachtet.
@@ -234,23 +231,54 @@ Nach \cref{negKreis} ist jedes $\delta_e$ endlich. Sollten nur degenerierte Iter
 Ein überraschend effektiver Ansatz ist es, $\tilde{C}\in \bar{C}_T$ zufällig zu wählen. Gerade für diesen mit \emph{Random} bezeichneten Weg ist es schwierig, untere oder obere Schranken zu beweisen.
 
 \subsection{Initialisierung} \label{ch:init}
-Geht nicht früher, weil LC degenerierte Iterationen braucht.
-Außerdem unlösbare Instanzen.
+Der letzte verbleibende Schritt, um einen vollständigen Algorithmus zur Lösung des Transportproblems zu erlangen, ist das Finden einer initialen, stark zulässigen Baumlösung $(T_0,f_0)_r$. Hierfür wenden wir einen Trick an:
 
-\section{Implementierung} \label{ch:prog}
-Hier beginnt mein schönes Werk \ldots
+Sei $N=(G,b,c,u)$ eine Instanz des Transportproblems. Wir fügen dem Netzwerk einen zusätzlichen Transitknoten $a$ mit $b(a)=0$ hinzu, den man als künstlichen \textit{(artificial)} Knoten bezeichnet. Für alle Quellen $v\in V(G):b(v)>0$ ergänzen wir eine künstliche Kante $(v,a)$, für alle Senken und Transitknoten $a\neq w\in V(G):b(w)\leq0$ eine künstliche Kante $(a,w)$. Sei $G'$ der entstehende Graph.
 
-\subsection{Spezielle Konstrukte}
-\ldots und hier endet es.
+Sämtliche künstlichen Kanten $e_v$ haben eine unbegrenzte Kapazität, die wir mit $u(e_v)=\frac{1}{2}\cdot\sum_{v\in V(G)} |b(v)| + 1$ abschätzen. Die Kosten sind ebenfalls unendlich und können mit $c(e_v)=|V(G)|\cdot\max_{e\in E(G)}\{c(e)\}+1$ abgeschätzt werden, da jeder Weg in $G$ geringere Kosten aufweist. Leicht finden wir nun die stark zulässige Baumlösung $(T_0,f_0)_a$, wobei $T_0=(V(G),\{e_v|v\in V(G)\})$ ist. Nach \cref{TreeUnique} ist $f_0$ eindeutig.
 
-\subsubsection{Die Klasse Circle}
-Kreise halt.\cite{NSAbook}
+Diese Art der Initialisierung werden wir im Folgenden mit \emph{HC} für \emph{High-Cost-Initialisierung} abkürzen.
 
-\subsubsection{Der Rest halt}
-Kleinkram.
+\begin{lem}Sei $N=(G,b,c,u)$ eine Instanz des Transportproblems und $(T',f)$ die Lösung des Netzwerk-Simplex-Algorithmus mit \emph{HC} auf dem erweiterten Graphen $G'$. Die Instanz $N$ ist genau dann lösbar, wenn $G'_f$ keine künstlichen Kanten enthält.\end{lem}
+\begin{proof}\label{solvable}$ $\par
+\begin{description}[topsep=0pt]
+	\item[\enquote{$\Rightarrow$}] Sei $\hat{f}$ ein maximaler Fluss von $N$ und $(T',f)$ die Lösung des Algorithmus. $\hat{f}$ ist auch ein maximaler Fluss des Netzwerkes $(G',b,c,u)$; damit gilt nach \cref{BLex} und \cref{korrekt} $c(f)\leq c(\hat{f})<\infty$. Da die Kosten einer künstlichen Kante äquivalent zu unendlich sind, kann keine davon in $G'_f$ enthalten sein.
+	
+	\item[\enquote{$\Leftarrow$}] Sei $(T',f)$ die Lösung des Algorithmus. Wenn $G'_f$ keine künstlichen Kanten enthält, ist $f_{|E(G)}$ ein maximaler Fluss von $N$, womit diese Instanz wiederum lösbar ist.
+\end{description}
+\end{proof}
+
+Betrachtet man Instanzen mit vielen Knoten oder hohen Kosten der teuersten Kante, so kann es passieren, dass die Kosten der künstlichen Kanten den darstellbaren Bereich der gängigen Datentypen sprengen. Unter anderem aus diesem Grund gibt es die \emph{Low-Cost-Initialisierung}, bei uns kurz \emph{LC}.
+
+Bei dieser wird die gegebene Instanz $N=(G,b,c,u)$ des Transportproblems zunächst zu $N'=(G,b,c',u)$ abgewandelt. Dabei ist $c'$ die Nullfunktion, also $c(e)=0$ für jede Kante $e\in E(G)$. Für $N'$ verwenden wir den Netzwerk-Simplex-Algorithmus mit \emph{HC} und erhalten eine stark zulässige Baumlösung $(T',f')_a$, wobei die Kosten einer künstlichen Kante $c(e_v)=|V(G)|\cdot0+1=1$ betragen.
+
+Offensichtlicherweise ist $N$ genau dann lösbar, wenn $N'$ lösbar ist. Wenn $c(f')>0$ ist, so ist $N$ nicht lösbar und wir sind fertig. Andernfalls iterieren wir $(T',f')_a$ degeneriert, bis $a$ ein Blatt von $T'$ ist. Dies wird in \cref{HCLC} detailliert erläutert.
+
+Damit bekommen wir die zulässige Baumlösung $(T=T'_{|V(G)}, f=f'_{|E(G)})$ für $N'$ und damit für $N$. Auch wenn der künstliche Knoten $a$ nicht in $G$ enthalten ist, können wir ihn trotzdem implizit als Wurzelknoten für die stark zulässige Baumlösung $(T,f)_a$ benutzen, da die künstlichen Kanten für den weiteren Verlauf des Algorithmus keine Rolle mehr spielen.
+
+\section{Erweiterung auf beschränkte Kapazitäten}\label{ch:alg2}
 
 \newpage
-\chapter{Exponentielle Instanzen aus der Literatur}\label{ch:exp}
+\chapter{Implementierung} \label{ch:prog}
+Hier beginnt mein schönes Werk \ldots
+
+\section{Netzwerke}
+Residual explizit ohne wandelnde Kapazität
+
+\section{Die Klasse \emph{Circle}}
+Magie des updaten
+
+\section{Stark zulässige Baumlösungen}
+Öhm, ja \ldots
+
+\section{Pivotalgorithmen}
+Sehr kurz? Probably nur Code
+
+\section{Initialisierung}\label{HCLC}
+Beweis LC
+
+\newpage
+\chapter{Exponentielle Instanzen aus der Literatur}\label{ch:lit}
 
 \newpage
 \chapter{Experimentelle Ergebnisse}\label{ch:erg}
