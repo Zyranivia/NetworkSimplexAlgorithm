@@ -66,7 +66,8 @@ Zunächst führen wir in \cref{ch:MCF} das Transportproblem und dessen Verallgem
 
 \section{Min-Cost-Flow-Problem}\label{ch:MCF}
 \begin{defn}Ein \textbf{Netzwerk} ist ein Tupel $(G,b,c,u)$, wobei $G = (V,E)$ ein gerichteter Graph, $b : V\rightarrow\mathbb{R}$ eine b-Wert-Funktion, $c : E\rightarrow\mathbb{R}$ eine Kostenfunktion und $u : E\rightarrow\mathbb{R}_{\geq 0}\cup \infty$ eine Kapazitätsfunktion seien.\end{defn}
-\begin{anm}Knoten mit positiven b-Wert werden als Quellen, solche mit negativen als Senken bezeichnet.\\
+\begin{anm}Knoten mit positiven b-Wert werden als Quellen, solche mit negativen als Senken bezeichnet.
+
 Ein ungerichteter Graph kann durch das Verwandeln jeder Kante $\{v,w\}$ in zwei Kanten $(v,w)$ und $(w,v)$ zu einem gerichteten modifiziert werden.\end{anm}
 
 \begin{defn}\label{DefMaxFlow}Ein \textbf{maximaler Fluss} auf einem Netzwerk $(G=(V,E),b,c,u)$ ist eine Abbildung $f : E\rightarrow\mathbb{R}_{\geq 0}$, die folgende Eigenschaften erfüllt:
@@ -137,13 +138,13 @@ Der \textbf{Residualgraph} $R$ ist ein Tupel $R_{N,f}=(\bar{G}=(V,E\amalg\bar{E}
 
 Erhöht man in einem Residualgraphen $R_{N,f}$ den Fluss einer Residualkante $\bar{e}$ um $0\leq\delta\leq u_f(\bar{e})$, so entspricht das der Flussreduktion der dazugehörigen Kante $e$ in $N$ um $\delta$. Nach obiger Definition ist sichergestellt, dass $f(e)-\delta\geq0$.
 
-Augmentieren wir in einem Residualgraphen $R_{N,f}$ einen gerichteten Kreis $C\subseteq G$, erhöhen also für alle Kanten $e\in E(C)$ den Fluss um einen festen Betrag $\delta\in\mathbb{N}_0$, ohne Kapazitätsschranken zu verletzen, erhalten wir einen neuen maximalen Fluss $f'$ in $N$. Seine Kosten betragen $c(f')=c(f) + \delta\cdot(\sum_{e\in C} \bar{c}(e))$.
+Augmentieren wir in einem Residualgraphen $R_{N,f}$ einen gerichteten Kreis $C\subseteq G$, erhöhen also für alle Kanten $e\in E(C)$ den Fluss um einen festen Betrag $\delta\in\mathbb{N}_0$, ohne Kapazitätsschranken zu verletzen, erhalten wir einen neuen maximalen Fluss $f'$ in $N$. Seine Kosten betragen $c(f')=c(f) + \delta\cdot c(C)$.
 
-\begin{lem}\label{negKreis}Sei $N$ eine Instanz des Transportproblems, $R_{N,f}$ ihr Residualgraph und $C$ ein Kreis in $R_{N,f}$ mit negativen Kosten. Der größte Wert $\delta$, um den $C$ augmentiert werden kann, ist endlich, und nach der Augmentierung um $\delta$ zum neuen maximalen Fluss $f'$ existiert eine Residualkante $\bar{e}\in C$, sodass die korrespondierende Kante $e$ einen Fluss von $f'(e)=0$ besitzt. 
+\begin{lem}\label{negKreis}Sei $N$ eine Instanz des Transportproblems, $R_{N,f}$ ihr Residualgraph und $C$ ein Kreis in $R_{N,f}$ mit negativen Kosten. Der größte Wert $\delta$, um den $C$ augmentiert werden kann, ist endlich, und nach der Augmentierung um $\delta$ zum neuen maximalen Fluss $f'$ existiert eine Residualkante $\bar{e}\in E(C)$, sodass die korrespondierende Kante $e$ einen Fluss von $f'(e)=0$ besitzt. 
 \end{lem}
-\begin{proof}Sei $N=((V,E),b,c,u)$ ein Instanz des Transportproblems mit maximalen Fluss $f$ und $C$ ein negativer Kreis in $R_{N,f}$. Da $c:E\rightarrow\mathbb{N}_0$ in die natürlichen Zahlen abbildet, enthält jeder negative Kreis in $R_{N,f}$ mindestens eine Residualkante $\bar{e}$. Damit ist $0\leq\delta\leq u_f(\bar{e})<\infty$.
-	
-Sei nun $\delta:=\min_{e\in C}\{\bar{u}(e)-\bar{f}(e)\}$ größtmöglich gewählt. Da alle Kanten $e\in E$ unbeschränkte Kapazität haben und ihr Fluss $f(e)$ endlich ist, gibt es eine Residualkante $\bar{e}$ mit $u_f(\bar{e})=\delta$. Augmentiert man $C$ um $\delta$ zu einem maximalen Fluss $f'$, ist der neue Fluss auf der korrespondierenden Kante $f'(e)=f(e)-\delta=f(e)-u_f(\bar{e})=f(e)-f(e)=0$.\end{proof}
+\begin{proof}Sei $N=(G,b,c,u)$ ein Instanz des Transportproblems mit maximalen Fluss $f$ und $C$ ein negativer Kreis in $R_{N,f}$. Da $c:E(G)\rightarrow\mathbb{N}_0$ in die natürlichen Zahlen abbildet, enthält jeder negative Kreis in $R_{N,f}$ mindestens eine Residualkante $\bar{e}$. Damit ist $0\leq\delta\leq u_f(\bar{e})<\infty$.
+
+Sei nun $\delta:=\min_{e\in E(C)}\{\bar{u}(e)-\bar{f}(e)\}$ größtmöglich gewählt. Da alle Kanten $e\in E(G)$ unbeschränkte Kapazität haben und ihr Fluss $f(e)$ endlich ist, gibt es eine Residualkante $\bar{e}$ mit $u_f(\bar{e})=\delta$. Augmentiert man $C$ um $\delta$ zu einem maximalen Fluss $f'$, ist der neue Fluss auf der korrespondierenden Kante $f'(e)=f(e)-\delta=f(e)-u_f(\bar{e})=f(e)-f(e)=0$.\end{proof}
 
 \begin{nota}Sei $f$ ein maximaler Fluss für ein Netzwerk $(G=(V,E),b,c,u)$ und $H=(V'\subseteq V, E'\subseteq E)$ ein Teilgraph. Mit $H_f=(V',E''=\{e\in E' | f(e) \neq 0\})$ bezeichnen wir den Graph aller durchflossenen Kanten.\end{nota}
 
@@ -152,7 +153,7 @@ Dank \cref{negKreis} wissen wir, dass nach maximaler Augmentierung eines negativ
 \begin{thm}\label{BLex}Sei $N$ eine Instanz des Transportproblems mit einem maximalen Fluss $f$. Es existiert ein maximaler Fluss $\hat{f}$, sodass $c(\hat{f})\leq c(f)$ ist und eine zulässige Baumlösung $(\hat{T},\hat{f})$ existiert.\end{thm}
 \begin{proof}Sei $N=(G,b,c,u)$ ein Instanz des Transportproblems mit maximalen Fluss $f$. Wir werden $f$ zu einem maximalen Fluss $\hat{f}$ umwandeln, sodass $G_{\hat{f}}$ ein Wald ist. Für $\hat{f}$ finden wir dann leicht eine zulässige Baumlösung. Wenn wir für die endlich vielen maximalen Zwischenflüsse $f=f_0,f_1,f_2,\ldots,f_n=\hat{f}$ sicherstellen, dass $c(f_{i+1})\leq c(f_i)$ ist, gilt auch $c(\hat{f})\leq c(f)$.
 
-Betrachte einen maximalen Fluss $f_i$. Wenn $G_{f_i}$ ein Wald ist, setzen wir $\hat{f}:=f_i$ und sind fertig. Ansonsten gibt es einen ungerichteten Kreis $C$ in $G_{f_i}$. Betrachte die beiden dazugehörigen, gerichteten, kantendisjunkten Kreise $C_1$ und $C_2$ in $R_{N,f_i}$. Nach \cref{defRes} gilt $c(C_1)=-c(C_2)$.
+Betrachte einen maximalen Fluss $f_i$. Wenn $G_{f_i}$ ein Wald ist, setzen wir $\hat{f}:=f_i$ und sind fertig. Ansonsten gibt es einen ungerichteten Kreis $C\subseteq G_{f_i}$. Betrachte die beiden dazugehörigen, gerichteten, kantendisjunkten Kreise $C_1$ und $C_2$ in $R_{N,f_i}$. Nach \cref{defRes} gilt $c(C_1)=-c(C_2)$.
 \begin{description}
 \item[Fall 1:] $c(C_1)=0$\\
 	Mindestens einer der beiden Kreise enthält eine Residualkante, sei dies \obda $C_1$. Augmentiere nun $C_1$ analog zum Beweis von \cref{negKreis} größtmöglich zu einem maximalen Fluss $f_{i+1}$. Damit ist $C\nsubseteq G_{f_{i+1}}$ und $c(f_{i+1}) = c(f_i)$.
@@ -169,7 +170,7 @@ Damit ist $G_{f_{i+1}}\subsetneq G_{f_i}$ sowie $c(f_{i+1})\leq c(f_i)$. Nach en
 
 Sei $N=(G,b,c,u)$ eine Instanz des Transportproblems. Wie beim Simplex-Algorithmus gibt es beim Netzwerk-Simplex-Algorithmus zwei Phasen. In der ersten wird eine initiale zulässige Baumlösung $(T_0,f_0)$ auf $N$ erzeugt; die beiden etablierten Vorgehensweisen werden in \cref{ch:init} beschrieben. Die Problematik einer Instanz ohne Lösung wird ebenfalls dort behandelt. Die zweite Phase iteriert folgende Vorgehensweise:
 
-Betrachte Iteration $i$ mit zulässiger Baumlösung $(T_i,f_i)$. Wähle einen negativen Kreis $\bar{C}_{T,e}$. Existiert kein solcher, beende den Algorithmus. Andernfalls augmentiere $\bar{C}_{T,e}$ größtmöglich zum maximalen Fluss $f_{i+1}$; jetzt existiert nach \cref{negKreis} eine Kante $e\neq e'\in C_{T,e}$ mit $f_{i+1}(e')=0$. Die neue zulässige Baumlösung sei dann $(T_{i+1}=T_i\backslash\{e'\}\cup\{e\},f_{i+1})$. Die verschiedenen Möglichkeiten zur Wahl von $e$ und $e'$ werden in \cref{ch:pivot} und \cref{ch:deg} näher beleuchtet.
+Betrachte Iteration $i$ mit zulässiger Baumlösung $(T_i,f_i)$. Wähle einen negativen Kreis $\bar{C}_{T,e}$. Existiert kein solcher, beende den Algorithmus. Andernfalls augmentiere $\bar{C}_{T,e}$ größtmöglich zum maximalen Fluss $f_{i+1}$; jetzt existiert nach \cref{negKreis} eine Kante $e\neq e'\in E(C_{T,e})$ mit $f_{i+1}(e')=0$. Die neue zulässige Baumlösung sei dann $(T_{i+1}=T_i\backslash\{e'\}\cup\{e\},f_{i+1})$. Die verschiedenen Möglichkeiten zur Wahl von $e$ und $e'$ werden in \cref{ch:pivot} und \cref{ch:deg} näher beleuchtet.
 
 Wir werden nun beweisen, dass der Algorithmus eine optimale Lösung des Transportproblems gefunden hat, wenn Phase 2 in Ermangelung einer geeigneten Kante $e$ beendet wird.
 
@@ -180,7 +181,9 @@ Wir werden nun beweisen, dass der Algorithmus eine optimale Lösung des Transpor
 	
 Sei $N=(G,b,c,u)$ ein Netzwerk mit einer optimalen zulässigen Baumlösung $(\hat{T},\hat{f})$ und einer zulässigen Baumlösung $(T,f)$, sodass $c(f)>c(\hat{f})$. Da $\hat{f}$ günstiger ist, existieren zwei verschiedene Knoten $x\neq y\in E(G)$, deren Weg $\hat{w}:=x\xrightarrow{\hat{T}}y$ günstiger ist als $w:=x\xrightarrow{T}y$. Der geschlossene Kantenzug $W:=x\xrightarrow{\hat{T}}y\xrightarrow{T}x$ besitzt damit Kosten $c(W)=c(\hat{w})-c(w)<0$. Zunächst sorgen wir dafür, dass aus dem geschlossenen Kantenzug mit negativen Kosten ein negativer Kreis wird.
 
-$W$ kann in kantendisjunkte Kreise $C_1,\ldots,C_k$ zerlegt werden, womit auch die Kosten $c(W)=\sum_{i=1}^{k}c(C_i)$ aufgeteilt werden. Für jeden Kreis $C_i$ gibt es zwei Knoten $x_i\neq y_i$ mit $C_i=x_i\xrightarrow{\hat{T}}y_i\xrightarrow{T}x_i$. Da $c(W)<0$, existiert ein Kreis $C_j$ mit negativen Kosten. Wir werden im Folgenden nur noch $C_j$ betrachten, also können wir $C:=C_j$, $x:=x_j$ und $y:=y_j$ setzen.
+TODO BILD
+
+Kanten $e$ in $W$, die zweimal vorkommen, können \obda kontrahiert werden. Danach kann $W$ in kantendisjunkte Kreise $C_1,\ldots,C_k$ zerlegt werden, womit auch die Kosten $c(W)=\sum_{i=1}^{k}c(C_i)$ aufgeteilt werden. Für jeden Kreis $C_i$ gibt es zwei Knoten $x_i\neq y_i$ mit $C_i=x_i\xrightarrow{\hat{T}}y_i\xrightarrow{T}x_i$. Da $c(W)<0$, existiert ein Kreis $C_j$ mit negativen Kosten. Wir werden im Folgenden nur noch $C_j$ betrachten, also können wir $C:=C_j$, $x:=x_j$ und $y:=y_j$ setzen.
 
 Wir werden nun $C$ derart verändern, dass der Weg $x\xrightarrow{\hat{T}}y$ nur noch aus einer Kante $\hat{e}$ besteht. Dann ist $C=\bar{C}_{T,\hat{e}}$; für $c(C)<0$ sind wir fertig, andernfalls werden wir zwischendurch bereits einen negativen Kreis $\bar{C}_{T,e}$ gefunden haben.
 
@@ -190,9 +193,9 @@ Betrachte einen Iterationsschritt mit negativen Kreis $C$, definiert durch die K
 
 Da der Wegteil in $C$, der über $\hat{T}$ geht, nach jeder Iteration um eins kleiner wird, finden wir nach endlich vielen Iterationen einen negativen Kreis $\bar{C}_{T,e}$.\end{proof}
 
-\begin{kor}\label{korrekt}Sei $N$ eine Instanz des Transportproblems mit einer zulässigen Initialbaumlösung $(T_0,f_0)$. Determiniert der Netzwerk-Simplex-Algorithmus, so ist er korrekt.\end{kor}
+\begin{kor}\label{korrekt}Sei $N$ eine Instanz des Transportproblems mit einer zulässigen Initialbaumlösung $(T_0,f_0)$. Determiniert der Netzwerk-Simplex-Algorithmus, so ist er korrekt.\qed\end{kor}
 
-Bislang haben wir nicht gezeigt, dass der Algorithmus immer terminiert. Dies wäre offensichtlich, wenn bei jeder Iteration von $(T,f)$ zu $(T',f')$ die Kosten sinken würden, also $c(f')<c(f)$ wäre. Es gibt jedoch sogenannte \emph{degenerierte Iterationen}, in denen ein negativer Kreis $\bar{C}_{T,e}$ um $\delta=0$ augmentiert wird. Entfernt man danach eine Kante $e\neq e'\in C_{T,e}$, verändert sich nur der Baum. Der nächste Abschnitt beschäftigt sich damit, wie sichergestellt werden kann, dass der Algorithmus zumindest jeden Baum höchstens einmal betrachtet.
+Bislang haben wir nicht gezeigt, dass der Algorithmus immer terminiert. Dies wäre offensichtlich, wenn bei jeder Iteration von $(T,f)$ zu $(T',f')$ die Kosten sinken würden, also $c(f')<c(f)$ wäre. Es gibt jedoch sogenannte \emph{degenerierte Iterationen}, in denen ein negativer Kreis $\bar{C}_{T,e}$ um $\delta=0$ augmentiert wird. Entfernt man danach eine Kante $e\neq e'\in E(C_{T,e})$, verändert sich nur der Baum. Der nächste Abschnitt beschäftigt sich damit, wie sichergestellt werden kann, dass der Algorithmus zumindest jeden Baum höchstens einmal betrachtet.
 
 \subsection{Degenerierte Iterationen}\label{ch:deg}
 TODO Bild degenerierte Iteration
@@ -223,7 +226,7 @@ Diesen Weg werden wir mit \emph{MaxVal} bezeichnen.
 Die Kostenverringerung nach der Augmentierung beträgt $\delta\cdot c(\bar{C}_{T,e})$, ist also von $\delta$ abhängt. Der Pivotalgorithmus \emph{MaxRev} maximiert diesen Wert:
 \begin{flalign*}
 &&\tilde{C}:=\argmin_{\bar{C}_{T,e}\in\bar{C}_T} \{\delta_e\cdot c(\bar{C}_{T,e})\}
-&&\delta_e:=\min_{e\in \bar{C}_{T,e}}\{\bar{u}(e)-\bar{f}(e)\}
+&&\delta_e:=\min_{e\in E(\bar{C}_{T,e})}\{\bar{u}(e)-\bar{f}(e)\}
 \end{flalign*}
 Nach \cref{negKreis} ist jedes $\delta_e$ endlich. Sollten nur degenerierte Iterationen zur Auswahl stehen, ist $c(\tilde{C})=0$. In dem Fall wendet meine konkrete Implementierung MaxVal an; hier sind aber auch andere Strategien denkbar.
 
