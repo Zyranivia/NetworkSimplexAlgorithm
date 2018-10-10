@@ -160,9 +160,32 @@ Sei $N=(G,b,c,u)$ eine Instanz des Transportproblems. Wie beim Simplex-Algorithm
 
 Betrachte Iteration $i$ mit zulässiger Baumlösung $(T_i,f_i)$. Wähle einen negativen Kreis $\bar{C}_{T,e}$. Existiert kein solcher, beende den Algorithmus. Andernfalls augmentiere $\bar{C}_{T,e}$ größtmöglich zum maximalen Fluss $f_{i+1}$; jetzt existiert nach \cref{negKreis} eine Kante $e\neq e'\in E(C_{T,e})$ mit $f_{i+1}(e')=0$. Die neue zulässige Baumlösung sei dann $(T_{i+1}=T_i\backslash\{e'\}\cup\{e\},f_{i+1})$. Die verschiedenen Möglichkeiten zur Wahl von $e$ und $e'$ werden in \cref{ch:pivot} und \cref{ch:deg} näher beleuchtet.
 
-Wir werden nun beweisen, dass der Algorithmus eine optimale Lösung des Transportproblems gefunden hat, wenn Phase 2 in Ermangelung einer geeigneten Kante $e$ beendet wird.
+Wir werden nun beweisen, dass der Algorithmus eine optimale Lösung des Transportproblems gefunden hat, wenn Phase 2 in Ermangelung einer geeigneten Kante $e$ beendet wird. \cref{iterierbar} ist etwas abstrakter gehalten, damit es noch mal in \cref{ch:alg2} Verwendung finden kann.
 
-\begin{nota}Sei $N=(G,b,c,u)$ ein Netzwerk mit einem maximalen Fluss $f$, $T$ ein aufspannender Baum von $G$ und $v,w\in V(G)$ zwei beliebige Knoten. Mit $v\xrightarrow{T}w$ bezeichnen wir den eindeutigen gerichteten Weg von $v$ nach $w$ in $R_{N,f}$, der nur über Kanten $e\in E(T)$ oder deren Residualkanten $\bar{e}$ verläuft. Insbesondere ist dieser Weg unabhängig von $f$ und für die Kosten gilt $c(w\xrightarrow{T}v) = -c(v\xrightarrow{T}w)$.\end{nota}
+\begin{nota}Sei $N=(G,b,c,u)$ ein Netzwerk mit einem maximalen Fluss $f$, $W$ ein Wald von $G$ und $v,w\in V(G)$ zwei beliebige Knoten. Mit $v\xrightarrow{W}w$ bezeichnen wir den eindeutigen gerichteten Weg von $v$ nach $w$ in $R_{N,f}$, der nur über Kanten $e\in E(W)$ oder deren Residualkanten $\bar{e}$ verläuft. Sollten $v$ und $w$ in $W$ nicht verbunden sein, ist der Weg der leere Graph. Insbesondere ist dieser Weg unabhängig von $f$ und für die Kosten gilt $c(w\xrightarrow{T}v) = -c(v\xrightarrow{T}w)$.\end{nota}
+
+\begin{lem}\label{iterierbar}Sei $N=(G,b,c,u)$ ein Netzwerk mit einer zulässigen Baumlösung $(T,f)$ und $C$ ein ungerichteter Kreis in $G$, sodass für einen korrespondierenden gerichteten Kreis $\bar{C}$ in $R_{N,f}$ gilt:
+\begin{enumerate}[(i)]
+	\item $c(\bar{C})<0$
+	\item $\forall e\in E(C)\backslash E(T) :$ die korrespondierende Kante $\bar{e}\in\bar{C}$ darf vom Netzwerk-Simplex-Algorithmus mit zulässiger Baumlösung $(T,f)$ als eingehende Kante gewählt werden\label{wählbar}
+\end{enumerate}
+Dann existiert ein negativer Kreis $\bar{C}_{T,\tilde{e}}$.
+\end{lem}
+\begin{proof}Seien $N$ ein Netzwerk, $(T,f)$ eine zulässige Baumlösung und $C$ mit $\bar{C}$ zwei Kreise wie gefordert. Sei $E_{\bar{C},\neg T}\subseteq E(\bar{C})$ die Menge der korrespondierenden Kanten in $\bar{C}$ von den Nichtbaumkanten $E(C)\backslash E(T)$ und $E_{\bar{C},T}=E(\bar{C})\backslash E_{\bar{C},\neg T}$ dessen Komplement. Betrachten wir zunächst den Fall, dass $E_{\bar{C},T}=\emptyset$:
+
+TODO Bild
+
+Nach \cref{wählbar} gibt es für alle Kanten $e_1,\ldots,e_c\in E_{\bar{C},\neg T}=E(\bar{C})$ einen Kreis $\bar{C}_{T,e_i}$. Insbesondere existiert eine Kante $e_j$, sodass die Kosten von $\hat{C}:=\bar{C}_{T,e_j}$ folgendermaßen definiert sind:
+\begin{equation}\label{eq:CircleCost}
+c(\hat{C})=c(\bar{C})-\sum_{i\neq j} c(\bar{C}_{T,e_i})
+\end{equation}
+Die Existenz von $\hat{C}$ wird von TODO veranschaulicht und liegt darin begründet, dass $T$ sonst nicht kreisfrei wäre. Sollte einer der Kreise $\bar{C}_{T,e_i}$ für $i\neq j$ negative Kosten aufweisen, ist die Aussage direkt gezeigt. Andernfalls besitzt $\hat{C}$ nach \cref{eq:CircleCost} negative Kosten und ist der gesuchte Kreis.
+
+Kommen wir zum Fall $E_{\bar{C},T}\neq\emptyset$. Da $T$ ein Baum ist, ist $E_{\bar{C},\neg T}\neq\emptyset$. Sollte $|E_{\bar{C},\neg T}|=1$ sein, ist $\bar{C}$ der gesuchte Kreis. Ansonsten werden wir $\bar{C}$ iterativ derart verändern, dass diese Eigenschaft für die aktualisierte Menge $E_{\bar{C},\neg T}$ erfüllt ist. Besitzt $\bar{C}$ dann negative Kosten, sind wir wieder fertig, andernfalls werden wir zwischendurch bereits einen negativen Kreis $\bar{C}_{T,e}$ gefunden haben.
+
+TODO Bild
+
+Betrachte einen Iterationsschritt mit negativen Kreis $\bar{C}$, $E_{\bar{C},\neg T}\subseteq E(\bar{C})$ sowie $E_{\bar{C},T}=E(\bar{C})\backslash E_{\bar{C},\neg T}$, wobei $|E_{\bar{C},\neg T}|>1$. Sei $e=(x,y)\in E_{\bar{C},\neg T}$ eine beliebige Nichtbaumkante. Wir betrachten nun die beiden Kreise $\tilde{C}:=y\xrightarrow{T}x\cup\{(x,y)\}$ und $C':=x\xrightarrow{T}y\xrightarrow{\bar{C}-\{e\}}x$, letzterer bereinigt um in beide Richtungen begangene Kanten. Sollte $c(\tilde{C})<0$ sein, ist $\tilde{C}$ nach \cref{wählbar} der gesuchte Kreis. Andernfalls ist $|E_{C',\neg T}|<|E_{\bar{C},\neg T}|$ und die Kosten $c(C')=c(\bar{C})-c(\tilde{C})\leq c(\bar{C})$ bleiben negativ. Wir setzen nun $\bar{C}:=C'$ und iterieren weiter, bis $|E_{\bar{C},\neg T}|=1$.\end{proof}
 
 \begin{thm}\label{opt}Sei $N$ eine Instanz des Transportproblems mit einer zulässigen Baumlösung $(T,f)$. Existiert kein negativer Kreis $\bar{C}_{T,e}$, so ist $f$ eine optimale Lösung.\end{thm}
 \begin{proof}Wir werden zeigen, dass ein negativer Kreis $\bar{C}_{T,e}$ existiert, wenn die betrachtete zulässige Baumlösung $(T,f)$ nicht optimal ist.
@@ -177,13 +200,8 @@ Sei $N=(G,b,c,u)$ ein Netzwerk mit einer optimalen zulässigen Baumlösung $(\ha
 
 Wie \cref{fig:decomp} veranschaulicht, kann $W$ in kantendisjunkte Kreise $C_1,\ldots,C_k$ zerlegt werden, womit auch die Kosten $c(W)=\sum_{i=1}^{k}c(C_i)$ aufgeteilt werden. Für jeden Kreis $C_i$ gibt es zwei Knoten $x_i\neq y_i$ mit $C_i=x_i\xrightarrow{\hat{T}}y_i\xrightarrow{T}x_i$. Da $c(W)<0$, existiert ein Kreis $C_j$ mit negativen Kosten. Wir werden im Folgenden nur noch $C_j$ betrachten, also können wir $C:=C_j$, $x:=x_j$ und $y:=y_j$ setzen.
 
-Wir werden nun $C$ derart verändern, dass der Weg $x\xrightarrow{\hat{T}}y$ nur noch aus einer Kante $\hat{e}$ besteht. Dann ist $C=\bar{C}_{T,\hat{e}}$; für $c(C)<0$ sind wir fertig, andernfalls werden wir zwischendurch bereits einen negativen Kreis $\bar{C}_{T,e}$ gefunden haben.
-
-TODO Bild
-
-Betrachte einen Iterationsschritt mit negativen Kreis $C$, definiert durch die Knoten $x$ und $y$. Sei $e=(x,z)$ die erste und nicht einzige Kante des Weges $x\xrightarrow{\hat{T}}y$. Wir schauen uns nun den Weg $w:=x\xrightarrow{T}z$ und die beiden entstehenden Kreise $\tilde{C}:=x\xrightarrow{\hat{T}}z\xrightarrow{T}x$ und $C':=z\xrightarrow{\hat{T}}y\xrightarrow{T}z$ an. Sollte $c(\tilde{C})<0$ sein, ist $\tilde{C}=\bar{C}_{T,e}$ der gesuchte Kreis. Andernfalls ist im Kreis $C'$ der Wegteil über $\hat{T}$ um eine Kante gesunken; die Kosten $c(C')=c(C)-c(\tilde{C})\leq c(C)$ bleiben negativ. Besteht der Weg $z\xrightarrow{\hat{T}}y$ aus nur einer Kante, sind wir fertig, ansonsten setzen wir $C:=C'$ sowie $x:=z$ und iterieren weiter.
-
-Da der Wegteil in $C$, der über $\hat{T}$ geht, nach jeder Iteration um eins kleiner wird, finden wir nach endlich vielen Iterationen einen negativen Kreis $\bar{C}_{T,e}$.\end{proof}
+TODO
+\end{proof}
 
 \begin{kor}\label{korrekt}Sei $N$ eine Instanz des Transportproblems mit einer zulässigen Initialbaumlösung $(T_0,f_0)$. Determiniert der Netzwerk-Simplex-Algorithmus, so ist er korrekt.\qed\end{kor}
 
