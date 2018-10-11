@@ -59,9 +59,8 @@
 \chapter{Einführung}
 Das Simplex-Verfahren, zu welchem eine Einführung in \cite{NSAbook} gefunden werden kann, löst Lineare Programme in der Praxis sehr schnell, obwohl die Worst-Case-Laufzeit nicht polynomiell ist. Jedes Netzwerkproblem lässt sich als Lineares Programm darstellen und somit durch das Simplex-Verfahren lösen, durch die konkrete Struktur solcher Probleme genügt jedoch der von \cite[Dantzig, 1951]{erf1} und \cite[Orden, 1956]{erf2} vereinfachte Network-Simplex-Algorithmus. Auch für diesen gibt es exponentielle Instanzen (siehe \cref{ch:lit}), in der Praxis wird er trotzdem vielfach verwendet.
 
-TODO Legende für Graphen einführen
 
-TODO Laufzeit definieren: Iterationsanzahl, obwohl in der Praxis Pivot relevant
+TODO: Die Einführung wird ohnehin ausgebaut. Irgendwie erwähne ich auch unauffällig, dass in dieser Bachelorarbeit die Laufzeit des Algorithmus als Iterationsanzahl definiert ist, obwohl in der Praxis natürlich die Gesamtgeschwindigkeit zählt.
 
 \newpage
 \chapter{Netzwerk-Simplex-Algorithmus}
@@ -90,6 +89,14 @@ In dieser Bachelorarbeit wird angenommen, dass $b$ auf $\mathbb{Z}$ sowie $c$ un
 
 Zusätzlich wird davon ausgegangen, dass $\sum_{v\in V(G)} b(v) = 0$ ist, Angebot und Nachfrage also ausgeglichen sind. Des Weiteren ist in der konkreten Implementierung $E$ keine Multimenge; es sind keine parallelen Kanten vorgesehen. Alle Netzwerke werden als zusammenhängend angenommen, da die Zusammenhangskomponenten einer Instanz einzeln gelöst werden können. Der programmierte Algorithmus verlangt keinen Zusammenhang.
 
+Sämtliche Bilder von Graphen im Verlauf dieser Bachelorarbeit sind nach folgender Legende zu lesen. Teilweise werden nur einige Werte angezeigt, Ausnahme ist die Kapazität, die nie ohne Flusswerte auftritt.
+\begin{itemize}\itemsep0em
+	\item b-Wert: schwarz im Knoten
+	\item Fluss: \textcolor{blue}{blau} auf Kante
+	\item Kapazität: schwarz auf Kante, mit Slash (/) vom Fluss abgetrennt
+	\item Kosten: \textcolor{red}{rot} auf Kante
+\end{itemize}
+
 \section{Der grundlegende Algorithmus}\label{ch:alg}
 Um die Funktionsweise des Netzwerk-Simplex-Algorithmus zu definieren, benötigen wir zuerst einige grundlegende Definitionen der Graphentheorie. Im Nachfolgenden sind nur die wichtigsten in Kürze aufgeführt, für eine vollständige Einführung sei der geneigte Leser auf \cite{Alma} verwiesen.
 
@@ -112,8 +119,7 @@ Wie \cref{fig:BL} veranschaulicht, gibt es maximale Flüsse, zu denen wir keine 
 
 \begin{figure}[!h]\centering
 \includestandalone{tikz_BL}
-\caption{Links ein maximaler Fluss ohne zulässige Baumlösung, rechts ein maximaler Fluss mit uneindeutiger zulässiger Baumlösung.\protect\\
-	\protect\textit{Legende.} b-Wert: schwarz im Knoten, Fluss: \protect\textcolor{blue}{blau} auf Kante, Kosten: \protect\textcolor{red}{rot} auf Kante}
+\caption{Links ein maximaler Fluss ohne zulässige Baumlösung, rechts ein maximaler Fluss mit uneindeutiger zulässiger Baumlösung.}
 \label{fig:BL}
 \end{figure}	
 
@@ -173,19 +179,31 @@ Dann existiert ein vom Algorithmus wählbares $\bar{e}\in\bar{C}$, sodass $c(\ba
 \end{lem}
 \begin{proof}Seien $N$ ein Netzwerk, $(T,f)$ eine zulässige Baumlösung und $C$ mit $\bar{C}$ zwei Kreise wie gefordert. Sei $E_{\bar{C},\neg T}\subseteq E(\bar{C})$ die Menge der korrespondierenden Kanten in $\bar{C}$ von den Nichtbaumkanten $E(C)\backslash E(T)$ und $E_{\bar{C},T}=E(\bar{C})\backslash E_{\bar{C},\neg T}$ dessen Komplement. Betrachten wir zunächst den Fall, dass $E_{\bar{C},T}=\emptyset$:
 
-TODO Bild
+\begin{figure}[!h]\centering
+	\includestandalone{tikz_nontreecircle}
+	\caption{Die durchgezogenen Kanten bilden den negativen Kreis $\bar{C}$. Jede Kante $(v,w)\in E(\bar{C})$ wird über $w\xrightarrow{T}v$ zu einem Kreis ergänzt.}
+	\label{fig:NTC}
+\end{figure}
 
 Nach \cref{wählbar} gibt es für alle Kanten $e_1,\ldots,e_c\in E_{\bar{C},\neg T}=E(\bar{C})$ einen Kreis $\bar{C}_{T,e_i}$. Insbesondere existiert eine Kante $e_j$, sodass die Kosten von $\hat{C}:=\bar{C}_{T,e_j}$ folgendermaßen definiert sind:
 \begin{equation}\label{eq:CircleCost}
 c(\hat{C})=c(\bar{C})-\sum_{i\neq j} c(\bar{C}_{T,e_i})
 \end{equation}
-Die Existenz von $\hat{C}$ wird von TODO veranschaulicht und liegt darin begründet, dass $T$ sonst nicht kreisfrei wäre. Sollte einer der Kreise $\bar{C}_{T,e_i}$ für $i\neq j$ negative Kosten aufweisen, ist die Aussage direkt gezeigt. Andernfalls besitzt $\hat{C}$ nach \cref{eq:CircleCost} negative Kosten und ist der gesuchte Kreis.
+Die Existenz von $\hat{C}$ wird von \cref{fig:NTC} veranschaulicht und liegt darin begründet, dass $T$ sonst nicht kreisfrei wäre. Sollte einer der Kreise $\bar{C}_{T,e_i}$ für $i\neq j$ negative Kosten aufweisen, ist die Aussage direkt gezeigt. Andernfalls besitzt $\hat{C}$ nach \cref{eq:CircleCost} negative Kosten und ist der gesuchte Kreis.
 
 Kommen wir zum Fall $E_{\bar{C},T}\neq\emptyset$. Da $T$ ein Baum ist, ist $E_{\bar{C},\neg T}\neq\emptyset$. Sollte $|E_{\bar{C},\neg T}|=1$ sein, ist $\bar{C}$ der gesuchte Kreis. Ansonsten werden wir $\bar{C}$ iterativ derart zu einem Kreis $\hat{C}$ verändern, dass $E_{\hat{C},\neg T}\subseteq E_{\bar{C},\neg T}$ und $|E_{\hat{C},\neg T}|=1$. Besitzt $\hat{C}$ negative Kosten, sind wir wieder fertig, andernfalls werden wir zwischendurch bereits einen negativen Kreis $\bar{C}_{T,e}$ mit $e\in E_{\bar{C},\neg T}$ gefunden haben.
 
-TODO Bild
+\begin{figure}[!h]\centering
+	\includestandalone{tikz_treecircleiter}
+	\caption{Der neue Kreis $C_1$ entsteht hier, indem wir von $x$ beginnend entgegen $\tilde{C}$ bis $z$ gehen und dann dem bisherigen Kreisverlauf $\bar{C}$ folgen.}
+	\label{fig:TC}
+\end{figure}
 
-Betrachte einen Iterationsschritt mit negativen Kreis $\bar{C}$ mit $|E_{\bar{C},\neg T}|>1$. Sei $e=(x,y)\in E_{\bar{C},\neg T}$ eine beliebige Nichtbaumkante. Wir betrachten nun die beiden Kreise $\tilde{C}:=\bar{C}_{T,e}=y\xrightarrow{T}x\cup\{(x,y)\}$ und $C':=x\xrightarrow{T}y\xrightarrow{\bar{C}-\{e\}}x$, letzterer bereinigt um in beide Richtungen begangene Kanten. Sollte $c(\tilde{C})<0$ sein, ist $\tilde{C}$ nach \cref{wählbar} der gesuchte Kreis. Andernfalls ist $|E_{C',\neg T}|<|E_{\bar{C},\neg T}|$ und die Kosten $c(C')=c(\bar{C})-c(\tilde{C})\leq c(\bar{C})$ bleiben negativ. Wir setzen nun $\bar{C}:=C'$ und iterieren weiter, bis $|E_{\bar{C},\neg T}|=1$. Dann ist $\hat{C}:=\bar{C}$ der gesuchte Kreis.\end{proof}
+Betrachte einen Iterationsschritt mit negativen Kreis $\bar{C}$ mit $|E_{\bar{C},\neg T}|>1$. Sei $e=(x,y)\in E_{\bar{C},\neg T}$ eine beliebige Nichtbaumkante. Wir betrachten nun den Kreis $\tilde{C}:=\bar{C}_{T,e}=y\xrightarrow{T}x\cup\{(x,y)\}$ und den Kantenzug $W:=x\xrightarrow{T}y\xrightarrow{\bar{C}-\{e\}}x$. Letzterer zerfällt bereinigt um in beide Richtungen begangene Kanten in disjunkte Kreise $C_1,\ldots,C_c$ mit $c(W)=\sum_{i=1}^{c} c(C_i)$. \Obda sei die Kante $e$ in $C_1$ enthalten.
+
+Sollte $c(\tilde{C})<0$ sein, ist $\tilde{C}$ nach \cref{wählbar} der gesuchte Kreis. Ist einer der Kreise $C_2,\ldots,C_c$ negativ, ersetzen wir $\bar{C}$ durch diesen Kreis. Andernfalls ist $|E_{C_1,\neg T}|<|E_{\bar{C},\neg T}|$ mit negativen Kosten $c(C_1)=c(\bar{C})-c(\tilde{C})-\sum_{i=2}^{c}\leq c(\bar{C})$. Damit können wir $\bar{C}:=C_1$ setzen.
+
+In letzteren beiden Fällen ist $|E_{\bar{C},\neg T}|$ im Vergleich zum Anfang der Iteration echt kleiner geworden. Wir iterieren weiter, bis $|E_{\bar{C},\neg T}|=1$. Dann ist $\hat{C}:=\bar{C}$ der gesuchte Kreis.\end{proof}
 
 \begin{thm}\label{opt}Sei $N$ eine Instanz des Transportproblems mit einer zulässigen Baumlösung $(T,f)$. Existiert kein negativer Kreis $\bar{C}_{T,e}$, so ist $f$ eine optimale Lösung.\end{thm}
 \begin{proof}Wir werden zeigen, dass ein negativer Kreis $\bar{C}_{T,e}$ existiert, wenn die betrachtete zulässige Baumlösung $(T,f)$ nicht optimal ist. Dazu finden wir einen gerichteten negativen Kreis, für den wir \cref{iterierbar} anwenden können.
@@ -217,7 +235,7 @@ Degenerierte Iterationen entstehen, wenn bei einer zulässigen Baumlösung $(T,f
 \begin{defn}Sei $N=(G,b,c,u)$ eine Instanz des Transportproblems. Ein aufspannender Baum $T$ von $G$, ein maximaler Fluss $f$ auf $N$ und ein Wurzelknoten $r\in V(T)=V(G)$ bilden eine \textbf{stark zulässige Baumlösung} $(T,f)_r$, wenn $(T,f)$ eine zulässige Baumlösung ist und zusätzlich jede Kante $e=(v,w)\in E(T)$ mit $f(e)=0$ von der Wurzel weggerichtet, also $e$ im Weg $r\xrightarrow{T}w$ enthalten ist.\end{defn}
 
 
-TODO erklären, was genau passiert. Tendenziell nicht beweisen.
+TODO: An dieser Stelle folgt ein Absatz, der erklärt, wie genau die ausgehende Kante abhängig vom Kreis und dem Wurzelknoten gewählt werden muss. Es folgt das Lemma, dass kein Baum zweifach betrachtet wird, für den Beweis wird auf die Literatur verwiesen. Dieser Teil fehlt momentan noch, da ich das noch mal mit meinem programmierten Algorithmus abgleichen muss.
 
 Die Laufzeit des Netzwerk-Simplex-Algorithmus ist bislang ungeklärt. Für bestimmte Varianten wurden exponentielle Instanzen gefunden, die auf \emph{Stalling} basieren, also einer exponentiellen Anzahl degenerierter Iterationen. Mit diesen werden wir uns in \cref{ch:lit} näher befassen. Meine eigene, experimentelle Suche nach schlechten Instanzen findet sich in \cref{ch:erg}. Zunächst vervollständigen wir den Algorithmus um die Wahl des negativen Kreises $\bar{C}_{T,e}$ und die Erzeugung einer initialen Baumlösung.
 
@@ -271,6 +289,7 @@ Damit bekommen wir die zulässige Baumlösung $(T=T'-a, f=f'_{|E(G)})$ für $N'$
 Wir werden nun den Netzwerk-Simplex-Algorithmus auf das Min-Cost-Flow-Problem erweitern. Die Funktionsweise bleibt dieselbe, nur die betrachteten zulässigen Baumlösungen verändern sich leicht:
 
 \begin{defn}Sei $N=(G,b,c,u)$ ein Netzwerk. Ein aufspannender Baum $T$ von $G$ und ein maximaler Fluss $f$ auf $N$ bilden eine \textbf{zulässige Baumlösung} $(T,f)$, wenn $\forall e\in E(G)\backslash E(T): f(e) = 0\vee f(e)=u(e)$.\end{defn}
+\begin{anm}Kanten $e\in E(G)$, die maximal durchflossen sind, bezeichnen wir auch als \emph{saturiert}.\end{anm}
 
 \begin{defn}Sei $N=(G,b,c,u)$ ein Netzwerk. Ein aufspannender Baum $T$ von $G$, ein maximaler Fluss $f$ auf $N$ und ein Wurzelknoten $r\in V(T)=V(G)$ bilden eine \textbf{stark zulässige Baumlösung} $(T,f)_r$, wenn $(T,f)$ eine zulässige Baumlösung ist und folgendes gilt:
 \begin{align*}
@@ -279,9 +298,15 @@ Wir werden nun den Netzwerk-Simplex-Algorithmus auf das Min-Cost-Flow-Problem er
 \end{align*}\end{defn}
 \begin{anm}An dieser Stelle sollten sämtliche Kanten $e\in E(G)$ mit $u(e)=0$ aus dem Graphen entfernt werden; sie sind für das Problem ohnehin irrelevant.\end{anm}
 
-Im Falle beschränkter Kapazitäten erlauben wir für eine zulässige Baumlösung $(T,f)$ auch Fluss außerhalb von $T$, insofern er die Kapazität der Kante voll ausnutzt. TODO veranschaulicht, warum dies notwendig ist. Für stark zulässige Baumlösungen müssen nun zusätzlich alle saturierten Kanten des Baumes zum Wurzelknoten hingerichtet sein.
+\begin{figure}[!h]\centering
+	\includestandalone{tikz_NSA}	
+	\caption{Derselbe, durch gestrichelte Linien dargestellte Baum mit unterschiedlichen maximalen Flüssen. Der Wurzelknoten ist die Senke.}
+	\label{fig:NSA}
+\end{figure}
 
-Die in \cref{TreeUnique} bewiesene Eindeutigkeit von $f$ gilt nun nicht mehr (siehe TODO), eine Eigenschaft, die wir bei der Initialisierung nutzten. Der Leser kann sich an dieser Stelle davon überzeugen, dass diese trotzdem komplett identisch durchführbar ist.
+Im Falle beschränkter Kapazitäten erlauben wir für eine zulässige Baumlösung $(T,f)$ auch Fluss außerhalb von $T$, insofern er die Kapazität der Kante voll ausnutzt. \cref{fig:NSA} veranschaulicht, warum dies notwendig ist. Solche saturierten Kanten $e\in E(G)\backslash E(T)$ sind als eingehende Kante keine sinnvolle Wahl mehr, stattdessen kann der Algorithmus über einen negativen Kreis $C_{T,\bar{e}}$ der Residualkante $\bar{e}$ augmentieren. Für stark zulässige Baumlösungen müssen nun zusätzlich alle saturierten Kanten des Baumes zum Wurzelknoten hingerichtet sein.
+
+Die in \cref{TreeUnique} bewiesene Eindeutigkeit von $f$ gilt nun nicht mehr (siehe \cref{fig:NSA}), eine Eigenschaft, die wir bei der Initialisierung nutzten. Der Leser kann sich an dieser Stelle davon überzeugen, dass diese trotzdem komplett identisch durchführbar ist.
 
 Wir werden jetzt \cref{negKreis,BLex,opt,TP} auf das Min-Cost-Fluss-Problem erweitern.
 
@@ -306,9 +331,10 @@ f'(\tilde{e})=f(\tilde{e})+\delta=f(\tilde{e})+\bar{u}(\tilde{e})-\bar{f}(\tilde
 
 Sei $N=(G,b,c,u)$ ein Netzwerk mit einer optimalen zulässigen Baumlösung $(\hat{T},\hat{f})$ und einer zulässigen Baumlösung $(T,f)$, sodass $c(f)>c(\hat{f})$. Im Beweis zu \cref{opt} haben wir nicht genutzt, dass die Kapazitätsfunktion unbeschränkt ist. Sofern $c(f_{|E(T)})\neq c(\hat{f}_{|E(\hat{T})})$ gilt, sind wir also fertig.
 
-Sei $c(f_{|E(T)})=c(\hat{f}_{|E(\hat{T})})$. Da $c(\hat{f})<c(f)$ ist, gibt es zwei verschiedene Knoten $x$
+Sei nun $c(f_{|E(T)})=c(\hat{f}_{|E(\hat{T})})$. Sei $S:=E(G_f)\backslash (E(G^f)\cup E(T))$ die Menge aller saturierten Nichtbaumkanten von $f$. Da $c(\hat{f})<c(f)$ gilt und die Flusskosten auf den Bäumen identisch sind, transportiert $\hat{f}$ irgendwo Fluss billiger als $f_{|S}$. Somit existiert ein negativer Kantenzug $W$, der nur aus Kanten $\hat{e}\in G_{\hat{f}}$ mit $f(\hat{e})<u(\hat{e})$ -- denn der günstigere Weg kann nicht voll von $f$ abgedeckt sein -- und aus Residualkanten $\bar{e}$ zu $e\in S$ besteht. Analog zu \cref{opt} gewinnen wir aus $W$ einen negativen Kreis $C$, der nach Konstruktion \cref{negativ} und \cref{wählbar} von \cref{iterierbar} erfüllt. Mit \cref{iterierbar} für $N$, $(T,f)$ und $\bar{C}:=C$ ist die Aussage bewiesen.
 \end{proof}
 
+\begin{kor}Der Netzwerk-Simplex-Algorithmus mit einer Initialisierung nach \cref{ch:init}, einem beliebigen Pivotalgorithmus und gemäß \cref{ch:deg} auf stark zulässige Baumlösungen beschränkt löst das Min-Cost-Flow-Problem korrekt.\qed\end{kor}
 
 \newpage
 \chapter{Implementierung} \label{ch:prog}

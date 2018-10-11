@@ -3,17 +3,17 @@
 \usetikzlibrary{arrows, automata}
 \begin{document}
 \begin{tikzpicture} [align=center]
-\path (0, 0) node[circle, draw, text width=0.42cm] (v0) {$-2$}
- 	  (3, 0) node[circle, draw, text width=0.42cm] (v1) {$0$}
-	  (1.5, 1.5) node[circle, draw, text width=0.42cm] (v2) {$2$};
+\path (0, 0) node[circle, draw, text width=0.44cm] (v0) {$2$}
+ 	  (3, 0) node[circle, draw, text width=0.44cm] (v1) {$0$}
+	  (1.5, 1.5) node[circle, draw, text width=0.44cm] (v2) {$-2$};
 	  
 \draw[->] (v0) -- node [sloped, anchor=center, below] {\tiny \textcolor{blue}{1}, \textcolor{red}{1}} (v1);
 \draw[->] (v0) -- node [sloped, anchor=center, above] {\tiny \textcolor{blue}{1}, \textcolor{red}{2}} (v2);
 \draw[->] (v1) -- node [sloped, anchor=center, above] {\tiny \textcolor{blue}{1}, \textcolor{red}{1}} (v2);
 
-\path (6, 0) node[circle, draw, text width=0.42cm] (v3) {$-2$}
-	  (9, 0) node[circle, draw, text width=0.42cm] (v4) {$0$}
-	  (7.5, 1.5) node[circle, draw, text width=0.42cm] (v5) {$2$};
+\path (6, 0) node[circle, draw, text width=0.44cm] (v3) {$2$}
+	  (9, 0) node[circle, draw, text width=0.44cm] (v4) {$0$}
+	  (7.5, 1.5) node[circle, draw, text width=0.44cm] (v5) {$-2$};
 \draw[->] (v3) -- node [sloped, anchor=center, below] {\tiny \textcolor{blue}{0}, \textcolor{red}{1}} (v4);
 \draw[->] (v3) -- node [sloped, anchor=center, above] {\tiny \textcolor{blue}{2}, \textcolor{red}{2}} (v5);
 \draw[->] (v4) -- node [sloped, anchor=center, above] {\tiny \textcolor{blue}{0}, \textcolor{red}{1}} (v5);
