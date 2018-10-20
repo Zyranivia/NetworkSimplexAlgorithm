@@ -1,0 +1,125 @@
+\documentclass[a4paper,twoside,ngerman]{report}
+%added for chapter implementation
+\usepackage{listings}
+\lstset{language=C++,
+	basicstyle=\ttfamily,
+	keywordstyle=\color{blue}\ttfamily,
+	commentstyle=\color{gray}\ttfamily,
+	morekeywords={size_t, intmax_t, uintmax_t}
+}
+\usepackage{xspace}
+
+%added for chapter algorithm
+\usepackage[utf8]{inputenc}
+\usepackage[T1]{fontenc}
+
+\usepackage{mathtools}
+
+\usepackage[shortlabels]{enumitem}
+
+\usepackage[ngerman]{babel}
+\usepackage{csquotes}
+\usepackage{anyfontsize}
+\usepackage[babel]{microtype}
+
+\usepackage{standalone}
+\usepackage{pgf, tikz}
+\usetikzlibrary{arrows, automata}
+
+\usepackage[hidelinks]{hyperref}
+% or colorlinks
+\usepackage{amsmath}
+\usepackage{amsthm}
+\usepackage{amssymb}
+% in between to suppress warning
+\DeclareMathOperator*{\argmin}{arg\,min}
+\DeclareMathOperator*{\argmax}{arg\,max}
+
+\usepackage{cleveref}
+
+\usepackage{enumitem}
+\setdescription{font=\normalfont}
+
+\theoremstyle{plain}
+\newtheorem{thm}{Theorem}
+\newtheorem{lem}[thm]{Lemma}
+\newtheorem{kor}[thm]{Korollar}
+
+\theoremstyle{definition}
+\newtheorem{defn}[thm]{Definition}
+
+\newtheorem*{anm}{Anmerkung}
+\newtheorem*{nota}{Notation}
+
+\crefname{thm}{Theorem}{Theoreme}
+\crefname{lem}{Lemma}{Lemmata}
+\crefname{defn}{Definition}{Definitionen}
+\crefname{kor}{Korollar}{Korollare}
+
+\newcommand{\obda}{o.\,B.\,d.\,A. }
+\newcommand{\Obda}{O.\,B.\,d.\,A. }
+\newcommand{\cpp}{C\texttt{++}\xspace}
+\newcommand{\cppelf}{C\texttt{++}11\xspace}
+
+\begin{document}
+
+\chapter{Implementierung} \label{ch:prog}
+Der Programmierteil dieser Bachelorarbeit implementiert den Netzwerk-Simplex-Algorithmus wie in \cref{ch:NSA} beschrieben, wobei einzelne Strukturen verändert wurden. Der Code ist in \cpp  geschrieben und hält sich an den \cppelf-Standard. Es folgen nun alle essentiellen Codebestandteile, für das Gesamtkonstrukt siehe TODO Anhang.
+
+\section{Netzwerke}
+Zur Umsetzung der Graphenstruktur habe ich eine Klasse \lstinline|class Network| geschrieben, die auf \lstinline|struct Node| sowie \lstinline|class Edge| basiert und den Fluss händelt. Damit kann \lstinline|Network| beispielsweise sicherstellen, dass nie Kanten entfernt werden, die aktuell durchflossen sind.
+\subsection{Knoten}
+\lstinline|struct Node| hat außer einem Konstruktor keinerlei Funktionen, weswegen es nicht in einer eigenen Klasse ausgelagert, sondern in \lstinline|network.h| enthalten ist. 
+\begin{lstlisting}
+struct Node {
+  size_t id;
+  intmax_t b_value;
+  //defined by (the other) nodeID
+  //always incoming and outgoing due to residual edges
+  std::set<size_t> neighbours;
+
+  //constructor
+  Node (size_t _id, intmax_t _b_value)
+    : id(_id), b_value(_b_value) {};
+};
+\end{lstlisting}
+Ein Knoten wird eindeutig durch seine \lstinline|size_t id| identifiziert, weitere Eigenschaften sind sein b-Wert aus $\mathbb{Z}$ und seine Nachbarknoten. Letztere Menge differenziert nicht zwischen Nachbarn aus eingehenden und ausgehenden Knoten, da diese Unterscheidung im Residualgraphen entfällt.
+
+\subsection{Kanten}
+Die Klasse \lstinline|class Edge| enthält alle Informationen über Kanten: Kosten, Kapazität, Fluss und die jeweiligen Endknoten. Residualkanten werden durch das Flag \lstinline|isResidual| gekennzeichnet. An dieser Stelle fällt auf, dass die Kapazität nicht nachträglich verändert werden kann, obwohl dies für Residualkanten notwendig wäre. Ich habe mich in meiner Implementierung dafür entschieden, auf Residualkanten Fluss zu erlauben und damit eine veränderliche Kapazität zu simulieren. Dies wird in TODO näher erläutert.
+\begin{lstlisting}
+class Edge {
+public:
+  //edges are initialized with a flow of zero
+  Edge (size_t node0, size_t node1, intmax_t cost,
+        intmax_t capacity, bool isResidual = false);
+
+  //returns true when flow change was successful
+  bool changeFlow (intmax_t value);
+  bool changeFlowPossible (intmax_t value);
+  //toggles cost betweeen itself and 0
+  void toggleCost ();
+
+private:
+  size_t node0, node1;
+  intmax_t cost, capacity, flow, toggledCost;
+  bool isResidual, isToggled = false;
+};
+\end{lstlisting}
+Die Funktion \lstinline|changeFlow| stellt über die Hilfsfunktion \lstinline|changeFlowPossible| sicher, dass bei einer Flussveränderung keine Kapazitätsschranken verletzt werden. Mittels \lstinline|toggleCost| können die Kosten einer Kante zwischen Null und ihrem eigentlichen Wert variiert werden. Somit lässt sich leicht die in \cref{ch:init} beschriebene Low-Cost-Initialisierung umsetzen.
+
+\subsection{Graph}
+
+\section{Die Klasse \emph{Circle}}
+Magie des updaten
+
+\section{Stark zulässige Baumlösungen}
+Öhm, ja \ldots
+
+\section{Pivotalgorithmen}
+Sehr kurz? Probably nur Code
+
+\section{Initialisierung}\label{HCLC}
+Beweis LC
+
+\end{document}
