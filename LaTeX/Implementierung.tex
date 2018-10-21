@@ -1,4 +1,4 @@
-\documentclass[a4paper,twoside,ngerman]{report}
+\documentclass[11pt,a4paper,twoside,ngerman,openany]{book}
 %added for chapter implementation
 \usepackage{listings}
 \lstset{language=C++,
@@ -64,7 +64,7 @@
 \begin{document}
 
 \chapter{Implementierung} \label{ch:prog}
-Der Programmierteil dieser Bachelorarbeit implementiert den Netzwerk-Simplex-Algorithmus wie in \cref{ch:NSA} beschrieben, wobei einzelne Strukturen verändert wurden. Der Code ist in \cpp  geschrieben und hält sich an den \cppelf-Standard. Es folgen nun alle essentiellen Codebestandteile, für das Gesamtkonstrukt siehe TODO Anhang.
+Der Programmierteil dieser Bachelorarbeit implementiert den Netzwerk-Simplex-Algorithmus wie in \cref{ch:NSA} beschrieben, wobei einzelne Strukturen verändert wurden. Der Code ist in \cpp  geschrieben und hält sich an den \cppelf-Standard. Es folgt eine vollständige Übersicht der Codebestandteile, für das Gesamtkonstrukt siehe TODO Anhang.
 
 \section{Netzwerke}
 Zur Umsetzung der Graphenstruktur habe ich eine Klasse \lstinline|class Network| geschrieben, die auf \lstinline|struct Node| sowie \lstinline|class Edge| basiert und den Fluss händelt. Damit kann \lstinline|Network| beispielsweise sicherstellen, dass nie Kanten entfernt werden, die aktuell durchflossen sind.
@@ -106,9 +106,58 @@ private:
   bool isResidual, isToggled = false;
 };
 \end{lstlisting}
-Die Funktion \lstinline|changeFlow| stellt über die Hilfsfunktion \lstinline|changeFlowPossible| sicher, dass bei einer Flussveränderung keine Kapazitätsschranken verletzt werden. Mittels \lstinline|toggleCost| können die Kosten einer Kante zwischen Null und ihrem eigentlichen Wert variiert werden. Somit lässt sich leicht die in \cref{ch:init} beschriebene Low-Cost-Initialisierung umsetzen.
+Die Funktion \lstinline|changeFlow| stellt über die Hilfsfunktion \lstinline|changeFlowPossible| sicher, dass bei einer Flussveränderung keine Kapazitätsschranken verletzt werden. Mittels \lstinline|toggleCost| können die Kosten einer Kante zwischen Null und ihrem eigentlichen Wert variiert werden. Somit lässt sich leicht die in \cref{ch:init} beschriebene Low-Cost-Initialisierung umsetzen, siehe dazu \cref{HCLC}.
 
 \subsection{Graph}
+Werfen wir einen Blick darauf, wie die Knoten und Kanten in einem Netzwerk gespeichert werden. Ich habe mich dafür entschieden, die Objekte in einer \lstinline|std::map| abzulegen. Die Knoten werden durch ihre \lstinline|size_t id| identifiziert, Kanten durch Anfangsknoten, Endknoten und die \lstinline|bool isResidual|. Ein \lstinline|std::set| benötigt einen Vergleichsoperator, daher habe ich für die Kanten \lstinline|custComp| definiert, das nach \lstinline|size_t node0|, \lstinline|size_t node1| und zuletzt \lstinline|bool isResidual| vergleicht.
+
+Insbesondere ist zu jedem Zeitpunkt zu dem Graph $G$ mit seinem Fluss $f$ der Residualgraph $R_{N,f}$ umgesetzt. TODO wo?
+
+\begin{lstlisting}
+class Network {
+private:
+  intmax_t flow = 0, cost = 0;
+  std::vector<size_t> sources, sinks, transit;
+
+  std::map<std::tuple<size_t, size_t, bool>,
+           Edge, custComp> edges;
+  std::map<size_t, Node, std::less<size_t>> nodes;
+};
+\end{lstlisting}
+Ein Netzwerk kennt außerdem seinen \lstinline|intmax_t flow|, also die Anzahl an Fluss, die von den Quellen zu den Senken transportiert wird, und die dafür anfallenden Kosten \lstinline|intmax_t cost|. Für den Algorithmus ist ersteres nicht relevant, da wir nur auf maximalen Flüssen arbeiten, aber es vereinfacht beispielsweise die Initialisierung.
+
+Die Klasse selbst wird leer oder mit einer Anzahl \lstinline|size_t noOfNodes| von Transitknoten konstruiert und durch Hinzufügen von Knoten und Kanten vervollständigt. Sofern keine Knoten gelöscht werden, ist die \lstinline|size_t id| lückenlos aufsteigend.
+\begin{lstlisting}
+class Network {
+public:
+  Network(size_t noOfNodes);
+
+  //return 0 if there's a parallel edge
+  //adds residual edge
+  bool addEdge(Edge e);
+  //returns nodeID
+  size_t addNode(intmax_t b_value = 0);
+
+//omitted several get-functions
+
+  //fails and returns 0 if there's flow left
+  bool deleteEdge(size_t node0, size_t node1);
+  //fails if there's flow on an edge to this node left
+  bool deleteNode(size_t nodeID);
+
+  //takes a path from a source to a sink
+  //doesn't use residual edges
+  bool addFlow(std::vector<size_t>& path, intmax_t flow);
+  //takes a circle
+  bool changeFlow(Circle& c, intmax_t flow);
+
+  //toggles all edges
+  void toggleCost();
+};
+\end{lstlisting}
+Die Funktionen \lstinline|deleteEdge| und \lstinline|deleteNode| schlagen fehl, wenn auf den zu löschenden Kanten noch Fluss ist. So kann unter anderem beim Löschen des künstlichen Knotens überprüft werden, ob die Instanz lösbar ist. Für die Initialisierung nutzen wir die Funktion \lstinline|addFlow|, die einen Weg von einer Quelle zu einer Senke verlangt und somit sicherstellt, dass $\sum_{v\in V(G)} b(v)$ bei unveränderter Knotenmenge gleichbleibt.
+
+\lstinline|changeFlow| wird in jeder Iteration der zweiten Phase des Netzwerk-Simplex-Algorithmus aufgerufen und augmentiert den übergebenen Kreis \lstinline|Circle c| um einen beliebigen Wert, sofern dies möglich ist. Die hier genutzte \lstinline|class Circle| wird im nächsten Kapitel erläutert. Zu guter Letzt wendet \lstinline|toggleCost| die Funktion \lstinline|Edge::toggleCost| für alle Kanten des Netzwerks an.
 
 \section{Die Klasse \emph{Circle}}
 Magie des updaten

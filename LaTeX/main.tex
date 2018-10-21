@@ -1,6 +1,14 @@
-\documentclass[a4paper,twoside,ngerman]{report}
+\documentclass[11pt,a4paper,twoside,ngerman,openany]{book}
 \author{Max~Kanold}
 \title{Eine graphentheoretische Herleitung und Implementierung des Netzwerk-Simplex-Algorithmus}
+%width=150mm,top=25mm,bottom=25mm,%
+\usepackage[a4paper,bindingoffset=6mm]{geometry}
+\pagestyle{plain}
+
+\usepackage{titlesec}
+\titleformat{\chapter}
+{\normalfont\huge\bfseries}{\thechapter}{1em}{}
+\titlespacing*{\chapter}{0pt}{0pt}{20pt}
 
 \usepackage[utf8]{inputenc}
 \usepackage[T1]{fontenc}
@@ -63,11 +71,13 @@
 \newcommand{\cppelf}{C\texttt{++}11\xspace}
 
 \begin{document}
+\frontmatter
 \maketitle
 \cleardoublepage
 \tableofcontents
 \cleardoublepage
 
+\mainmatter
 \chapter{Einführung}
 Das Simplex-Verfahren, zu welchem eine Einführung in \cite{NSAbook} gefunden werden kann, löst Lineare Programme in der Praxis sehr schnell, obwohl die Worst-Case-Laufzeit nicht polynomiell ist. Jedes Netzwerkproblem lässt sich als Lineares Programm darstellen und somit durch das Simplex-Verfahren lösen, durch die konkrete Struktur solcher Probleme genügt jedoch der von \cite[Dantzig, 1951]{erf1} und \cite[Orden, 1956]{erf2} vereinfachte Netzwerk-Simplex-Algorithmus. Auch für diesen gibt es exponentielle Instanzen (siehe \cref{ch:lit}), in der Praxis wird er trotzdem vielfach verwendet.
 
@@ -83,6 +93,7 @@ Meh.
 \chapter{Ausblick}
 La la la.
 
+\backmatter
 \bibliography{bibliography}{}
 \bibliographystyle{ieeetr}
 
