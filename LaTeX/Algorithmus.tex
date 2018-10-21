@@ -1,55 +1,3 @@
-\documentclass[11pt,a4paper,twoside,ngerman,openany]{book}
-
-\usepackage[utf8]{inputenc}
-\usepackage[T1]{fontenc}
-
-\usepackage{mathtools}
-
-\usepackage[shortlabels]{enumitem}
-
-\usepackage[ngerman]{babel}
-\usepackage{csquotes}
-\usepackage{anyfontsize}
-\usepackage[babel]{microtype}
-
-\usepackage{standalone}
-\usepackage{pgf, tikz}
-\usetikzlibrary{arrows, automata}
-
-\usepackage[hidelinks]{hyperref}
-% or colorlinks
-\usepackage{amsmath}
-\usepackage{amsthm}
-\usepackage{amssymb}
-% in between to suppress warning
-\DeclareMathOperator*{\argmin}{arg\,min}
-\DeclareMathOperator*{\argmax}{arg\,max}
-
-\usepackage[nameinlink]{cleveref}
-
-\usepackage{enumitem}
-\setdescription{font=\normalfont}
-
-\theoremstyle{plain}
-\newtheorem{thm}{Theorem}
-\newtheorem{lem}[thm]{Lemma}
-\newtheorem{kor}[thm]{Korollar}
-
-\theoremstyle{definition}
-\newtheorem{defn}[thm]{Definition}
-
-\newtheorem*{anm}{Anmerkung}
-\newtheorem*{nota}{Notation}
-
-\crefname{thm}{Theorem}{Theoreme}
-\crefname{lem}{Lemma}{Lemmata}
-\crefname{defn}{Definition}{Definitionen}
-\crefname{kor}{Korollar}{Korollare}
-
-\newcommand{\obda}{o.\,B.\,d.\,A. }
-\newcommand{\Obda}{O.\,B.\,d.\,A. }
-
-\begin{document}
 \chapter{Netzwerk-Simplex-Algorithmus}\label{ch:NSA}
 Zunächst führen wir in \cref{ch:MCF} das Transportproblem und dessen Verallgemeinerung auf beschränkte Kapazitäten ein. Gleichzeitig geben wir die Einschränkungen an, auf denen insbesondere der Programmierteil dieser Bachelorarbeit fußt. Die Beschreibung des Netzwerk-Simplex-Algorithmus in \cref{ch:alg} orientiert sich zuerst an \cite[S. 291\,ff.]{NSAbook} zur Lösung des Transportproblems, danach wird in \cref{ch:alg2} der Algorithmus anhand von \cite[S. 353\,ff.]{NSAbook} auf den allgemeinen Fall erweitert.
 
@@ -329,4 +277,3 @@ Sei nun $c(f_{|E(T)})=c(\hat{f}_{|E(\hat{T})})$. Sei $S:=E(G_f)\backslash (E(G^f
 \end{proof}
 
 \begin{kor}Der Netzwerk-Simplex-Algorithmus mit einer Initialisierung nach \cref{ch:init}, einem beliebigen Pivotalgorithmus und gemäß \cref{ch:deg} auf stark zulässige Baumlösungen beschränkt löst das Min-Cost-Flow-Problem korrekt.\qed\end{kor}
-\end{document}

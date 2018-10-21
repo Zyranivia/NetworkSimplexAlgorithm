@@ -1,44 +1,42 @@
-\documentclass[11pt,a4paper,twoside,ngerman,openany]{book}
+\documentclass[11pt,a4paper,twoside,ngerman,openany]{scrbook}
+\KOMAoptions{BCOR=6mm}
 \author{Max~Kanold}
 \title{Eine graphentheoretische Herleitung und Implementierung des Netzwerk-Simplex-Algorithmus}
-%width=150mm,top=25mm,bottom=25mm,%
-\usepackage[a4paper,bindingoffset=6mm]{geometry}
-\pagestyle{plain}
 
-\usepackage{titlesec}
-\titleformat{\chapter}
-{\normalfont\huge\bfseries}{\thechapter}{1em}{}
-\titlespacing*{\chapter}{0pt}{0pt}{20pt}
+%\pagestyle{plain}
+\usepackage{scrhack}
 
 \usepackage[utf8]{inputenc}
 \usepackage[T1]{fontenc}
-
-\usepackage{mathtools}
-
-\usepackage[shortlabels]{enumitem}
 
 \usepackage[ngerman]{babel}
 \usepackage{csquotes}
 \usepackage{anyfontsize}
 \usepackage[babel]{microtype}
 
-\usepackage{standalone}
-\usepackage{pgf, tikz}
-\usetikzlibrary{arrows, automata}
+%clever space after own command
+\usepackage{xspace}
+%\-/ can be used to allow LaTeX hyphenation in dashed words
+\usepackage[shortcuts]{extdash}
 
 \usepackage[hidelinks]{hyperref}
 % or colorlinks
+\usepackage{mathtools}
 \usepackage{amsmath}
 \usepackage{amsthm}
 \usepackage{amssymb}
-% in between to suppress warning
+% in between the refs to suppress warning
 \DeclareMathOperator*{\argmin}{arg\,min}
 \DeclareMathOperator*{\argmax}{arg\,max}
 
 \usepackage[nameinlink]{cleveref}
 
-\usepackage{enumitem}
+\usepackage[shortlabels]{enumitem}
 \setdescription{font=\normalfont}
+
+\usepackage{standalone}
+\usepackage{pgf, tikz}
+\usetikzlibrary{arrows, automata}
 
 \theoremstyle{plain}
 \newtheorem{thm}{Theorem}
@@ -58,12 +56,12 @@
     commentstyle=\color{gray}\ttfamily,
     morekeywords={size_t, intmax_t, uintmax_t}
 }
-\usepackage{xspace}
 
 \crefname{thm}{Theorem}{Theoreme}
 \crefname{lem}{Lemma}{Lemmata}
 \crefname{defn}{Definition}{Definitionen}
 \crefname{kor}{Korollar}{Korollare}
+\crefname{enumi}{Eigenschaft}{Eigenschaften}
 
 \newcommand{\obda}{o.\,B.\,d.\,A. }
 \newcommand{\Obda}{O.\,B.\,d.\,A. }
