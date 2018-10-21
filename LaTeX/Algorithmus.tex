@@ -25,7 +25,7 @@
 \DeclareMathOperator*{\argmin}{arg\,min}
 \DeclareMathOperator*{\argmax}{arg\,max}
 
-\usepackage{cleveref}
+\usepackage[nameinlink]{cleveref}
 
 \usepackage{enumitem}
 \setdescription{font=\normalfont}
@@ -173,6 +173,7 @@ Nach \cref{wählbar} gibt es für alle Kanten $e_1,\ldots,e_c\in E_{\bar{C},\neg
 \begin{equation}\label{eq:CircleCost}
 c(\hat{C})=c(\bar{C})-\sum_{i\neq j} c(\bar{C}_{T,e_i})
 \end{equation}
+
 Die Existenz von $\hat{C}$ wird von \cref{fig:NTC} veranschaulicht und liegt darin begründet, dass $T$ sonst nicht kreisfrei wäre. Sollte einer der Kreise $\bar{C}_{T,e_i}$ für $i\neq j$ negative Kosten aufweisen, ist die Aussage direkt gezeigt. Andernfalls besitzt $\hat{C}$ nach \cref{eq:CircleCost} negative Kosten und ist der gesuchte Kreis.
 
 Kommen wir zum Fall $E_{\bar{C},T}\neq\emptyset$. Da $T$ ein Baum ist, ist $E_{\bar{C},\neg T}\neq\emptyset$. Sollte $|E_{\bar{C},\neg T}|=1$ sein, ist $\bar{C}$ der gesuchte Kreis. Ansonsten werden wir $\bar{C}$ iterativ derart zu einem Kreis $\hat{C}$ verändern, dass $E_{\hat{C},\neg T}\subseteq E_{\bar{C},\neg T}$ und $|E_{\hat{C},\neg T}|=1$. Besitzt $\hat{C}$ negative Kosten, sind wir wieder fertig, andernfalls werden wir zwischendurch bereits einen negativen Kreis $\bar{C}_{T,e}$ mit $e\in E_{\bar{C},\neg T}$ gefunden haben.
@@ -190,9 +191,8 @@ Sollte $c(\tilde{C})<0$ sein, ist $\tilde{C}$ nach \cref{wählbar} der gesuchte 
 &|E_{C_1,\neg T}|<|E_{\bar{C},\neg T}| \\
 &c(C_1)=c(\bar{C})-c(\tilde{C})-\sum_{i=2}^{c}c(C_i)\leq c(\bar{C})<0
 \end{align*}
-Damit können wir $\bar{C}:=C_1$ setzen.
 
-In letzteren beiden Fällen ist $|E_{\bar{C},\neg T}|$ im Vergleich zum Anfang der Iteration echt kleiner geworden. Wir iterieren weiter, bis $|E_{\bar{C},\neg T}|=1$ ist. Dann ist $\hat{C}:=\bar{C}$ der gesuchte Kreis.\end{proof}
+Damit können wir $\bar{C}:=C_1$ setzen. In letzteren beiden Fällen ist $|E_{\bar{C},\neg T}|$ im Vergleich zum Anfang der Iteration echt kleiner geworden. Wir iterieren weiter, bis $|E_{\bar{C},\neg T}|=1$ ist. Dann ist $\hat{C}:=\bar{C}$ der gesuchte Kreis.\end{proof}
 
 \begin{thm}\label{opt}Sei $N$ eine Instanz des Transportproblems mit einer zulässigen Baumlösung $(T,f)$. Existiert kein negativer Kreis $\bar{C}_{T,e}$, so ist $f$ eine optimale Lösung.\end{thm}
 \begin{proof}Wir werden zeigen, dass ein negativer Kreis $\bar{C}_{T,e}$ existiert, wenn die betrachtete zulässige Baumlösung $(T,f)$ nicht optimal ist. Dazu finden wir einen gerichteten negativen Kreis, für den wir \cref{iterierbar} anwenden können.
@@ -240,6 +240,7 @@ Sei $N=(G,b,c,u)$ ein Netzwerk mit zulässiger Baumlösung $(T,f)$. Algorithmen,
 Der erste Ansatz ist es, den negativsten Kreis zu wählen, sprich \begin{equation*}
 \tilde{C}:=\argmin_{\bar{C}_{T,e}\in\bar{C}_T} \{c(\bar{C}_{T,e})\}
 \end{equation*}
+
 Diesen Weg werden wir mit \emph{MaxVal} bezeichnen.
 
 \subsubsection{Maximum Revenue}
@@ -248,6 +249,7 @@ Die Kostenverringerung nach der Augmentierung beträgt $\delta\cdot c(\bar{C}_{T
 &&\tilde{C}:=\argmin_{\bar{C}_{T,e}\in\bar{C}_T} \{\delta_e\cdot c(\bar{C}_{T,e})\}
 &&\delta_e:=\min_{e'\in E(\bar{C}_{T,e})}\{\bar{u}(e')-\bar{f}(e')\}
 \end{flalign*}
+
 Nach \cref{negKreis} ist jedes $\delta_e$ endlich. Sollten nur degenerierte Iterationen zur Auswahl stehen, ist $c(\tilde{C})=0$. In dem Fall wendet meine konkrete Implementierung MaxVal an; hier sind aber auch andere Strategien denkbar.
 
 \subsubsection{Random}
@@ -258,9 +260,7 @@ Der letzte verbleibende Schritt, um einen vollständigen Algorithmus zur Lösung
 
 Sei $N=(G,b,c,u)$ eine Instanz des Transportproblems. Wir fügen dem Netzwerk einen zusätzlichen Transitknoten $a$ mit $b(a)=0$ hinzu, den man als künstlichen \textit{(artificial)} Knoten bezeichnet. Für alle Quellen $v\in V(G):b(v)>0$ ergänzen wir eine künstliche Kante $(v,a)$, für alle Senken und Transitknoten $a\neq w\in V(G):b(w)\leq0$ eine künstliche Kante $(a,w)$. Sei $G'$ der entstehende Graph.
 
-Sämtliche künstlichen Kanten $e_v$ haben eine unbegrenzte Kapazität, die wir mit $u(e_v)=\frac{1}{2}\cdot\sum_{v\in V(G)} |b(v)| + 1$ abschätzen. Die Kosten sind ebenfalls unendlich und können mit $c(e_v)=|V(G)|\cdot\max_{e\in E(G)}\{c(e)\}+1$ abgeschätzt werden, da jeder Weg in $G$ geringere Kosten aufweist. Leicht finden wir nun die stark zulässige Baumlösung $(T_0,f_0)_a$, wobei $T_0=(V(G),\{e_v|v\in V(G)\})$ ist. Nach \cref{TreeUnique} ist $f_0$ eindeutig.
-
-Diese Art der Initialisierung werden wir im Folgenden mit \emph{HC} für \emph{High-Cost-Initialisierung} abkürzen.
+Sämtliche künstlichen Kanten $e_v$ haben eine unbegrenzte Kapazität, die wir mit $u(e_v)=\frac{1}{2}\cdot\sum_{v\in V(G)} |b(v)| + 1$ abschätzen. Die Kosten sind ebenfalls unendlich und können mit $c(e_v)=|V(G)|\cdot\max_{e\in E(G)}\{c(e)\}+1$ abgeschätzt werden, da jeder Weg in $G$ geringere Kosten aufweist. Leicht finden wir nun die stark zulässige Baumlösung $(T_0,f_0)_a$, wobei $T_0=(V(G),\{e_v|v\in V(G)\})$ ist. Nach \cref{TreeUnique} ist $f_0$ eindeutig. Diese Art der Initialisierung werden wir im Folgenden mit \emph{HC} für \emph{High-Cost-Initialisierung} abkürzen.
 
 \begin{lem}Sei $N=(G,b,c,u)$ eine Instanz des Transportproblems und $(T',f)$ die Lösung des Netzwerk-Simplex-Algorithmus mit \emph{HC} auf dem erweiterten Graphen $G'$. Die Instanz $N$ ist genau dann lösbar, wenn $G'_f$ keine künstlichen Kanten enthält.\end{lem}
 \begin{proof}\label{solvable}\mbox{}

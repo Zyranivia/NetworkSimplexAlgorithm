@@ -35,7 +35,7 @@
 \DeclareMathOperator*{\argmin}{arg\,min}
 \DeclareMathOperator*{\argmax}{arg\,max}
 
-\usepackage{cleveref}
+\usepackage[nameinlink]{cleveref}
 
 \usepackage{enumitem}
 \setdescription{font=\normalfont}
@@ -69,6 +69,15 @@
 \newcommand{\Obda}{O.\,B.\,d.\,A. }
 \newcommand{\cpp}{C\texttt{++}\xspace}
 \newcommand{\cppelf}{C\texttt{++}11\xspace}
+
+%TODO necessary?
+\newenvironment{tightcenter}{%
+    \setlength\topsep{0pt}
+    \setlength\parskip{0pt}
+    \begin{center}
+    }{%
+    \end{center}
+}
 
 \begin{document}
 \frontmatter
