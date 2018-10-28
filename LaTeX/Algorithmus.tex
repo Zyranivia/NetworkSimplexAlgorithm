@@ -1,11 +1,11 @@
 \chapter{Netzwerk-Simplex-Algorithmus}\label{ch:NSA}
 Zunächst führen wir in \cref{ch:MCF} das Transportproblem und dessen Verallgemeinerung auf beschränkte Kapazitäten ein. Gleichzeitig geben wir die Einschränkungen an, auf denen insbesondere der Programmierteil dieser Bachelorarbeit fußt. Die Beschreibung des Netzwerk-Simplex-Algorithmus in \cref{ch:alg} orientiert sich zuerst an \cite[S. 291\,ff.]{NSAbook} zur Lösung des Transportproblems, danach wird in \cref{ch:alg2} der Algorithmus anhand von \cite[S. 353\,ff.]{NSAbook} auf den allgemeinen Fall erweitert.
 
-\section{Min-Cost-Flow-Problem}\label{ch:MCF}
-\begin{defn}Ein \textbf{Netzwerk} ist ein Tupel $(G,b,c,u)$, wobei $G = (V,E)$ ein gerichteter Graph, $b : V\rightarrow\mathbb{R}$ eine b-Wert-Funktion, $c : E\rightarrow\mathbb{R}$ eine Kostenfunktion und $u : E\rightarrow\mathbb{R}_{\geq 0}\cup \infty$ eine Kapazitätsfunktion seien.\end{defn}
-\begin{anm}Knoten mit positivem b-Wert werden als Quellen, solche mit negativem als Senken bezeichnet. Knoten mit neutralem b-Wert werden Transitknoten genannt.
+Wir werden nur endliche Graphen betrachten. Außerdem werden alle Graphen einfach sein, das heißt, sie weisen weder mehrfache Kanten noch Schleifen auf. Der später eingeführte Residualgraph wird weiterhin keine Schleifen besitzen, doppelte Kanten können unter Umständen vorkommen.
 
-Ein ungerichteter Graph kann durch das Verwandeln jeder Kante $\{v,w\}$ in zwei Kanten $(v,w)$ und $(w,v)$ zu einem gerichteten modifiziert werden.\end{anm}
+\section{Min-Cost-Flow-Problem}\label{ch:MCF}
+\begin{defn}Ein \textbf{Netzwerk} ist ein Tupel $(G,b,c,u)$ aus einem gerichteten Graph $G = (V,E)$ und den Abbildungen $b : V\rightarrow\mathbb{R}$, $c : E\rightarrow\mathbb{R}$ sowie $u : E\rightarrow\mathbb{R}_{\geq 0}\cup \infty$. Wir bezeichnen $b$ als \emph{b-Wert-Funktion}, $c$ als \emph{Kostenfunktion} und $u$ als \emph{Kapazitätsfunktion}.\end{defn}
+\begin{anm}Knoten mit positivem b-Wert werden als \emph{Quellen}, solche mit negativem als \emph{Senken} bezeichnet. Knoten mit neutralem b-Wert werden \emph{Transitknoten} genannt. Ein ungerichteter Graph kann durch das Verwandeln jeder Kante $\{v,w\}$ in zwei Kanten $(v,w)$ und $(w,v)$ zu einem gerichteten modifiziert werden.\end{anm}
 
 \begin{defn}\label{DefMaxFlow}Ein \textbf{maximaler Fluss} auf einem Netzwerk $(G=(V,E),b,c,u)$ ist eine Abbildung $f : E\rightarrow\mathbb{R}_{\geq 0}$, die folgende Eigenschaften erfüllt:
 \begin{align}
@@ -15,39 +15,41 @@ Ein ungerichteter Graph kann durch das Verwandeln jeder Kante $\{v,w\}$ in zwei 
 Die \emph{Kosten} von $f$ betragen $c(f) = \sum_{e\in E} f(e)\cdot c(e)$.
 \end{defn}
 
-Beim \emph{Min-Cost-Flow-Problem} wird unter allen maximalen Flüssen einer mit minimalen Kosten gesucht. Sind die Kapazitäten unbeschränkt, so wird es als \emph{Transportproblem} bezeichnet.
+\begin{defn}Sei $N=(G,b,c,u)$ ein Netzwerk. Als \textbf{Min-Cost-Flow-Problem} bezeichnen wir die Suche nach einem maximalen Fluss $f$ auf $N$ mit minimalen Kosten. Die vereinfachte Version, bei der die Kapazitätsfunktion unbeschränkt ist, also $u(e)=\infty$ für alle $e\in E(G)$ gilt, nennen wir \textbf{Transportproblem}.\end{defn}
 
-In dieser Bachelorarbeit wird angenommen, dass $b$ auf $\mathbb{Z}$ sowie $c$ und $u$ auf $\mathbb{N}_0$ abbilden, um Gleitkommazahlungenauigkeit beim Programmieren zu vermeiden. Durch eine entsprechende Skalierung des Problems können die Funktionen nach $\mathbb{R}$ bzw. $\mathbb{R}_{\geq 0}$ hinreichend genug angenähert werden. Es wird davon ausgegangen, dass $\sum_{v\in V(G)} b(v) = 0$ ist, Angebot und Nachfrage also ausgeglichen sind. Der Fall eines übermäßigen Angebotes kann durch eine Dummy-Senke abgefangen werden.
+In dieser Bachelorarbeit wird angenommen, dass $b$ auf $\mathbb{Z}$ sowie $c$ und $u$ auf $\mathbb{N}_0$ abbilden, um Gleitkommazahlungenauigkeit beim Programmieren zu vermeiden. Durch eine entsprechende Skalierung des Problems können Funktionen nach $\mathbb{R}$ bzw. $\mathbb{R}_{\geq 0}$ hinreichend genug angenähert werden. Es wird davon ausgegangen, dass $\sum_{v\in V(G)} b(v) = 0$ ist, die b-Werte der Quellen und Senken also ausgeglichen sind. Sollte die Summe der Senken überwiegen, ist die Instanz unlösbar. Der Fall einer zu großen Summe der Quellen kann durch eine Dummy-Senke\footnotemark{} abgefangen werden.
 
-Durch die eingeschränkte Kostenfunktion hat kein maximaler Fluss negative Kosten; es gibt keine unbeschränkten Instanzen. Unbeschränkte Kapazitäten können somit \obda durch $\frac{1}{2}\cdot\sum_{v\in V} |b(v)| + 1$ abgeschätzt werden. Des Weiteren ist in der konkreten Implementierung $E$ keine Multimenge; es sind keine parallelen Kanten vorgesehen. Alle Netzwerke werden als zusammenhängend angenommen, da die Zusammenhangskomponenten einer Instanz einzeln gelöst werden können. Der programmierte Algorithmus verlangt keinen Zusammenhang.
+\footnotetext{Gemäß TODO fügen wir $G$ eine zusätzliche Senke $s$ hinzu, die mit allen Quellen $q_i$ über eine Kante $e_i=(q_i,s)$ verbunden ist und einen b-Wert von $b(s)=-\sum_{v\in V(G)} b(v)$ zugewiesen bekommt. Für die Kanten gilt $c(e_i)=0$ und $u(e_i)=\infty$.}
 
-Sämtliche Bilder von Graphen im Verlauf dieser Bachelorarbeit sind nach folgender Legende zu lesen. Teilweise werden nur einzelne Werte angezeigt, Ausnahme ist die Kapazität, die nie ohne Flusswerte auftritt.
-\begin{itemize}\itemsep0em
-	\item b-Wert: schwarz im Knoten
-	\item Fluss: \textcolor{blue}{blau} auf Kante
-	\item Kapazität: schwarz auf Kante, mit Slash (/) vom Fluss abgetrennt
-	\item Kosten: \textcolor{red}{rot} auf Kante, falls notwendig mit Komma (,) abgetrennt
-\end{itemize}
+Durch die auf nicht-negative Werte eingeschränkte Kostenfunktion hat kein maximaler Fluss negative Kosten. Damit gibt es keine unbeschränkten Instanzen. Unbeschränkte Kapazitäten können somit in der konkreten Implementierung durch $\frac{1}{2}\cdot\sum_{v\in V} |b(v)| + 1$ abgeschätzt werden, ohne dass die Lösungsmenge verändert wird. Alle Netzwerke werden als zusammenhängend angenommen, da die Zusammenhangskomponenten einer Instanz einzeln gelöst werden können. Der programmierte Algorithmus verlangt keinen Zusammenhang.
 
 \section{Der grundlegende Algorithmus}\label{ch:alg}
-Um die Funktionsweise des Netzwerk-Simplex-Algorithmus zu definieren, benötigen wir zuerst einige grundlegende Definitionen der Graphentheorie. Im Nachfolgenden sind nur die wichtigsten in Kürze aufgeführt, für eine vollständige Einführung sei der geneigte Leser auf \cite{Alma} verwiesen.
+Um die Funktionsweise des Netzwerk-Simplex-Algorithmus zu definieren, benötigen wir zuerst einige grundlegende Definitionen der Graphentheorie. Im Nachfolgenden sind die wichtigsten in Kürze aufgeführt, für eine vollständige Einführung sei der geneigte Leser auf \cite{Alma} verwiesen.
 
 \begin{defn}Der einem gerichteten Graphen $G=(V,E)$ \textbf{zugrundeliegende ungerichtete Graph} $G'=(V,E')$ ist definiert durch:
 \begin{equation*}\{v,w\}\in E' \iff (v,w) \in E \lor (w,v) \in E\end{equation*} \end{defn}
-\begin{anm}Nach dieser Definition gibt es keine Bijektion zwischen gerichteten und den zugrundeliegenden ungerichteten Graphen; dafür vermeidet man parallele Kanten.\end{anm}
+\begin{anm}Nach dieser Definition bleibt der zugrundeliegende Graph einfach. Eine gängige Alternative behält alle Kanten und entfernt nur die Richtung, dies ist für unsere Zwecke jedoch nicht praktikabel.\end{anm}
 
 \begin{defn}Ein \textbf{Baum} $T$ ist ein ungerichteter, zusammenhängender und kreisfreier Graph. Ein \textbf{Wald} ist ein Graph, bei dem jede Zusammenhangskomponente ein Baum ist.\\
 Ein Teilgraph $T=(V',E')$ eines ungerichteten Graphen $G=(V,E)$ heißt \textbf{aufspannender Baum}, wenn T ein Baum und $V'=V$ ist.\end{defn}
+
 \begin{anm}Sprechen wir bei einem gerichteten Graphen $G$ über einen Wald bzw. (aufspannenden) Baum, so bezieht sich das stets auf einen Teilgraphen $T$ von $G$, dessen zugrundeliegender ungerichteter Graph ein Wald bzw. (aufspannender) Baum des $G$ zugrundeliegenden ungerichteten Graphen ist.\end{anm}
 
 \begin{defn}Sei $N=(G,b,c,u)$ eine Instanz des Transportproblems. Ein aufspannender Baum $T$ von $G$ und ein maximaler Fluss $f$ auf $N$ bilden eine \textbf{zulässige Baumlösung} $(T,f)$, wenn für alle Kanten $e\in E(G)\backslash E(T)$ außerhalb des Baumes $f(e) = 0$ gilt.\end{defn}
 
-\begin{lem}\label{TreeUnique}Jede zulässige Baumlösung $(T,f)$ ist eindeutig durch den aufspannenden Baum $T$ definiert.\end{lem}
-\begin{proof}Sei $(T=(V,E),f)$ eine zulässige Baumlösung einer Instanz des Transportproblems. Für jedes Blatt von $l\in V$ sei $e_l\in E$ die eindeutige Kante in $T$ zwischen den Knoten $k$ und $l$. Für alle Blätter $l$ ist der Wert von $f(e_l)$ nach \cref{DefMaxFlow} \cref{DefMaxFlowII} eindeutig.
-	
-Wir entfernen nun alle mit Fluss belegten Kanten $e_l$ sowie die nun isolierten Knoten $l$ und aktualisieren den b-Wert von $k$. Der dabei entstehende Graph $T'=(V'\subsetneq V,E'\subsetneq E)$ bleibt weiterhin ein aufspannender Baum und $f_{|E'}$ ein maximaler Fluss. Durch Iteration ist $f$ wohldefiniert und eindeutig.\end{proof}
+\begin{nota}Sei $G=(V,E)$ ein Graph und $V'\subseteq V$ eine Teilmenge der Knoten. Der \emph{induzierte Teilgraph} $G[V']=(V',\{(v,w)\in E|v\in V'\land w\in V'\})$ enthält alle Knoten aus $V'$ und alle Kanten zwischen ihnen, die schon in $E$ vorhanden waren.\end{nota}
 
-Wie \cref{fig:BL} veranschaulicht, gibt es maximale Flüsse, zu denen wir keine zulässige Baumlösung finden können. Auch wenn wir uns auf die maximalen Flüsse beschränken, zu denen es zulässige Baumlösungen gibt, gilt die Gegenrichtung nach \cref{fig:BL} nicht.
+\begin{lem}\label{TreeUnique}Jede zulässige Baumlösung $(T,f)$ ist eindeutig durch den aufspannenden Baum $T$ definiert.\end{lem}
+\begin{proof}Sei $(T,f)$ eine zulässige Baumlösung einer Instanz des Transportproblems. Wir führen eine Induktion über die Anzahl der Knoten des Baumes durch. Die zulässige Baumlösung zum leeren Baum ist offensichtlich.
+
+Für jedes Blatt von $l\in V(T)$ sei $e_l\in E(T)$ die Kante in $T$ zwischen dem Knoten $l$ und seinem eindeutigen Nachbarknoten $k_l$. Für alle Blätter $l$ ist der Wert von $f(e_l)$ nach \cref{DefMaxFlowII} eindeutig. Wir betrachten nun die eingeschränkte Knotenmenge $\tilde{V}=\{v\in V(T)|v\text{ ist kein Blatt in }T\}$. Da jeder Baum mindestens zwei Blätter besitzt, ist $|\tilde{V}|<|V(T)|$. Sei $T'=T[\tilde{V}]\subsetneq T$ der durch $\tilde{V}$ induzierte Teilbaum von $T$. Damit sind $E(T')$ genau die Kanten, für die $f$ noch nicht bestimmt wurde.
+
+Sei $N'=(G'=G[\tilde{V}],b',c_{|E(T')},u_{|E(T')})$ das auf $\tilde{V}$ eingeschränkte Netzwerk $N$ mit der folgendermaßen angepassten b-Wert-Funktion $b'$: Für alle Blattnachbarn $k_l$, die selbst kein Blatt sind, setzen wir
+\begin{equation}\label{eq:newB}
+b'(k_l):=b(k_l)+\sum_{(l,k_l)\in E(T)} b(l)-\sum_{(k_l,l)\in E(T)} b(l),\end{equation}
+für alle anderen Knoten in $V(G')$ behalten wir den alten b-Wert bei. Durch die Induktionsbehauptung bekommen wir für den aufspannenden Baum $T'$ von $G'$ einen eindeutigen Fluss $f'$. Wir setzen für alle Kanten $e\in E(T')$ den Fluss $f(e)=f'(e)$. Nach \cref{eq:newB} ist $f$ ein maximaler Fluss von $N$, außerdem ist $f$ nach Konstruktion eindeutig.\end{proof}
+
+Wie \cref{fig:BL} veranschaulicht, gibt es maximale Flüsse, zu denen wir keine zulässige Baumlösung finden können. Auch wenn wir uns auf die maximalen Flüsse beschränken, zu denen es zulässige Baumlösungen gibt, gilt die Gegenrichtung, also dass $T$ eindeutig aus $f$ bestimmt werden kann, gemäß \cref{fig:BL} nicht.
 
 \begin{figure}[!ht]\centering
 \includestandalone{tikz_BL}
@@ -55,31 +57,39 @@ Wie \cref{fig:BL} veranschaulicht, gibt es maximale Flüsse, zu denen wir keine 
 \label{fig:BL}
 \end{figure}	
 
-Wie wir in \cref{TP} zeigen werden, existiert eine zulässige Baumlösung $(T,f)$, sodass $c(f)$ minimal ist. Die dem Algorithmus zugrundeliegende Idee ist es, über die Bäume zulässiger Baumlösungen mit sinkenden Kosten zu iterieren. Der Übergang basiert dabei auf dem Augmentieren negativer Kreise, eine Methode, für die das Konzept des Residualgraphen hilfreich ist.
+Wie wir in \cref{TP} zeigen werden, existiert für das Min-Cost-Flow-Problem immer eine Lösung, die eine zulässige Baumlösung $(T,f)$ ist. Die dem Algorithmus zugrundeliegende Idee ist es, über die Bäume zulässiger Baumlösungen mit sinkenden Kosten zu iterieren. Der Übergang basiert dabei auf dem Augmentieren negativer Kreise, eine Methode, für die das Konzept des Residualgraphen hilfreich ist.
 
 \begin{defn}\label{defRes}Sei $N=(G=(V,E),b,c,u)$ ein Netzwerk mit einem maximalen Fluss $f$. Die \textbf{Residualkante} $\bar{e}$ einer Kante $e=(v,w)\in E$ verläuft von $w$ nach $v$. Sei $\bar{E}=\{\bar{e}|e\in E\}$ die Menge aller Residualkanten. Die \textit{Residualkapazität} $u_f:\bar{E}\rightarrow\mathbb{Z}$ ist bestimmt durch $u_f(\bar{e})=f(e)$, die \textit{Residualkosten} $c_f:\bar{E}\rightarrow\mathbb{Z}$ durch $c_f(\bar{e})=-c(e)$.
 
-Der \textbf{Residualgraph} $R$ ist ein Tupel $R_{N,f}=(\bar{G}=(V,E\amalg\bar{E}),\bar{f},b,\bar{c},\bar{u})$ mit dem gerichteten Multigraphen $\bar{G}$ aus der bisherigen Knotenmenge und der disjunkten Vereinigung von Kanten und Residualkanten, dem maximalen Fluss $\bar{f}$ mit $\bar{f}(e)=f(e)$ für alle $e\in E$ und $\bar{f}(\bar{e})=0$ für alle $\bar{e}\in\bar{E}$, der b-Wert-Funktion $b$ wie gehabt, der Kostenfunktion $\bar{c}=c\amalg c_f:E\amalg\bar{E}\rightarrow\mathbb{Z}$ und der Kapazitätsfunktion $\bar{u}=u\amalg u_f:E\amalg\bar{E}\rightarrow\mathbb{Z}$. 
-\end{defn}
+Der \textbf{Residualgraph} $R$ ist ein Tupel $R_{N,f}=(\bar{G}=(V,E\amalg\bar{E}),\bar{f},b,\bar{c},\bar{u})$ mit dem gerichteten Multigraphen $\bar{G}$ aus der bisherigen Knotenmenge und der disjunkten Vereinigung von Kanten und Residualkanten, dem maximalen Fluss $\bar{f}$ mit $\bar{f}(e)=f(e)$ für alle $e\in E$ und $\bar{f}(\bar{e})=0$ für alle $\bar{e}\in\bar{E}$, der b-Wert-Funktion $b$ wie gehabt, der Kostenfunktion $\bar{c}=c\amalg c_f:E\amalg\bar{E}\rightarrow\mathbb{Z}$ und der Kapazitätsfunktion $\bar{u}=u\amalg u_f:E\amalg\bar{E}\rightarrow\mathbb{Z}$.\end{defn}
 
-Erhöht man in einem Residualgraphen $R_{N,f}$ den Fluss einer Residualkante $\bar{e}$ um $0\leq\delta\leq u_f(\bar{e})$, so entspricht das der Flussreduktion der dazugehörigen Kante $e$ in $N$ um $\delta$. Nach obiger Definition ist sichergestellt, dass $f(e)-\delta\geq0$.
+\begin{nota}Mit $\varphi:E\leftrightarrow\bar{E}$ bezeichnen wir die kanonische Bijektion zwischen den Kanten und ihren Residualkanten.\end{nota}
 
-Augmentieren wir in einem Residualgraphen $R_{N,f}$ einen gerichteten Kreis $C\subseteq G$, erhöhen also für alle Kanten $e\in E(C)$ den Fluss um einen festen Betrag $\delta\in\mathbb{N}_0$, ohne Kapazitätsschranken zu verletzen, erhalten wir einen neuen maximalen Fluss $f'$ in $N$. Seine Kosten betragen $c(f')=c(f) + \delta\cdot c(C)$.
+Wenn wir uns in einem Residualgraphen $R_{N,f}$ befinden und dort den Fluss einer Residualkante $\bar{e}$ um $0\leq\delta\leq u_f(\bar{e})$ erhöhen, so wird in Wirklichkeit der Fluss $f(\varphi(\bar{e}))$ um $\delta$ reduziert. Nach obiger Definition ist sichergestellt, dass $f(\varphi(\bar{e}))-\delta\geq0$.
 
-\begin{lem}\label{negKreis}Sei $N$ eine Instanz des Transportproblems, $R_{N,f}$ ihr Residualgraph und $C$ ein Kreis in $R_{N,f}$ mit negativen Kosten. Der größte Wert $\delta$, um den $C$ augmentiert werden kann, ist endlich, und nach der Augmentierung um $\delta$ zum neuen maximalen Fluss $f'$ existiert eine Residualkante $\bar{e}\in E(C)$, sodass die korrespondierende Kante $e$ einen Fluss von $f'(e)=0$ besitzt. 
+Verändern wir den maximalen Fluss $f$ auf nur einer Kante, so ist die resultierende Abbildung $f'$ kein maximaler Fluss mehr. Deswegen werden wir stattdessen gerichtete Kreise $C$ im Residualgraph $R_{N,f}$ zu $f'$ augmentieren, das heißt, wir erhöhen den Fluss auf allen Kanten $e\in E(C)$ um einen festen Betrag $\delta\in\mathbb{N}_0$, ohne dabei Kapazitätsschranken zu verletzen. Damit ist \cref{DefMaxFlowII} für maximale Flüsse erfüllt:
+\begin{align*}
+\forall v\in V(C) :&&&\sum_{(w,v)\in E(G)} f'((w,v)) &&-\sum_{(v,w)\in E(G)} f'((v,w)) &&+ b(v) \\
+&=&&\sum_{(w,v)\in E(G)} f((w,v)) + \delta &&-\sum_{(v,w)\in E(G)} f((v,w)) - \delta &&+ b(v) = 0\end{align*}
+Somit ist $f'$ ein maximaler Fluss. Seine Kosten betragen $c(f')=c(f) + \delta\cdot c(C)$.
+
+\begin{lem}\label{negKreis}Sei $N$ eine Instanz des Transportproblems, $R_{N,f}$ ihr Residualgraph und $C$ ein gerichteter Kreis in $R_{N,f}$ mit negativen Kosten. Der größte Wert $\delta$, um den $C$ augmentiert werden kann, ist endlich, und nach der Augmentierung um $\delta$ zum neuen maximalen Fluss $f'$ existiert eine Residualkante $\bar{e}\in E(C)$, sodass die korrespondierende Kante einen Fluss von $f'(\varphi(e))=0$ besitzt. 
 \end{lem}
-\begin{proof}Sei $N=(G,b,c,u)$ ein Instanz des Transportproblems mit maximalen Fluss $f$ und $C$ ein negativer Kreis in $R_{N,f}$. Da $c:E(G)\rightarrow\mathbb{N}_0$ in die natürlichen Zahlen abbildet, enthält jeder negative Kreis in $R_{N,f}$ mindestens eine Residualkante $\bar{e}$. Damit ist $0\leq\delta\leq u_f(\bar{e})<\infty$.
+\begin{proof}Sei $N=(G,b,c,u)$ ein Instanz des Transportproblems mit maximalen Fluss $f$ und $C$ ein negativer Kreis in $R_{N,f}$. Wir setzen $\delta:=\min_{e\in E(C)}\{\bar{u}(e)-\bar{f}(e)\}$. Da $c:E(G)\rightarrow\mathbb{N}_0$ in die natürlichen Zahlen abbildet, enthält jeder negative Kreis in $R_{N,f}$ mindestens eine Residualkante $\bar{e}$. Damit ist $0\leq\delta\leq u_f(\bar{e})<\infty$.
 
-Sei nun $\delta:=\min_{e\in E(C)}\{\bar{u}(e)-\bar{f}(e)\}$ größtmöglich gewählt. Da alle Kanten $e\in E(G)$ unbeschränkte Kapazität haben und ihr Fluss $f(e)$ endlich ist, gibt es eine Residualkante $\bar{e}$ mit $u_f(\bar{e})=\delta$. Augmentiert man $C$ um $\delta$ zu einem maximalen Fluss $f'$, ist der neue Fluss auf der korrespondierenden Kante $f'(e)=f(e)-\delta=f(e)-u_f(\bar{e})=f(e)-f(e)=0$.\end{proof}
+Wir haben $\delta$ unter allen zulässigen Werten größtmöglich gewählt. Da alle Kanten $e\in E(G)$ unbeschränkte Kapazität haben und ihr Fluss $f(e)$ endlich ist, gibt es eine Residualkante $\bar{e}$ mit $u_f(\bar{e})=\delta$. Nachdem wir $C$ um $\delta$ zu einem maximalen Fluss $f'$ augmentieren, ist der neue Fluss auf der korrespondierenden Kante $e:=\varphi(\bar{e})$
+\begin{equation*}
+f'(e)=f(e)-\delta=f(e)-u_f(\bar{e})=f(e)-f(e)=0.\qedhere
+\end{equation*}\end{proof}
 
-\begin{nota}Sei $f$ ein maximaler Fluss für ein Netzwerk $(G=(V,E),b,c,u)$ und $H=(V'\subseteq V, E'\subseteq E)$ ein Teilgraph. Mit $H_f=(V',\{e\in E' | f(e) \neq 0\})$ bezeichnen wir den Graph aller durchflossenen Kanten.\end{nota}
+\begin{nota}Sei $f$ ein maximaler Fluss für ein Netzwerk $(G=(V,E),b,c,u)$ und $H=(V'\subseteq V, E'\subseteq E)$ ein Teilgraph von $G$. Mit $H_f=(V',\{e\in E' | f(e) \neq 0\})$ bezeichnen wir den Graph aller durchflossenen Kanten von $H$.\end{nota}
 
 Dank \cref{negKreis} wissen wir, dass nach maximaler Augmentierung eines negativen Kreises $C$ alle seine durchflossenen Kanten $C_f$ einen Wald bilden. Damit können wir nun zeigen, dass eine zulässige Baumlösung $(T,f)$ mit einem maximalen Fluss $f$ minimaler Kosten existiert.
 
 \begin{thm}\label{BLex}Sei $N$ eine Instanz des Transportproblems mit einem maximalen Fluss $f$. Es existiert ein maximaler Fluss $\hat{f}$, sodass $c(\hat{f})\leq c(f)$ ist und eine zulässige Baumlösung $(\hat{T},\hat{f})$ existiert.\end{thm}
 \begin{proof}Sei $N=(G,b,c,u)$ ein Instanz des Transportproblems mit maximalen Fluss $f$. Wir werden $f$ zu einem maximalen Fluss $\hat{f}$ umwandeln, sodass $G_{\hat{f}}$ ein Wald ist. Für $\hat{f}$ finden wir dann leicht eine zulässige Baumlösung. Wenn wir für die endlich vielen maximalen Zwischenflüsse $f=f_0,f_1,f_2,\ldots,f_n=\hat{f}$ sicherstellen, dass $c(f_{i+1})\leq c(f_i)$ ist, gilt auch $c(\hat{f})\leq c(f)$.
 
-Betrachte einen maximalen Fluss $f_i$. Wenn $G_{f_i}$ ein Wald ist, setzen wir $\hat{f}:=f_i$ und sind fertig. Ansonsten gibt es einen ungerichteten Kreis $C\subseteq G_{f_i}$. Betrachte die beiden dazugehörigen, gerichteten, kantendisjunkten Kreise $C_1$ und $C_2$ in $R_{N,f_i}$. Nach \cref{defRes} gilt $c(C_1)=-c(C_2)$.
+Betrachte einen maximalen Fluss $f_i$. Wenn $G_{f_i}$ ein Wald ist, setzen wir $\hat{f}:=f_i$ und sind fertig. Ansonsten gibt es einen ungerichteten Kreis $C\subseteq G_{f_i}$. Betrachte die beiden dazugehörigen, gerichteten, kantendisjunkten Kreise $C_1$ und $C_2$ in $R_{N,f_i}$. Nach \cref{defRes} gilt $c(C_1)=-c(C_2)$. Wir werden einen der Kreise so augmentieren, dass $|E(G_{f+1})|<|E(G_f)|$ ist.
 \begin{description}
 \item[Fall 1:] $c(C_1)=0$\\
 	Mindestens einer der beiden Kreise enthält eine Residualkante, sei dies \obda $C_1$. Augmentiere nun $C_1$ analog zum Beweis von \cref{negKreis} größtmöglich zu einem maximalen Fluss $f_{i+1}$. Damit ist $C\nsubseteq G_{f_{i+1}}$ und $c(f_{i+1}) = c(f_i)$.
@@ -94,9 +104,9 @@ Damit ist $G_{f_{i+1}}\subsetneq G_{f_i}$ sowie $c(f_{i+1})\leq c(f_i)$. Nach en
 
 \begin{nota}Sei $N=(G,b,c,u)$ ein Netzwerk mit maximalen Fluss $f$, $T$ ein aufspannender Baum von $G$, $R_{N,f}=(\bar{G},\bar{f},b,\bar{c},\bar{u})$ der Residualgraph und $e\in E(\bar{G})\backslash E(T)$ eine weitere Kante. Mit $C_{T,e}$ bezeichnen wir den eindeutigen Teilgraph von $T\cup\{e\}$, dessen zugrundeliegender Graph ein Kreis ist, und mit  $\bar{C}_{T,e}$ den eindeutigen gerichteten Kreis in $\bar{G}$ zu $C_{T,e}$, der $e$ enthält.\end{nota}
 
-Sei $N=(G,b,c,u)$ eine Instanz des Transportproblems. Wie beim Simplex-Algorithmus gibt es beim Netzwerk-Simplex-Algorithmus zwei Phasen. In der ersten wird eine initiale zulässige Baumlösung $(T_0,f_0)$ auf $N$ erzeugt; die beiden etablierten Vorgehensweisen werden in \cref{ch:init} beschrieben. Die Problematik einer Instanz ohne Lösung wird ebenfalls dort behandelt. Die zweite Phase iteriert folgende Vorgehensweise:
+Sei $N=(G,b,c,u)$ eine Instanz des Transportproblems. Wie beim Simplex-Algorithmus gibt es beim Netzwerk-Simplex-Algorithmus zwei Phasen. In der ersten wird eine initiale zulässige Baumlösung $(T_0,f_0)$ auf $N$ erzeugt; die beiden etablierten Vorgehensweisen werden in \cref{ch:init} beschrieben. Die Problematik einer Instanz ohne Lösung wird ebenfalls dort behandelt.
 
-Betrachte Iteration $i$ mit zulässiger Baumlösung $(T_i,f_i)$. Wähle einen negativen Kreis $\bar{C}_{T,e}$ mit $e\in E(G)\backslash E(T)$. Existiert kein solcher, beende den Algorithmus. Andernfalls augmentiere $\bar{C}_{T,e}$ größtmöglich zum maximalen Fluss $f_{i+1}$; jetzt existiert nach \cref{negKreis} eine Kante $e\neq e'\in E(C_{T,e})$ mit $f_{i+1}(e')=0$. Die neue zulässige Baumlösung sei dann $(T_{i+1}=T_i\backslash\{e'\}\cup\{e\},f_{i+1})$. Die verschiedenen Möglichkeiten zur Wahl von $e$ und $e'$ werden in \cref{ch:pivot} und \cref{ch:deg} näher beleuchtet.
+Die zweite Phase iteriert folgende Vorgehensweise: Betrachte Iteration $i$ mit zulässiger Baumlösung $(T_i,f_i)$. Wähle einen negativen Kreis $\bar{C}_{T,e}$ mit $e\in E(G)\backslash E(T)$. Existiert kein solcher, beende den Algorithmus. Andernfalls augmentiere $\bar{C}_{T,e}$ größtmöglich zum maximalen Fluss $f_{i+1}$; jetzt existiert nach \cref{negKreis} eine Kante $e\neq e'\in E(C_{T,e})$ mit $f_{i+1}(e')=0$. Die neue zulässige Baumlösung ist $(T_{i+1}=T_i\backslash\{e'\}\cup\{e\},f_{i+1})$. Die verschiedenen Möglichkeiten zur Wahl von $e$ und $e'$ werden in \cref{ch:pivot} und \cref{ch:deg} näher beleuchtet.
 
 Wir werden nun beweisen, dass der Algorithmus eine optimale Lösung des Transportproblems gefunden hat, wenn Phase 2 in Ermangelung einer geeigneten Kante $e$ beendet wird. \cref{iterierbar} ist etwas abstrakter gehalten, damit es noch mal in \cref{ch:alg2} Verwendung finden kann.
 
@@ -109,7 +119,7 @@ Wir werden nun beweisen, dass der Algorithmus eine optimale Lösung des Transpor
 \end{enumerate}
 Dann existiert ein vom Algorithmus wählbares $\bar{e}\in\bar{C}$, sodass $c(\bar{C}_{T,\bar{e}})<0$.
 \end{lem}
-\begin{proof}Seien $N$ ein Netzwerk, $(T,f)$ eine zulässige Baumlösung und $C$ mit $\bar{C}$ zwei Kreise wie gefordert. Sei $E_{\bar{C},\neg T}\subseteq E(\bar{C})$ die Menge der korrespondierenden Kanten in $\bar{C}$ von den Nichtbaumkanten $E(C)\backslash E(T)$ und $E_{\bar{C},T}=E(\bar{C})\backslash E_{\bar{C},\neg T}$ dessen Komplement. Betrachten wir zunächst den Fall, dass $E_{\bar{C},T}=\emptyset$:
+\begin{proof}Sei $N$ ein Netzwerk, $(T,f)$ eine zulässige Baumlösung und $C$ mit $\bar{C}$ zwei Kreise wie gefordert. Sei $E_{\bar{C},\neg T}\subseteq E(\bar{C})$ die Menge der korrespondierenden Kanten in $\bar{C}$ von den Nichtbaumkanten $E(C)\backslash E(T)$ und $E_{\bar{C},T}=E(\bar{C})\backslash E_{\bar{C},\neg T}$ dessen Komplement. Betrachten wir zunächst den Fall, dass $E_{\bar{C},T}=\emptyset$:
 
 \begin{figure}[!ht]\centering
 	\includestandalone{tikz_nontreecircle}
@@ -117,12 +127,13 @@ Dann existiert ein vom Algorithmus wählbares $\bar{e}\in\bar{C}$, sodass $c(\ba
 	\label{fig:NTC}
 \end{figure}
 
-Nach \cref{wählbar} gibt es für alle Kanten $e_1,\ldots,e_c\in E_{\bar{C},\neg T}=E(\bar{C})$ einen Kreis $\bar{C}_{T,e_i}$. Insbesondere existiert eine Kante $e_j$, sodass die Kosten von $\hat{C}:=\bar{C}_{T,e_j}$ folgendermaßen definiert sind:
-\begin{equation}\label{eq:CircleCost}
-c(\hat{C})=c(\bar{C})-\sum_{i\neq j} c(\bar{C}_{T,e_i})
-\end{equation}
+Nach \cref{wählbar} gibt es für alle Kanten $e_1,\ldots,e_c\in E_{\bar{C},\neg T}=E(\bar{C})$ einen Kreis $\bar{C}_{T,e_i}$. Wie \cref{fig:NTC} veranschaulicht, können wir einen Kreis $\bar{C}_{T,e_i}$ erzeugen, indem wir $\bar{C}$ für alle $j\neq i$ um die Kreise $\bar{C}_{T,e_j}$ invertiert augmentieren. Damit gilt für die Kosten:
+\begin{align}
+&&c(\bar{C}_{T,e_i})&=c(\bar{C})-\sum_{j\neq i} c(\bar{C}_{T,e_j})&&\nonumber\\
+\Leftrightarrow&&\sum_{i=1}^{c} c(\bar{C}_{T,e_i})&=c(\bar{C})&&\label{eq:CircleCost}
+\end{align}
 
-Die Existenz von $\hat{C}$ wird von \cref{fig:NTC} veranschaulicht und liegt darin begründet, dass $T$ sonst nicht kreisfrei wäre. Sollte einer der Kreise $\bar{C}_{T,e_i}$ für $i\neq j$ negative Kosten aufweisen, ist die Aussage direkt gezeigt. Andernfalls besitzt $\hat{C}$ nach \cref{eq:CircleCost} negative Kosten und ist der gesuchte Kreis.
+Nach \cref{eq:CircleCost} muss mindestens ein Kreis $\bar{C}_{T,e_i}$ negative Kosten besitzen, da $c(\bar{C})<0$ ist. Mittels dieses Kreises ist die Aussage gezeigt.
 
 Kommen wir zum Fall $E_{\bar{C},T}\neq\emptyset$. Da $T$ ein Baum ist, ist $E_{\bar{C},\neg T}\neq\emptyset$. Sollte $|E_{\bar{C},\neg T}|=1$ sein, ist $\bar{C}$ der gesuchte Kreis. Ansonsten werden wir $\bar{C}$ iterativ derart zu einem Kreis $\hat{C}$ verändern, dass $E_{\hat{C},\neg T}\subseteq E_{\bar{C},\neg T}$ und $|E_{\hat{C},\neg T}|=1$. Besitzt $\hat{C}$ negative Kosten, sind wir wieder fertig, andernfalls werden wir zwischendurch bereits einen negativen Kreis $\bar{C}_{T,e}$ mit $e\in E_{\bar{C},\neg T}$ gefunden haben.
 
@@ -141,6 +152,8 @@ Sollte $c(\tilde{C})<0$ sein, ist $\tilde{C}$ nach \cref{wählbar} der gesuchte 
 \end{align*}
 
 Damit können wir $\bar{C}:=C_1$ setzen. In letzteren beiden Fällen ist $|E_{\bar{C},\neg T}|$ im Vergleich zum Anfang der Iteration echt kleiner geworden. Wir iterieren weiter, bis $|E_{\bar{C},\neg T}|=1$ ist. Dann ist $\hat{C}:=\bar{C}$ der gesuchte Kreis.\end{proof}
+
+TODO Zirkulation einführen + einfaches Lemma zeigen
 
 \begin{thm}\label{opt}Sei $N$ eine Instanz des Transportproblems mit einer zulässigen Baumlösung $(T,f)$. Existiert kein negativer Kreis $\bar{C}_{T,e}$, so ist $f$ eine optimale Lösung.\end{thm}
 \begin{proof}Wir werden zeigen, dass ein negativer Kreis $\bar{C}_{T,e}$ existiert, wenn die betrachtete zulässige Baumlösung $(T,f)$ nicht optimal ist. Dazu finden wir einen gerichteten negativen Kreis, für den wir \cref{iterierbar} anwenden können.
@@ -252,7 +265,7 @@ Die in \cref{TreeUnique} bewiesene Eindeutigkeit von $f$ gilt nun nicht mehr (si
 
 Wir werden jetzt \cref{negKreis,BLex,opt,TP} auf das Min-Cost-Flow-Problem erweitern.
 
-\begin{lem}\label{negKreis2}Sei $N$ ein Netzwerk, $R_{N,f}$ sein Residualgraph und $C$ ein Kreis in $R_{N,f}$ mit negativen Kosten. Der größte Wert $\delta$, um den $C$ augmentiert werden kann, ist endlich, und nach der Augmentierung um $\delta$ zum neuen maximalen Fluss $f'$ existiert eine Residualkante $\bar{e}\in E(C)$, deren korrespondierende Kante $e$ einen Fluss von $f'(e)=0$ besitzt, oder eine Kante $e\in E(C)\cap E(G)$ mit $f'(e)=u(e)$.\end{lem}
+\begin{lem}\label{negKreis2}Sei $N$ ein Netzwerk, $R_{N,f}$ sein Residualgraph und $C$ ein gerichteter Kreis in $R_{N,f}$ mit negativen Kosten. Der größte Wert $\delta$, um den $C$ augmentiert werden kann, ist endlich, und nach der Augmentierung um $\delta$ zum neuen maximalen Fluss $f'$ existiert eine Residualkante $\bar{e}\in E(C)$, deren korrespondierende Kante $e$ einen Fluss von $f'(e)=0$ besitzt, oder eine Kante $e\in E(C)\cap E(G)$ mit $f'(e)=u(e)$.\end{lem}
 \begin{proof}Sei $N=(G,b,c,u)$ ein Netzwerk mit maximalen Fluss $f$ und $C$ ein negativer Kreis in $R_{N,f}$. $\delta$ ist analog zum Beweis von \cref{negKreis} endlich.
 	
 Sei nun $\tilde{e}:=\argmin_{e\in E(C)}\{\bar{u}(e)-\bar{f}(e)\}$ und $\delta:=\bar{u}(\tilde{e})-\bar{f}(\tilde{e})$ größtmöglich gewählt. Ist $\tilde{e}$ eine Residualkante, so besitzt die korrespondierende Kante $e$ einen Fluss von
