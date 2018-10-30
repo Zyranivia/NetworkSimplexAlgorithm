@@ -22,9 +22,13 @@
 \usepackage[hidelinks]{hyperref}
 % or colorlinks
 \usepackage{mathtools}
+\usepackage{mathrsfs}
 \usepackage{amsmath}
 \usepackage{amsthm}
 \usepackage{amssymb}
+% restate a theorem
+\usepackage{thmtools}
+\usepackage{thm-restate}
 % in between the refs to suppress warning
 \DeclareMathOperator*{\argmin}{arg\,min}
 \DeclareMathOperator*{\argmax}{arg\,max}
@@ -54,7 +58,8 @@
     basicstyle=\ttfamily,
     keywordstyle=\color{blue}\ttfamily,
     commentstyle=\color{gray}\ttfamily,
-    morekeywords={size_t, intmax_t, uintmax_t}
+    morekeywords={size_t, intmax_t, uintmax_t},
+    deletekeywords={delete}
 }
 
 \crefname{thm}{Theorem}{Theoreme}

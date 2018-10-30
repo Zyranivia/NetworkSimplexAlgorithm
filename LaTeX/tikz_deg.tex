@@ -12,20 +12,20 @@
 	  (2, 2) node[circle, draw, text width=0.5cm] (v2) {$-1$}
 	  (0, 2) node[circle, draw, text width=0.5cm] (v3) {$1$};
 	  
-\draw[densely dotted, ->] (v0) to node [below] {\tiny\textcolor{blue}{1},\textcolor{red}{$1$}} (v1);
+\draw[dashed, ->] (v0) to node [below] {\tiny\textcolor{blue}{1},\textcolor{red}{$1$}} (v1);
 \draw[->] (v1) to node [right] {\tiny\textcolor{blue}{0},\textcolor{red}{$2$}} (v2);
-\draw[densely dotted, ->] (v3) to node [above] {\tiny\textcolor{blue}{1},\textcolor{red}{$4$}} (v2);
+\draw[dashed, ->] (v3) to node [above] {\tiny\textcolor{blue}{1},\textcolor{red}{$4$}} (v2);
 \draw[->] (v3) to node [left] {\tiny\textcolor{blue}{0},\textcolor{red}{$0$}} (v0);
-\draw[densely dotted, ->] (v1) to node [sloped, anchor=center, above] {\tiny\textcolor{blue}{0},\textcolor{red}{$0$}} (v3);
+\draw[dashed, ->] (v1) to node [sloped, anchor=center, above] {\tiny\textcolor{blue}{0},\textcolor{red}{$0$}} (v3);
 
 \path (5, 0) node[circle, draw, text width=0.5cm] (v4) {$1$}
 	  (7, 0) node[circle, draw, text width=0.5cm] (v5) {$-1$}
 	  (7, 2) node[circle, draw, text width=0.5cm] (v6) {$-1$}
 	  (5, 2) node[circle, draw, text width=0.5cm] (v7) {$1$};
 
-\draw[densely dotted, ->] (v4) to node [below] {\tiny\textcolor{blue}{1},\textcolor{red}{$1$}} (v5);
-\draw[densely dotted, ->] (v5) to node [right] {\tiny\textcolor{blue}{0},\textcolor{red}{$2$}} (v6);
-\draw[densely dotted, ->] (v7) to node [above] {\tiny\textcolor{blue}{1},\textcolor{red}{$4$}} (v6);
+\draw[dashed, ->] (v4) to node [below] {\tiny\textcolor{blue}{1},\textcolor{red}{$1$}} (v5);
+\draw[dashed, ->] (v5) to node [right] {\tiny\textcolor{blue}{0},\textcolor{red}{$2$}} (v6);
+\draw[dashed, ->] (v7) to node [above] {\tiny\textcolor{blue}{1},\textcolor{red}{$4$}} (v6);
 \draw[->] (v7) to node [left] {\tiny\textcolor{blue}{0},\textcolor{red}{$0$}} (v4);
 \draw[->] (v5) to node [sloped, anchor=center, above] {\tiny\textcolor{blue}{0},\textcolor{red}{$0$}} (v7);
 
@@ -34,10 +34,10 @@
 	  (12, 2) node[circle, draw, text width=0.5cm] (v10) {$-1$}
 	  (10, 2) node[circle, draw, text width=0.5cm] (v11) {$1$};
 
-\draw[densely dotted, ->] (v8) to node [below] {\tiny\textcolor{blue}{2},\textcolor{red}{$1$}} (v9);
-\draw[densely dotted, ->] (v9) to node [right] {\tiny\textcolor{blue}{1},\textcolor{red}{$2$}} (v10);
+\draw[dashed, ->] (v8) to node [below] {\tiny\textcolor{blue}{2},\textcolor{red}{$1$}} (v9);
+\draw[dashed, ->] (v9) to node [right] {\tiny\textcolor{blue}{1},\textcolor{red}{$2$}} (v10);
 \draw[->] (v11) to node [above] {\tiny\textcolor{blue}{0},\textcolor{red}{$4$}} (v10);
-\draw[densely dotted, ->] (v11) to node [left] {\tiny\textcolor{blue}{1},\textcolor{red}{$0$}} (v8);
+\draw[dashed, ->] (v11) to node [left] {\tiny\textcolor{blue}{1},\textcolor{red}{$0$}} (v8);
 \draw[->] (v9) to node [sloped, anchor=center, above] {\tiny\textcolor{blue}{0},\textcolor{red}{$0$}} (v11);
 \end{tikzpicture}
 \end{document}
