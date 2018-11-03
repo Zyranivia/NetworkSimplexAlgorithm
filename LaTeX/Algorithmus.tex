@@ -8,11 +8,11 @@ Wir werden nur endliche Graphen betrachten. Außerdem werden alle Graphen einfac
 \begin{anm}Knoten mit positivem b-Wert werden als \emph{Quellen}, solche mit negativem als \emph{Senken} bezeichnet. Knoten mit neutralem b-Wert werden \emph{Transitknoten} genannt. Ein ungerichteter Graph kann durch das Verwandeln jeder Kante $\{v,w\}$ in zwei Kanten $(v,w)$ und $(w,v)$ zu einem gerichteten modifiziert werden.\end{anm}
 
 \begin{defn}\label{DefMaxFlow}Ein \textbf{maximaler Fluss} auf einem Netzwerk $(G=(V,E),b,c,u)$ ist eine Abbildung $f \colon E\rightarrow\mathbb{R}_{\geq 0}$, die folgende Eigenschaften erfüllt:
-\begin{align}
-&\text{(i)}&&\forall e\in E \colon f(e)\leq u(e)\nonumber\\
-&\text{(ii)}&&\forall v\in V \colon \sum_{\mathclap{(w,v)\in E}} f((w,v)) - \sum_{\mathclap{(v,w)\in E}} f((v,w)) + b(v) = 0\label{DefMaxFlowII}
-\end{align}
-Die \emph{Kosten} von $f$ betragen $c(f) = \sum\limits_{e\in E} f(e)\cdot c(e)$.
+\begin{alignat}{3}
+&\text{(i)}\quad&&\forall e\in E &&\colon f(e)\leq u(e)\nonumber\\
+&\text{(ii)}\quad&&\forall v\in V &&\colon \sum_{\mathclap{(w,v)\in E}} f((w,v)) - \sum_{\mathclap{(v,w)\in E}} f((v,w)) + b(v) = 0\label{DefMaxFlowII}
+\end{alignat}
+Die \emph{Kosten} von $f$ betragen $c(f) = \sum\limits_{\mathclap{e\in E}} f(e)\cdot c(e)$.
 \end{defn}
 
 \begin{defn}Sei $N=(G,b,c,u)$ ein Netzwerk. Als \textbf{Min-Cost-Flow-Problem} bezeichnen wir die Suche nach einem maximalen Fluss $f$ auf $N$ mit minimalen Kosten. Die vereinfachte Version, bei der die Kapazitätsfunktion unbeschränkt ist, also $u(e)=\infty$ für alle $e\in E(G)$ gilt, nennen wir \textbf{Transportproblem}.\end{defn}
@@ -150,23 +150,23 @@ Kommen wir zum Fall $E_{\bar{C},T}\neq\emptyset$. Da $T$ ein Baum ist, ist auch 
 Betrachte einen Iterationsschritt mit negativen Kreis $\bar{C}$, sodass $|E_{\bar{C},\neg T}|>1$ gilt. Sei $e=(x,y)\in E_{\bar{C},\neg T}$ eine beliebige Nichtbaumkante. Wir betrachten nun den Kreis $\tilde{C}:=\bar{C}_{T,e}=y\xrightarrow{T}x\cup\{(x,y)\}$ und den Kantenzug $W:=x\xrightarrow{T}y\xrightarrow{\bar{C}-\{e\}}x$. Letzterer zerfällt bereinigt um in beide Richtungen begangene Kanten in kantendisjunkte Kreise $C_1,\ldots,C_c$ mit $c(W)=\sum_{i=1}^{c} c(C_i)$. \Obda sei die Kante $e$ in $C_1$ enthalten.
 
 Sollten die Kosten $c(\tilde{C})<0$ negativ sein, ist $\tilde{C}$ nach \cref{wählbar} der gesuchte Kreis. Ist einer der Kreise $C_2,\ldots,C_c$ negativ, ersetzen wir $\bar{C}$ durch diesen Kreis. Andernfalls gilt für den Kreis $C_1$:
-\begin{align*}
-|E_{C_1,\neg T}|&<|E_{\bar{C},\neg T}| \\
-c(C_1)&=c(\bar{C})-c(\tilde{C})-\sum_{i=2}^{c}c(C_i)\leq c(\bar{C})<0
-\end{align*}
+\begin{alignat*}{2}
+&\text{(i)}\quad&&|E_{C_1,\neg T}|<|E_{\bar{C},\neg T}|\\
+&\text{(ii)}\quad&&c(C_1)=c(\bar{C})-c(\tilde{C})-\sum_{i=2}^{c}c(C_i)\leq c(\bar{C})<0
+\end{alignat*}
 
 Damit können wir $\bar{C}:=C_1$ setzen. In beiden Fällen ist $|E_{\bar{C},\neg T}|$ im Vergleich zum Anfang der Iteration echt kleiner geworden. Wir iterieren weiter, bis $|E_{\bar{C},\neg T}|=1$ ist; dann ist $\hat{C}:=\bar{C}$ der gesuchte Kreis.\end{proof}
 
 Um unser gewünschtes \cref{opt} zu zeigen, genügt es, einen negativen Kreis gemäß \cref{iterierbar} zu finden. Dafür werden wir den Begriff der Zirkulation einführen und den Zusammenhang zwischen maximalen Flüssen und Zirkulationen herstellen.
 
 \begin{defn}\label{zirk}Sei $R_{N,f}= (\bar{G},\bar{f},b,\bar{c},\bar{u})$ ein Residualgraph. Eine \textbf{Zirkulation} auf $R_{N,f}$ ist eine Abbildung $z \colon E(\bar{G})\rightarrow\mathbb{N}_{\geq0}$, die folgende Eigenschaften erfüllt:
-\begin{align}
-&\text{(i)}&&\forall e\in E(\bar{G}) \colon z(e)\leq \bar{u}(e)\label{zirkI}\\
-&\text{(ii)}&&\forall v\in V(\bar{G}) \colon \sum_{\mathclap{(w,v)\in E(\bar{G})}} z((w,v)) - \sum_{\mathclap{(v,w)\in E(\bar{G})}} z((v,w)) + b(v) = b(v)\label{zirkII}
-\end{align}
-Die \emph{Kosten} von $z$ betragen $c(z) = \sum\limits_{e\in E(\bar{G})} z(e)\cdot \bar{c}(e)$.
+\begin{alignat}{3}
+&\text{(i)}\quad&&\forall e\in E(\bar{G}) &&\colon z(e)\leq \bar{u}(e)\label{zirkI}\\
+&\text{(ii)}\quad&&\forall v\in V(\bar{G}) &&\colon \sum_{\mathclap{(w,v)\in E(\bar{G})}} z((w,v)) - \sum_{\mathclap{(v,w)\in E(\bar{G})}} z((v,w)) + b(v) = b(v)\label{zirkII}
+\end{alignat}
+Die \emph{Kosten} von $z$ betragen $c(z) = \sum\limits_{\mathclap{e\in E(\bar{G})}} z(e)\cdot \bar{c}(e)$.
 \end{defn}
-\begin{anm}Zirkulationen sind an sich für beliebige gerichtete Graphen mit einer Kapazitätsfunktion definiert, für unsere Zwecke genügt die obige Version. Die Notation für den Graph aller durchflossenen Kanten überträgt sich.\end{anm}
+\begin{anm}Zirkulationen sind an sich für beliebige gerichtete Graphen mit einer Kapazitätsfunktion definiert, für unsere Zwecke genügt die obige Version. Die Notation für den Graph der durchflossenen Kanten überträgt sich.\end{anm}
 
 \begin{lem}\label{zerl}Für jede Zirkulation $z$ gibt es eine endliche Menge von gerichteten Kreisen $\{C_1,\ldots,C_n\}$, sodass für Faktoren $\lambda_1,\ldots,\lambda_n\in\mathbb{N}$ die Kosten $c(z) = \sum_{i=1}^{n} \lambda_i\cdot c(C_i)$ zerfallen.\end{lem}
 \begin{proof}Sei $R_{N,f}= (\bar{G},\bar{f},b,\bar{c},\bar{u})$ ein Residualgraph und $z$ eine Zirkulation. Wir führen eine Induktion über die Gesamtmenge Fluss $\sigma_z:=\sum_{e\in E(\bar{G})}z(e)$ der Zirkulation durch. Ist $\sigma_z=0$, so erfüllt die leere Menge das Lemma.
@@ -200,9 +200,8 @@ Diese Teilaussage gilt also. Nun überprüfen wir, ob $z$ alle Eigenschaften wie
 \begin{equation*}z(e)=\max\{\hat{f}(e)-f(e),0\}\leq\hat{f}(e)\leq u(e)=\bar{u}(e),\end{equation*}
 für Residualkanten $\bar{e}\in \bar{E}$ gilt
 \begin{equation*}z(\bar{e})=\max\{f(\varphi(\bar{e}))-\hat{f}(\varphi(\bar{e})),0\}\leq f(\varphi(\bar{e}))\leq u_f(\bar{e})\leq \bar{u}(e).\end{equation*}
-\cref{zirkI} ist also erfüllt.
 
-Damit bleibt zu zeigen, dass sich der Fluss von $z$ für alle Knoten $v\in V(\bar{G})$ gemäß \cref{zirkII} ausgleicht:
+\cref{zirkI} ist also gegeben. Damit bleibt zu zeigen, dass sich der Fluss von $z$ für alle Knoten $v\in V(\bar{G})$ gemäß \cref{zirkII} ausgleicht:
 \begin{align*}&\sum_{\mathclap{(w,v)\in E\amalg\bar{E}}} z((w,v)) - \sum_{\mathclap{(v,w)\in E\amalg\bar{E}}} z((v,w)) + b(v)\\
 ={}&\sum_{\mathclap{(w,v)\in E}} \Big(\hat{f}((w,v)) -  f((w,v))\Big) -  \sum_{\mathclap{(v,w)\in E}} \Big(\hat{f}((v,w)) - f((v,w))\Big) + b(v)\\
 ={}&b(v)-b(v)+b(v)=b(v)\end{align*}
@@ -247,7 +246,7 @@ TODO: An dieser Stelle folgt ein Absatz, der erklärt, wie genau die ausgehende 
 Die Laufzeit des Netzwerk-Simplex-Algorithmus ist bislang ungeklärt. Für bestimmte Varianten wurden exponentielle Instanzen gefunden, die auf \emph{Stalling} basieren, also einer exponentiellen Anzahl degenerierter Iterationen. Mit diesen werden wir uns in \cref{ch:lit} näher befassen. Meine eigene, experimentelle Suche nach schlechten Instanzen findet sich in \cref{ch:erg}. Zunächst vervollständigen wir den Algorithmus um die Wahl des negativen Kreises $\bar{C}_{T,e}$ und die Erzeugung einer initialen Baumlösung.
 
 \subsection{Pivotalgorithmen}\label{ch:pivot}
-Sei $N=(G,b,c,u)$ ein Netzwerk mit zulässiger Baumlösung $(T,f)$. Algorithmen, die aus der Menge $\bar{C}_T=\{\bar{C}_{T,e}\mid c(\bar{C}_{T,e})<0)\}$ aller möglichen Iterationen eine auswählen, heißen \emph{Pivotalgorithmen}. In der Praxis wird der Pivotalgorithmus nur auf einer Teilmenge von $\bar{C}_T$ ausgeführt, um Rechenzeit zu sparen. In dieser Bachelorarbeit werden nur drei naheliegende, einfache Pivotalgorithmen betrachtet.
+Sei $N=(G,b,c,u)$ ein Netzwerk mit zulässiger Baumlösung $(T,f)$. Algorithmen, die aus der Menge $\bar{C}_T=\{\bar{C}_{T,e}\mid c(\bar{C}_{T,e})<0\}$ aller sinnvollen Iterationen eine auswählen, heißen \emph{Pivotalgorithmen}. In der Praxis wird der Pivotalgorithmus nur auf einer Teilmenge von $\bar{C}_T$ ausgeführt, um Rechenzeit zu sparen. In dieser Bachelorarbeit werden nur drei naheliegende, einfache Pivotalgorithmen betrachtet.
 
 \subsubsection{Maximum Value}
 Der erste Ansatz ist es, den negativsten Kreis zu wählen, sprich \begin{equation*}
@@ -259,8 +258,8 @@ Diesen Weg werden wir mit \emph{MaxVal} bezeichnen.
 \subsubsection{Maximum Revenue}
 Die Kostenverringerung nach der Augmentierung beträgt $\delta\cdot c(\bar{C}_{T,e})$, ist also von $\delta$ abhängt. Der Pivotalgorithmus \emph{MaxRev} maximiert diesen Wert:
 \begin{flalign*}
-&&\tilde{C}:=\argmin_{\bar{C}_{T,e}\in\bar{C}_T} \{\delta_e\cdot c(\bar{C}_{T,e})\}
-&&\delta_e:=\min_{e'\in E(\bar{C}_{T,e})}\{\bar{u}(e')-\bar{f}(e')\}
+&&\tilde{C}:=\argmin_{\bar{C}_{T,e}\in\bar{C}_T} \{\delta_e\cdot c(\bar{C}_{T,e})\},
+&&\text{wobei }\delta_e:=\min_{e'\in E(\bar{C}_{T,e})}\{\bar{u}(e')-\bar{f}(e')\}
 \end{flalign*}
 
 Nach \cref{negKreis} ist jedes $\delta_e$ endlich. Sollten nur degenerierte Iterationen zur Auswahl stehen, ist $c(\tilde{C})=0$. In dem Fall wendet meine konkrete Implementierung MaxVal an; hier sind aber auch andere Strategien denkbar.
