@@ -111,9 +111,9 @@ public:
 };
 \end{lstlisting}
 
-Die Funktionen \lstinline|deleteEdge| und \lstinline|deleteNode| schlagen fehl, wenn auf den zu löschenden Kanten noch Fluss ist. So kann unter anderem durch Löschen des künstlichen Knotens überprüft werden, ob die Instanz lösbar ist. Für Phase 1 des Algorithmus nutzen wir die Funktion \lstinline|addFlow|, die einen Weg von einer Quelle zu einer Senke verlangt und somit sicherstellt, dass $\sum_{v\in V(G)} b(v)$ bei unveränderter Knotenmenge gleichbleibt.
+Die Funktionen \lstinline|deleteEdge| und \lstinline|deleteNode| schlagen fehl, wenn auf den zu löschenden Kanten noch Fluss ist. So kann unter anderem durch Löschen des künstlichen Knotens überprüft werden, ob die Instanz lösbar ist. Für Phase 1 des Algorithmus nutzen wir die Funktion \lstinline|addFlow|, die einen Weg von einer Quelle zu einer Senke verlangt.
 
-\lstinline|changeFlow| wird in jeder Iteration der zweiten Phase des Netzwerk-Simplex-Algorithmus aufgerufen und augmentiert den übergebenen Kreis \lstinline|Circle c| um einen beliebigen Wert, sofern dies möglich ist. Die hier genutzte \lstinline|class Circle| werden wir uns nun genauer anschauen.
+\lstinline|changeFlow| wird in jeder Iteration der zweiten Phase des Netzwerk-Simplex-Algorithmus aufgerufen und augmentiert den übergebenen Kreis \lstinline|Circle c| um einen beliebigen Wert, sofern dies möglich ist. Dieser Wert wird analog zur $\delta$ aus \cref{ch:NSA} der größte zulässige sein. Die hier genutzte \lstinline|class Circle| werden wir uns nun genauer anschauen.
 
 \section{Die Klasse \emph{Circle}}
 Magie des updaten
