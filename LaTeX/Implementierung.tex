@@ -49,7 +49,7 @@ private:
 Die Funktion \lstinline|changeFlow| stellt über die Hilfsfunktion \lstinline|changeFlowPossible| sicher, dass bei einer Flussveränderung keine Kapazitätsschranken verletzt werden. Mittels \lstinline|toggleCost| können die Kosten einer Kante zwischen Null und ihrem eigentlichen Wert variiert werden. Somit lässt sich leicht die in \cref{ch:init} beschriebene Low-Cost-Initialisierung umsetzen, siehe dazu \cref{HCLC}.
 
 \subsection{Graph}\label{ch:graph}
-Werfen wir einen Blick darauf, wie die Knoten und Kanten in einem Netzwerk gespeichert werden. Ich habe mich dafür entschieden, die Objekte für eine logarithmische Laufzeit von \lstinline|find|, \lstinline|insert| sowie \lstinline|delete| in einer \lstinline|std::map| abzulegen. Die Knoten werden durch ihre \lstinline|size_t id| identifiziert, Kanten durch Anfangsknoten, Endknoten und die \lstinline|bool isResidual|. Ein \lstinline|std::set| benötigt einen Vergleichsoperator, daher habe ich für die Kanten \lstinline|custComp| definiert, das nach \lstinline|size_t node0|, \lstinline|size_t node1| und zuletzt \lstinline|bool isResidual| vergleicht.
+Werfen wir einen Blick darauf, wie die Knoten und Kanten in einem Netzwerk gespeichert werden. Ich habe mich dafür entschieden, die Objekte für eine logarithmische Laufzeit von \lstinline|find|, \lstinline|insert| sowie \lstinline|delete| in einer \lstinline|std::map| abzulegen. Die Knoten werden durch ihre \lstinline|size_t id| identifiziert, Kanten wiederum durch Anfangsknoten, Endknoten und die \lstinline|bool isResidual|. Eine \lstinline|std::map| benötigt einen Vergleichsoperator, daher habe ich für die Kanten \lstinline|custComp| definiert, das nach \lstinline|size_t node0|, \lstinline|size_t node1| und zuletzt \lstinline|bool isResidual| vergleicht.
 
 \begin{lstlisting}
 class Network {
@@ -111,18 +111,18 @@ public:
 };
 \end{lstlisting}
 
-Die Funktionen \lstinline|deleteEdge| und \lstinline|deleteNode| schlagen fehl, wenn auf den zu löschenden Kanten noch Fluss ist. So kann unter anderem durch Löschen des künstlichen Knotens überprüft werden, ob die Instanz lösbar ist. Für Phase 1 des Algorithmus nutzen wir die Funktion \lstinline|addFlow|, die einen Weg von einer Quelle zu einer Senke verlangt.
+Die Funktionen \lstinline|deleteEdge| und \lstinline|deleteNode| schlagen fehl, wenn auf den zu löschenden Kanten noch Fluss ist. So kann unter anderem durch Löschen des künstlichen Knotens überprüft werden, ob die Instanz lösbar ist. Für Phase 1 des Algorithmus (siehe \cref{HCLC}) nutzen wir die Funktion \lstinline|addFlow|, die einen Weg von einer Quelle zu einer Senke verlangt.
 
 \lstinline|changeFlow| wird in jeder Iteration der zweiten Phase des Netzwerk-Simplex-Algorithmus aufgerufen und augmentiert den übergebenen Kreis \lstinline|Circle c| um einen beliebigen Wert, sofern dies möglich ist. Dieser Wert wird analog zur $\delta$ aus \cref{ch:NSA} der größte zulässige sein. Die hier genutzte \lstinline|class Circle| werden wir uns nun genauer anschauen.
 
 \section{Die Klasse \emph{Circle}}
-Sei $G$ ein gerichteter Graph mit $n$ Knoten sowie $m$ Kanten und $T$ ein aufspannender Baum von $G$. In der Herleitung des Algorithmus haben wir genutzt, dass für eine Kante $e\in E(G)\backslash E(T)$ außerhalb des Baumes der Kreis $C_{T,e}$ eindeutig ist. Ein Kreis $C_{T,e}$ lässt sich in Laufzeit $\bigO(n)$ berechnen, womit wir pro Iteration bei einer Komplexität von $\bigO(n\cdot(m-n)\cdot \text{poly}(n,m))$\footnotemark{} für Laufzeit $\text{poly}(n,m)$ des Pivotalgorithmus sind.
+Sei $G$ ein gerichteter Graph mit $n$ Knoten sowie $m$ Kanten und $T$ ein aufspannender Baum von $G$. In der Herleitung des Algorithmus haben wir genutzt, dass für eine Kante $e\in E(G)\backslash E(T)$ außerhalb des Baumes der Kreis $C_{T,e}$ eindeutig ist. Ein Kreis $C_{T,e}$ lässt sich beispielsweise per Tiefensuche in Laufzeit $\bigO(n)$ berechnen, womit wir pro Iteration bei einer Komplexität von $\bigO(n\cdot(m-n)\cdot \text{poly}(n,m))$\footnotemark{} für Laufzeit $\text{poly}(n,m)$ des Pivotalgorithmus sind.
 
 \footnotetext{Wie in \cref{ch:pivot} erwähnt, betrachten wir Pivotalgorithmen, die sämtliche Kreise in ihre Entscheidung einbeziehen.}
 
 Im Normalfall verändern sich von einer Iteration auf die nächste nur ein Bruchteil der Kreise. Diese lassen sich jedoch schlecht herausfiltern, wenn nur die Veränderung der zulässigen Baumlösung betrachtet wird. Daher habe ich mich entschieden, nach \cite{betreuer} nicht den Baum abzuspeichern, sondern alle Kreise. Die Klasse \lstinline|class Circle| speichert gerichtete Kreise als zwei Vektoren (\lstinline|std::vector|), die Kanten wie gehabt über Anfangsknoten, Endknoten und die \lstinline|bool isResidual| identifizieren. Außerdem speichern sie ihre jeweiligen Werte für $\delta$ und $c(\bar{C}_{T,e})$; diese müssen jedoch vom Algorithmus gesetzt werden.
 
-Nicht explizit in der Klassendeklaration schlägt sich die Invariante nieder, dass im Verlauf des Algorithmus jeder Kreis durch die erste Kante als einzige Nichtbaumkante spezifiziert wird.
+Nicht explizit in der Klassendeklaration schlägt sich die Invariante nieder, dass im Verlauf des Algorithmus jeder \lstinline|Circle| durch die erste Kante als einzige Nichtbaumkante spezifiziert wird.
 
 \begin{lstlisting}[escapechar=ß]
 //first edge of edges is not part of the underlying tree
@@ -148,7 +148,7 @@ Bevor wir uns die Umsetzung anschauen, überlegen wir uns theoretisch, was die K
     \label{fig:circles}
 \end{figure}
 
-Der Algorithmus wird nun $e_i$ zum neuen Baum $T'$ hinzufügen und eine ausgehende Kante $e_i\neq e'\in E(C_{T,e_1})$ wählen, die dafür entfernt wird. Zunächst halten wir fest, dass es vor der Iteration keinen weiteren Fall als die beiden aus \cref{fig:circles} geben kann: Wären $e_1$ und $e_2$ im Schnitt der ungerichteten Kreise $E(C_{T,e_1})\cap E(C_{T,e_2})$ enthalten, dann wäre $T$ nicht kreisfrei.
+Der Algorithmus wird nun $e_1$ zum neuen Baum $T'$ hinzufügen und eine ausgehende Kante $e_1\neq e'\in E(C_{T,e_1})$ wählen, die dafür entfernt wird. Zunächst halten wir fest, dass es vor der Iteration keinen weiteren Fall als die beiden aus \cref{fig:circles} geben kann: Wären $e_1$ und $e_2$ im Schnitt der ungerichteten Kreise $E(C_{T,e_1})\cap E(C_{T,e_2})$ enthalten, dann wäre $T$ nicht kreisfrei.
 
 Für den neuen ungerichteten Kreis gilt $C_{T',e'}=C_{T,e_1}$, zur Beibehaltung der Invariante muss \lstinline|class Circle| die gespeicherten Kanten rotieren. Für die Konstellation, dass $e_1$ im Gegensatz zu $e'$ nicht saturiert ist oder vice versa ändert sich zusätzlich die Richtung von $\bar{C}_{T',e'}$ im Vergleich zu $\bar{C}_{T,e_1}$. All dies leistet die Funktion \lstinline|Circle::rotateBy|:
 
@@ -172,25 +172,43 @@ void Circle::rotateBy (size_t index, bool toReverse) {
 }
 \end{lstlisting}
 
-Der einfache Fall a) aus \cref{fig:circles} ist damit abgehandelt, da $C_2$ unverändert bleibt. Die gilt ebenfalls für Fall b), insofern $e'\notin E(C_{T,e_1})\cap E(C_{T,e_2})$. Andernfalls TODO XOR der ungerichteten Kreis, Orientierung ergibt sich (Bild tikzen!)!
+Der einfache Fall a) aus \cref{fig:circles} ist damit abgehandelt, da $C_2$ unverändert bleibt. Dies gilt ebenfalls für Fall b), insofern $e'\notin E(C_{T,e_1})\cap E(C_{T,e_2})$. Andernfalls wird, wie \cref{fig:bypass} veranschaulicht, $C_{T',e_2}$ nun $e_1$ oder $\varphi(e_1)$ statt $e'$ enthalten.
 
-\newpage
-\begin{lstlisting}[basicstyle=\small]
+\begin{figure}[!ht]\centering
+    \includestandalone{tikz_circlesbypass}
+    \caption{Ursprünglich sind $e_1$ und $e_2$ Nichtbaumkanten, die Orientierung von $e_1$ und $e'$ ist irrelevant. Der Kreis $\bar{C}_{T,e_2}$ geht von $x$ über $e_2$ nach $y$ (schwarze Kanten) zurück nach $x$ über $e'$ oder $\varphi(e')$ (rote Kanten). Im neuen Baum $T'$, der statt $e_1$ die Kante $e'$ enthält, führt $\bar{C}_{T',e_2}$ nun von $y$ nach $x$ über $e_1$ oder $\varphi(e_2)$ (blaue Kanten).}
+    \label{fig:bypass}
+\end{figure}
+
+Sei $W:=E(C_{T,e_1})\cap E(C_{T,e_2})$ der Schnitt der beiden ungerichteten Kreise unter $T$. Dann gilt:
+\begin{align}E(C_{T',e_2})&=\big(E(C_{T,e_2})\backslash W\big)\cup\big(E(C_{T,e_1})\backslash W\big)\nonumber\\
+&=\big(E(C_{T,e_1})\cup E(C_{T,e_2})\big)\backslash W\label{eq:XOR}\end{align}
+
+Gemäß \cref{eq:XOR} lässt sich also nach einer Iteration vom aufspannenden Baum $T$ zu $T'=T-\{e_1\}+\{e'\}$ die Kantenmenge jedes weiteren ungerichteten Kreises $C_{T,e_i}$ mit $i\neq1$  aktualisieren, indem wir eine XOR-Operation mit der alten Kantenmenge und $E(C_{T,e_1})=E(C_{T',e'})$ durchführen. Um $\bar{C}_{T',e_i}$ zu erhalten, muss der Kreis nur noch entsprechend $e_i$ gerichtet werden.
+
+Wir werden nun die recht komplexe Funktion \lstinline|Circle::update|, die oben beschriebene Routine umsetzt, im Detail betrachten. Die Funktion bekommt \lstinline|Circle& c| übergeben, dies entspricht $\bar{C}_{T',e'}$. Zunächst suchen wir sowohl in unseren Kanten als auch in ihren umgedrehten Pendants nach $e'$. Dies ist nötig, da wir die Orientierung der Kreise zueinander nicht kennen.
+
+Sind wir nicht fündig geworden, ist die Routine abgeschlossen, da es nichts zu tun gibt. Ansonsten erreichen wir den Zustand, dass die beiden gerichteten Kreise gegeneinander orientiert sind, also der Schnitt ihrer Kanten leer ist, indem wir gegebenenfalls \lstinline|c.rotateBy(0, true)| aufrufen. Damit ist gegeben, dass in \lstinline|Circle c| nach Notation von \cref{fig:bypass} der Weg von $y$ nach $x$ den blauen Kanten entspricht.
+
+\begin{lstlisting}
 void Circle::update(Circle& c) {
   bool iR = c.getIsResidual()[0];
   std::pair<size_t, size_t> edgeSame = c.getEdges()[0];
-  std::pair<size_t, size_t> edgeReverse = std::make_pair(edgeSame.second, edgeSame.first);
+  std::pair<size_t, size_t> edgeReverse =
+       std::make_pair(edgeSame.second, edgeSame.first);
 
   bool reversed = false;
   size_t index = 0;
-  std::vector<std::pair<size_t, size_t>>::iterator it = edges.begin();
+  std::vector<std::pair<size_t, size_t>>::iterator
+       it = edges.begin();
   //find edgeSame if existent
   for (index = 0; it != edges.end(); index++) {
-    if (iR == isResidual[index] and edges[index] == edgeSame) {break;}
+    if (iR == isResidual[index] and
+        edges[index] == edgeSame) {break;}
   it++;
   }
-  //if edgeSame is in this->edges, reverse c, do second if-case
-  //and reverse back
+  //if edgeSame is in this->edges, reverse c,
+  //do second if-case and reverse back
   if (it != edges.end()) {
     c.rotateBy(0, true);
     reversed = true;
@@ -199,13 +217,18 @@ void Circle::update(Circle& c) {
   else {
     it = edges.begin();
     for (index = 0; it != edges.end(); index++) {
-      if (iR != isResidual[index] and edges[index] == edgeReverse) {break;}
+      if (iR != isResidual[index] and 
+          edges[index] == edgeReverse) {break;}
       it++;
     }
   }
+\end{lstlisting}
 
+Insofern wir $e'$ oder $\varphi(e')$ gefunden haben, zeigt der Iterator \lstinline|it| an dieser Stelle darauf. Indem wir von dieser Kante aus $x$ und $y$ suchen, finden wir heraus, welche Kanten in beiden zugrundeliegenden ungerichteten Kreisen enthalten sind. Insbesondere haben wir danach in \lstinline|size_t indexLeft| und \lstinline|indexRight| gespeichert, bis wohin bzw. ab wann wir die Kanten unseres bisherigen gerichteten Kreises beibehalten.
+
+\begin{lstlisting}
   //redirect this circle over c
-  if (reversed or  it != edges.end()) {
+  if (reversed or it != edges.end()) {
     std::vector<bool> toCopy (c.length, true);
     size_t indexLeft = index - 1, indexRight = index + 1;
     
@@ -213,23 +236,37 @@ void Circle::update(Circle& c) {
     toCopy[0] = false; //first edge not even in tree
     //left from first edge
     for (; indexLeft > 0; indexLeft--) {
-      //circles are in opposite directions, so reverse the edge for existence check
+      //circles are in opposite directions,
+      //so reverse the edge for existence check
       std::pair<size_t, size_t> checkEdge =
-      std::make_pair(c.getEdges()[index - indexLeft].second, c.getEdges()[index - indexLeft].first);
+      std::make_pair(
+           c.getEdges()[index - indexLeft].second,
+           c.getEdges()[index - indexLeft].first);
       iR = c.getIsResidual()[index - indexLeft];
-      if (iR != isResidual[indexLeft] and edges[indexLeft] == checkEdge) {toCopy[index - indexLeft] = false;}
+      if (iR != isResidual[indexLeft] 
+          and edges[indexLeft] == checkEdge)
+      {toCopy[index - indexLeft] = false;}
       else {break;}
     }
     //right from first edge
     for (; indexRight < this->length; indexRight++) {
-      //circles are in opposite directions, so reverse the edge for existence check
+      //circles are in opposite directions,
+      //so reverse the edge for existence check
       std::pair<size_t, size_t> checkEdge =
-      std::make_pair(c.getEdges()[c.length + index - indexRight].second, c.getEdges()[c.length + index - indexRight].first);
-      iR = c.getIsResidual()[c.length + index - indexRight];
-      if (iR != isResidual[indexRight] and edges[indexRight] == checkEdge) {toCopy[c.length + index - indexRight] = false;}
+      std::make_pair(
+           c.getEdges()[c.length+index-indexRight].second,
+           c.getEdges()[c.length+index-indexRight].first);
+      iR = c.getIsResidual()[c.length+index-indexRight];
+      if (iR != isResidual[indexRight]
+          and edges[indexRight] == checkEdge)
+      {toCopy[c.length + index - indexRight] = false;}
       else {break;}
     }
+\end{lstlisting}
+
+Anschließend konstruiere ich der Einfachheit halber die beiden Vektoren \lstinline|edges| und \lstinline|isResidual| komplett neu. Der neue Kreis besteht dann wie in \cref{fig:bypass} aus dem Weg von $e_2$ nach $y$, gefolgt von den neuen, im Bild blauen Kanten von $y$ nach $x$ und dem Schluss von $x$ zu $e_2$. Falls wir \lstinline|Circle c| umgedreht haben, machen wir dies als letztes noch rückgängig.
     
+\begin{lstlisting}
     //construct new circle
     std::vector<std::pair<size_t, size_t>> edgesNew;
     std::vector<char> isResidualNew;
@@ -261,7 +298,8 @@ void Circle::update(Circle& c) {
   length = edges.size();
 }
 \end{lstlisting}
-\newpage
+
+Der nächste Abschnitt behandelt nun, wie wir gemäß \cref{ch:deg} eine Kante $e'$ wählen, sodass die stark zulässige Baumstruktur erhalten bleibt.
 
 \section{Stark zulässige Baumlösungen}
 Öhm, ja \ldots
