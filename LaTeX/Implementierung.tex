@@ -1,5 +1,5 @@
 \chapter{Implementierung} \label{ch:prog}
-Der Programmierteil dieser Bachelorarbeit implementiert den Netzwerk-Simplex-Algorithmus wie in \cref{ch:NSA} beschrieben, wobei einzelne Strukturen verändert wurden. Der Code ist in \cpp  geschrieben und hält sich an den \cppelf-Standard. Es folgt eine vollständige Übersicht der Codebestandteile, für das Gesamtkonstrukt siehe TODO Anhang.
+Der Programmierteil dieser Bachelorarbeit implementiert den Netzwerk-Simplex-Algorithmus wie in \cref{ch:NSA} beschrieben, wobei einzelne Strukturen verändert wurden. Der Code ist in \cpp  geschrieben und hält sich an den \cppelf-Standard. Es folgt eine vollständige Übersicht der Codebestandteile, für das Gesamtkonstrukt siehe TODO Anhang. An einigen Stellen wurden für ein besseres Layout Variablennamen angepasst.
 
 \section{Netzwerke}
 Zur Umsetzung der Graphenstruktur habe ich eine Klasse \lstinline|class Network| geschrieben, die auf \lstinline|struct Node| sowie \lstinline|class Edge| basiert und den Fluss händelt. Damit kann \lstinline|Network| beispielsweise sicherstellen, dass nie Kanten entfernt werden, die aktuell durchflossen sind.
@@ -46,7 +46,7 @@ private:
 };
 \end{lstlisting}
 
-Die Funktion \lstinline|changeFlow| stellt über die Hilfsfunktion \lstinline|changeFlowPossible| sicher, dass bei einer Flussveränderung keine Kapazitätsschranken verletzt werden. Mittels \lstinline|toggleCost| können die Kosten einer Kante zwischen Null und ihrem eigentlichen Wert variiert werden. Somit lässt sich leicht die in \cref{ch:init} beschriebene Low-Cost-Initialisierung umsetzen, siehe dazu \cref{HCLC}.
+Die Funktion \lstinline|changeFlow| stellt über die Hilfsfunktion \lstinline|changeFlowPossible| sicher, dass bei einer Flussveränderung keine Kapazitätsschranken verletzt werden. Mittels \lstinline|toggleCost| können die Kosten einer Kante zwischen Null und ihrem eigentlichen Wert variiert werden. Somit lässt sich leicht die in \cref{ch:init} beschriebene Low-Cost-Initialisierung umsetzen, siehe dazu \cref{ch:HCLC}.
 
 \subsection{Graph}\label{ch:graph}
 Werfen wir einen Blick darauf, wie die Knoten und Kanten in einem Netzwerk gespeichert werden. Ich habe mich dafür entschieden, die Objekte für eine logarithmische Laufzeit von \lstinline|find|, \lstinline|insert| sowie \lstinline|delete| in einer \lstinline|std::map| abzulegen. Die Knoten werden durch ihre \lstinline|size_t id| identifiziert, Kanten wiederum durch Anfangsknoten, Endknoten und die \lstinline|bool isResidual|. Eine \lstinline|std::map| benötigt einen Vergleichsoperator, daher habe ich für die Kanten \lstinline|custComp| definiert, das nach \lstinline|size_t node0|, \lstinline|size_t node1| und zuletzt \lstinline|bool isResidual| vergleicht.
@@ -111,18 +111,18 @@ public:
 };
 \end{lstlisting}
 
-Die Funktionen \lstinline|deleteEdge| und \lstinline|deleteNode| schlagen fehl, wenn auf den zu löschenden Kanten noch Fluss ist. So kann unter anderem durch Löschen des künstlichen Knotens überprüft werden, ob die Instanz lösbar ist. Für Phase 1 des Algorithmus (siehe \cref{HCLC}) nutzen wir die Funktion \lstinline|addFlow|, die einen Weg von einer Quelle zu einer Senke verlangt.
+Die Funktionen \lstinline|deleteEdge| und \lstinline|deleteNode| schlagen fehl, wenn auf den zu löschenden Kanten noch Fluss ist. So kann unter anderem durch Löschen des künstlichen Knotens überprüft werden, ob die Instanz lösbar ist. Für Phase 1 des Algorithmus (siehe \cref{ch:HCLC}) nutzen wir die Funktion \lstinline|addFlow|, die einen Weg von einer Quelle zu einer Senke verlangt.
 
 \lstinline|changeFlow| wird in jeder Iteration der zweiten Phase des Netzwerk-Simplex-Algorithmus aufgerufen und augmentiert den übergebenen Kreis \lstinline|Circle c| um einen beliebigen Wert, sofern dies möglich ist. Dieser Wert wird analog zur $\delta$ aus \cref{ch:NSA} der größte zulässige sein. Die hier genutzte \lstinline|class Circle| werden wir uns nun genauer anschauen.
 
 \section{Die Klasse \emph{Circle}}
-Sei $G$ ein gerichteter Graph mit $n$ Knoten sowie $m$ Kanten und $T$ ein aufspannender Baum von $G$. In der Herleitung des Algorithmus haben wir genutzt, dass für eine Kante $e\in E(G)\backslash E(T)$ außerhalb des Baumes der Kreis $C_{T,e}$ eindeutig ist. Ein Kreis $C_{T,e}$ lässt sich beispielsweise per Tiefensuche in Laufzeit $\bigO(n)$ berechnen, womit wir pro Iteration bei einer Komplexität von $\bigO(n\cdot(m-n)\cdot \text{poly}(n,m))$\footnotemark{} für Laufzeit $\text{poly}(n,m)$ des Pivotalgorithmus sind.
+Sei $G$ ein gerichteter Graph mit $n$ Knoten sowie $m$ Kanten und $T$ ein aufspannender Baum von $G$. In der Herleitung des Algorithmus haben wir genutzt, dass für eine Kante $e\in E(G)\backslash E(T)$ außerhalb des Baumes der Kreis $C_{T,e}$ eindeutig ist. Wird $T$ im Speicher gehalten, kann beispielsweise durch Tiefensuche in Laufzeit $\bigO(n)$ oder mit einer angepassten Datenstruktur (siehe TODO) noch schneller ein Kreis $C_{T,e}$ bzw. dessen Orientierung $\bar{C}_{T,e}$ gefunden werden.
 
-\footnotetext{Wie in \cref{ch:pivot} erwähnt, betrachten wir Pivotalgorithmen, die sämtliche Kreise in ihre Entscheidung einbeziehen.}
+Im Normalfall verändern sich von einer Iteration auf die nächste nur ein Bruchteil der Kreise. Diese lassen sich jedoch schlecht herausfiltern, wenn nur die Veränderung der zulässigen Baumlösung betrachtet wird. Um die Kreise nicht jede Iteration neu berechnen zu müssen, habe ich mich entschieden, nach \cite{betreuer} nicht den Baum abzuspeichern, sondern alle Kreise. Die theoretische Komplexität bleibt etwa dieselbe,\footnotemark{} in der Praxis ist es schneller, nur die veränderten Kreise neu zu berechnen.
 
-Im Normalfall verändern sich von einer Iteration auf die nächste nur ein Bruchteil der Kreise. Diese lassen sich jedoch schlecht herausfiltern, wenn nur die Veränderung der zulässigen Baumlösung betrachtet wird. Daher habe ich mich entschieden, nach \cite{betreuer} nicht den Baum abzuspeichern, sondern alle Kreise. Die Klasse \lstinline|class Circle| speichert gerichtete Kreise als zwei Vektoren (\lstinline|std::vector|), die Kanten wie gehabt über Anfangsknoten, Endknoten und die \lstinline|bool isResidual| identifizieren. Außerdem speichern sie ihre jeweiligen Werte für $\delta$ und $c(\bar{C}_{T,e})$; diese müssen jedoch vom Algorithmus gesetzt werden.
+\footnotetext{Wenn wir Pivotalgorithmen betrachten, die in Laufzeit $\text{poly}(m-n)$ sämtliche Kreise in ihre Entscheidung einbeziehen, erhalten wir eine Komplexität von $\bigO(n\cdot(m-n) + \text{poly}(m-n))$.}
 
-Nicht explizit in der Klassendeklaration schlägt sich die Invariante nieder, dass im Verlauf des Algorithmus jeder \lstinline|Circle| durch die erste Kante als einzige Nichtbaumkante spezifiziert wird.
+Die Klasse \lstinline|class Circle| speichert gerichtete Kreise als zwei Vektoren, die Kanten wie gehabt über Anfangsknoten, Endknoten und die \lstinline|bool isResidual| identifizieren. Außerdem speichern sie ihre jeweiligen Werte für $\delta$ und $c(\bar{C}_{T,e})$; diese müssen jedoch vom Algorithmus gesetzt werden. Nicht explizit in der Klassendeklaration schlägt sich die Invariante nieder, dass im Verlauf des Algorithmus jeder \lstinline|Circle| durch die erste Kante als einzige Nichtbaumkante spezifiziert wird.
 
 \begin{lstlisting}[escapechar=ß]
 //first edge of edges is not part of the underlying tree
@@ -176,7 +176,7 @@ Der einfache Fall a) aus \cref{fig:circles} ist damit abgehandelt, da $C_2$ unve
 
 \begin{figure}[!ht]\centering
     \includestandalone{tikz_circlesbypass}
-    \caption{Ursprünglich sind $e_1$ und $e_2$ Nichtbaumkanten, die Orientierung von $e_1$ und $e'$ ist irrelevant. Der Kreis $\bar{C}_{T,e_2}$ geht von $x$ über $e_2$ nach $y$ (schwarze Kanten) zurück nach $x$ über $e'$ oder $\varphi(e')$ (rote Kanten). Im neuen Baum $T'$, der statt $e_1$ die Kante $e'$ enthält, führt $\bar{C}_{T',e_2}$ nun von $y$ nach $x$ über $e_1$ oder $\varphi(e_2)$ (blaue Kanten).}
+    \caption{Ursprünglich sind $e_1$ und $e_2$ Nichtbaumkanten, die Orientierung von $e_1$ und $e'$ ist irrelevant. Der Kreis $\bar{C}_{T,e_2}$ geht von $x$ über $e_2$ nach $y$ (schwarze Kanten) zurück nach $x$ über $e'$ oder $\varphi(e')$ (rote Kanten). Im neuen Baum $T'$, der statt $e'$ die Kante $e_1$ enthält, führt $\bar{C}_{T',e_2}$ nun von $y$ nach $x$ über $e_1$ oder $\varphi(e_1)$ (blaue Kanten).}
     \label{fig:bypass}
 \end{figure}
 
@@ -299,13 +299,193 @@ Anschließend konstruiere ich der Einfachheit halber die beiden Vektoren \lstinl
 }
 \end{lstlisting}
 
-Der nächste Abschnitt behandelt nun, wie wir gemäß \cref{ch:deg} eine Kante $e'$ wählen, sodass die stark zulässige Baumstruktur erhalten bleibt.
+Mit diesen Datenstrukturen als Grundlage können wir nun den Algorithmus implementieren.
 
-\section{Stark zulässige Baumlösungen}
-Öhm, ja \ldots
+\section{Netzwerk-Simplex-Algorithmus}
+Die Klasse \lstinline|class Algorithm| besteht nur aus einem Konstruktor und der Funktion \lstinline|Algorithm::solution|, die das Min-Cost-Flow-Problem entweder mit LC- oder HC-Initialisierung (siehe \cref{ch:init} für die Funktionsweise und \cref{ch:HCLC} für die Umsetzung) löst. Ein \lstinline|Algorithm a| wird mit einer konkreten Pivotfunktion erstellt, die aus einem \lstinline|std::vector| von \lstinline|Circle| einen auswählt und dessen Index zurückgibt.
+\begin{lstlisting}
+class Algorithm {
+public:
+  Algorithm (Network& _n, size_t (*_pivot)
+                          (const std::vector<Circle>&))
+    : n(_n), pivot(_pivot) {};
 
-\section{Pivotalgorithmen}
-Sehr kurz? Probably nur Code
+  //returns 0 if n cannot be solved
+  //false for high cost edge initialization
+  bool solution (bool modus = true);
+}
+\end{lstlisting}
 
-\section{Initialisierung}\label{HCLC}
-Beweis LC
+Die Klasse speichert intern das Netzwerk, den Pivotalgorithmus, die Kreise, die ID des künstlichen Knoten sowie die Anzahl an Iterationen ab. Zusätzlich gibt es eine Funktion zur anfänglichen Erzeugung aller Kreise (per Tiefensuche).
+
+\begin{lstlisting}
+class Algorithm {
+private:
+  intmax_t iterations = 0;
+  Network& n;
+  size_t (*pivot)(const std::vector<Circle>&);
+  size_t artNode;
+  std::vector<Circle> circles;
+
+  //false if no optimization was possible
+  bool optimize();
+  //takes tree and creates circles;
+  void createCircles(std::vector<Node> tree);
+};
+\end{lstlisting}
+
+Der Kern der Klasse ist die Funktion \lstinline|Algorithm::optimize|, die eine Iteration durchführt oder \lstinline|false| zurückgibt, falls dies nicht mehr möglich und damit Phase 2 beendet ist. Nachdem Phase 1 abgeschlossen ist, wird dementsprechend die Schleife \lstinline|while (optimize());| ausgeführt.
+ 
+Die Funktion aktualisiert zunächst die Werte \lstinline|flow| und \lstinline|costPerFlow| für die Kreise, insofern notwendig. Dann wählt sie durch den Pivotalgorithmus einen Kreis \lstinline|Circle C| für die nächste Iteration aus oder gibt \lstinline|false| zurück, falls es keinen negativen Kreis mehr gibt. \lstinline|C| wird um \lstinline|C.flow| augmentiert und gemäß \cref{ch:deg} wird die Kante $e'$ gewählt, die den Baum verlässt. Zum Schluss wenden wir \lstinline|Circle::update| für alle Kreise an. Mit unseren bisher vorgestellten Datenstrukturen und Codeschnipseln ist alles bis auf die Wahl von $e'$ leicht implementierbar. Das nächste Kapitel beschäftigt sich mit der Umsetzung dieses Teilproblems.
+
+\subsection{Stark zulässige Baumlösungen}
+TODO: Fun Fact – um stark zulässige Baumlösungen zu erhalten, muss ich vermutlich doch den Baum speichern. Na ja.
+
+\subsection{Pivotalgorithmen}
+Die Pivotalgorithmen werden in meiner Implementierung in \lstinline|PivotAlgorithms.h| gesammelt. Ein Pivotalgorithmus gibt einen ungültigen Index zurück, falls es keinen negativen Kreis gibt.
+
+\begin{lstlisting}
+//return index of chosen circle or circles.size() if
+//no circle can be chosen
+
+//returns a random circle with negative cost
+size_t pivotRandom(const std::vector<Circle>& circles);
+//returns most negative circle
+size_t pivotMaxVal(const std::vector<Circle>& circles);
+//returns max |flow*costperflow|
+size_t pivotMaxRev(const std::vector<Circle>& circles);
+\end{lstlisting}
+
+Beispielhaft schauen wir uns noch die Umsetzung von \lstinline|pivotMaxVal| an:
+
+\begin{lstlisting}
+size_t pivotMaxVal(const std::vector<Circle>& circles) {
+  intmax_t mini = 0;
+  size_t index = circles.size();
+  for (size_t i = 0; i < circles.size(); i++) {
+    intmax_t value = circles[i].costPerFlow;
+    if (value < mini) {mini = value; index = i;}
+  }
+    return index;
+}
+\end{lstlisting}
+
+\subsection{Initialisierung}\label{ch:HCLC}
+Wir haben nun alle essentiellen Bestandteil der Implementierung von Phase 2 des Netzwerk-Simplex-Algorithmus gesehen. Zum vollständigen Algorithmus fehlt uns nur noch Phase 1, wie in \cref{ch:init} beschrieben. Zu Beginn legen wir je nach Modus die Kosten der künstlichen Kanten fest.
+
+\begin{lstlisting}[escapechar=ß]
+bool Algorithm::solution (bool modus) {
+  //initialize iterations
+  iterations = 0;
+  //high cost edge
+  intmax_t maxCost = 0;
+  if (modus == false) {
+    for (autoß\footnotemarkß edge : n.getEdges()) {
+      if (edge.second.cost > maxCost) {
+        maxCost = edge.second.cost;
+      }
+    }
+  }
+  //toggle all edges
+  else {n.toggleCost();}
+  maxCost = maxCost*n.getNoOfNodes() + 1;
+\end{lstlisting}
+
+\footnotetext{\lstinline|const std::pair<const std::tuple<size_t, size_t, bool>, Edge>&|}
+
+Nun legen wir den künstlichen Knoten und die künstlichen Kanten an, hier beispielhaft für die Quellen:
+\begin{lstlisting}
+  artNode = n.addNode(0);
+  Node artNode_Tree = Node(artNode, 0);
+
+  for (size_t source : n.sources) {
+    n.addEdge(Edge(source, artNode, maxCost,
+                   n.sumSource + 1));
+  }
+\end{lstlisting}
+
+Die Funktion \lstinline|bool Algorithm::solution| gibt sofort \lstinline|false| zurück, falls der übergebene Graph $G$ die Gleichung $\sum_{v\in V(G)} b(v)=0$ nicht erfüllt. Somit können wir bei der Erzeugung des initialen Flusses $f_0$ Wege von Quellen zu Senken über den künstlichen Knoten augmentieren, bis der b-Wert eines der beiden Endknoten erfüllt ist, und dann mit der nächsten Quelle bzw. Senke iterieren.
+
+\begin{lstlisting}
+  //get that flow started
+  std::vector<size_t>::iterator iSo = sources.begin(),
+                                iSi = sinks.begin();
+  while (iSo != sources.end()) {
+    if (std::abs(n.getNodes().find(*iSo)->second.b_value)
+     <= std::abs(n.getNodes().find(*iSi)->second.b_value)){
+      std::vector<size_t> temp = {*iSo, artNode, *iSi};
+      n.addFlow(temp,
+        std::abs(n.getNodes().find(*iSo)->second.b_value));
+      iSo++;
+    }
+    else {
+      std::vector<size_t> temp = {*iSo, artNode, *iSi};
+      n.addFlow(temp,
+        std::abs(n.getNodes().find(*iSi)->second.b_value));
+      iSi++;
+    }
+  }
+\end{lstlisting}
+
+Die Initialisierung ist an dieser Stelle abgeschlossen, nun können wir die Instanz lösen.
+
+\begin{lstlisting}
+  //complete tree and create circles
+  createCircles(tree);
+
+  //solve with artificial node
+  while (optimize());
+\end{lstlisting}
+
+Ist \lstinline|modus = false|, dann befinden wir uns in HC und sind an dieser Stelle fertig. Kann der künstliche Knoten gelöscht werden, ist die Instanz lösbar und die Lösung im Netzwerk abgespeichert, andernfalls gibt \lstinline|solution| den Wert \lstinline|false| zurück.
+
+Für LC wissen wir zunächst nur, ob die Instanz lösbar ist oder nicht. Um erneut die Routine \lstinline|optimize| aufrufen zu können, müssen wir sicherstellen, dass der künstliche Knoten ein Blatt des aktuellen Baumes $T$ ist, da wir ihn sonst nicht einfach aus $T$ entfernen können.
+
+Hierfür gibt es zwei Ansätze: Ein Weg ist es, einfach den künstlichen Knoten zu löschen und auf dem Graphen einen neuen Baum $T'$ zu bestimmen, der mit dem aktuellen Fluss $f$ eine zulässige Baumlösung $(T',f)$ bildet. In meiner Umsetzung führen wir dagegen degenerierte Iterationen durch, bis der künstliche Knoten ein Blatt ist. Dies schien mir der kohärente Ansatz zu sein.
+
+Dafür gehen wir über den Vektor \lstinline|circles| und suchen nach Kreisen, in denen zwei Baumkanten mit dem künstlichen Knoten benachbart sind. Sei $e$ diejenige der beiden Kanten, die den Baum verlässt. $e$ kann nur in schon betrachteten Kreisen enthalten sein, wenn deren identifizierende Kante mit dem künstlichen Knoten benachbart ist; diese Kreise werden jedoch später gelöscht. Also genügt es, nur Kreise über \lstinline|update| zu aktualisieren, die noch nicht betrachtet wurden, womit folgende Subroutine terminiert.
+
+\begin{lstlisting}
+  //iterate < n times until artificialNode is a leaf
+  for (std::vector<Circle>::iterator it = circles.begin();
+       it != circles.end(); it++) {
+  //find edge over artificial node if existent
+  size_t i = 1;
+  for (; i < it->size(); i++) {
+    if (it->getEdges()[i].first == artificialNode or
+        it->getEdges()[i].second == artificialNode)
+      {break;}
+  }
+  if (i < it->size()) {
+    //since n is feasible, one of the both cases occures
+
+    //not residual <==> flow == 0
+    //new first edge, same direction
+    if (not it->getIsResidual()[i])
+      {it->rotateBy(i, false);}
+    //new first edge, but reversed direction
+    else {it->rotateBy(i, true);}
+
+    //circles before this one don't need an update 
+    for (std::vector<Circle>::iterator otherCircle = it+1;
+         otherCircle != circles.end(); otherCircle++)
+      {otherCircle->update(*it);}
+    iterations++;
+  }
+\end{lstlisting}
+
+Zuletzt werden der künstliche Knoten und wie angedeutet die $|V(G)|-1$ Kreise gelöscht, die am künstlichen Knoten beginnen, bevor die finale Lösung berechnet wird. Ich benutze an dieser Stelle eine Lambdafunktion, um die entsprechenden Kreise herauszufiltern.
+
+\begin{lstlisting}
+  //now remove all circles beginning at the artificial node
+  circles.erase(std::remove_if(circles.begin(), 
+                               circles.end(),
+    [this](const Circle& c)
+    {return c.getEdges()[0].first == artificialNode or
+            c.getEdges()[0].second == artificialNode;}
+    ), circles.end());
+
+  while (optimize());
+  return true;
+}
+\end{lstlisting} 
