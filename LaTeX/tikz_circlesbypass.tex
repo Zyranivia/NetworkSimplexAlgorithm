@@ -14,15 +14,15 @@
       (5,0) node[circle, draw] (v6) {}
       (5,1) node[circle, draw] (v7) {};
 
-\draw[dashed, blue] (v0) to node[black, left] {$e_1$} (v1);
-\draw[dashed, red] (v3) to node[black, left] {$e'$} (v4);
-\draw[dashed, ->] (v6) to node[right] {$e_2$} (v7);
-\draw[blue, ->] (v0) to [bend right] (v2);
-\draw[blue, <-] (v1) to [bend left] (v5);
-\draw[red, <-] (v2) to (v3);
-\draw[red, <-] (v4) to (v5);
-\draw[->] (v2) to [bend right] (v6);
-\draw[<-] (v5) to [bend left] (v7);
+\draw[blue] (v0) to node[black, left] {$e_1$} (v1);
+\draw[red] (v3) to node[black, left] {$e'$} (v4);
+\draw[->] (v6) to node[right] {$e_2$} (v7);
+\draw[dashed, blue, ->] (v0) to [bend right] (v2);
+\draw[dashed, blue, <-] (v1) to [bend left] (v5);
+\draw[dashed, red, <-] (v2) to (v3);
+\draw[dashed, red, <-] (v4) to (v5);
+\draw[dashed, ->] (v2) to [bend right] (v6);
+\draw[dashed, <-] (v5) to [bend left] (v7);
 
 \end{tikzpicture}
 \end{document}

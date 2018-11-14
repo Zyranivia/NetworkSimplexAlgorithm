@@ -4,7 +4,7 @@ Zunächst führen wir in \cref{ch:MCF} das Transportproblem und dessen Verallgem
 Wir werden im Folgenden nur endliche Graphen betrachten. Außerdem sind alle Graphen einfach, das heißt, sie weisen weder mehrfache Kanten noch Schleifen auf. Der später eingeführte Residualgraph wird ebenfalls keine Schleifen besitzen, doppelte Kanten können unter Umständen vorkommen.
 
 \section{Min-Cost-Flow-Problem}\label{ch:MCF}
-\begin{defn}Ein \textbf{Netzwerk} ist ein Tupel $(G,b,c,u)$ bestehend aus einem gerichteten Graph $G = (V,E)$ und den Abbildungen $b \colon V\rightarrow\mathbb{R}$, $c \colon E\rightarrow\mathbb{R}$ sowie $u \colon E\rightarrow\mathbb{R}_{\geq 0}\cup \{\infty\}$. Wir bezeichnen $b$ als \emph{b-Wert-Funktion}, $c$ als \emph{Kostenfunktion} und $u$ als \emph{Kapazitätsfunktion}.\end{defn}
+\begin{defn}Ein \textbf{Netzwerk} ist ein Tupel $(G,b,c,u)$ bestehend aus einem gerichteten Graphen $G = (V,E)$ und den Abbildungen $b \colon V\rightarrow\mathbb{R}$, $c \colon E\rightarrow\mathbb{R}$ sowie $u \colon E\rightarrow\mathbb{R}_{\geq 0}\cup \{\infty\}$. Wir bezeichnen $b$ als \emph{b-Wert-Funktion}, $c$ als \emph{Kostenfunktion} und $u$ als \emph{Kapazitätsfunktion}.\end{defn}
 \begin{anm}Ein ungerichteter Graph kann durch das Verwandeln jeder Kante $\{v,w\}$ in zwei Kanten $(v,w)$ und $(w,v)$ zu einem gerichteten modifiziert werden. Knoten mit positivem b-Wert werden als \emph{Quellen}, solche mit negativem als \emph{Senken} bezeichnet. Knoten mit neutralem b-Wert werden \emph{Transitknoten} genannt.\end{anm}
 
 \begin{defn}\label{DefMaxFlow}Ein \textbf{maximaler Fluss} auf einem Netzwerk $(G=(V,E),b,c,u)$ ist eine Abbildung $f \colon E\rightarrow\mathbb{R}_{\geq 0}$, die folgende Eigenschaften erfüllt:
@@ -21,7 +21,7 @@ In dieser Bachelorarbeit wird angenommen, dass $b$ auf $\mathbb{Z}$ sowie $c$ un
 
 \footnotetext{Gemäß \cite[S. 454]{LP&NF2010} fügen wir $G$ eine zusätzliche Senke $s$ hinzu, die mit allen Quellen $q_i$ über eine Kante $e_i=(q_i,s)$ verbunden ist und einen b-Wert von $b(s)=-\sum_{v\in V(G)} b(v)$ zugewiesen bekommt. Für die neuen Kanten gilt $c(e_i)=0$ und $u(e_i)=\infty$.}
 
-Da die Kostenfunktion auf nicht-negative Werte eingeschränkt ist, hat kein maximaler Fluss negative Kosten und unbeschränkte Instanzen sind ausgeschlossen. Unbeschränkte Kapazitäten können somit in der konkreten Implementierung durch $1+0,5\cdot\sum_{v\in V} |b(v)|$ abgeschätzt werden, ohne dass die Lösungsmenge verändert wird. Alle Netzwerke werden als zusammenhängend angenommen, da die Zusammenhangskomponenten einer Instanz separat gelöst werden können. Der programmierte Algorithmus verlangt keinen Zusammenhang.
+Da die Kostenfunktion auf nicht-negative Werte eingeschränkt ist, hat kein maximaler Fluss negative Kosten und unbeschränkte Instanzen sind ausgeschlossen. Unbeschränkte Kapazitäten können somit in der konkreten Implementierung durch $1+0,5\cdot\sum_{v\in V} |b(v)|$ abgeschätzt werden, ohne dass die Lösungsmenge verändert wird. Alle Netzwerke werden als zusammenhängend angenommen, da die Zusammenhangskomponenten einer Instanz separat gelöst werden können. Der implementierte Algorithmus verlangt keinen Zusammenhang.
 
 \section{Der grundlegende Algorithmus}\label{ch:alg}
 Um die Funktionsweise des Netzwerk-Simplex-Algorithmus zu beschreiben, benötigen wir zunächst einige grundlegende Definitionen der Graphentheorie. Im Nachfolgenden sind die wichtigsten in Kürze aufgeführt, für eine vollständige Einführung sei der geneigte Leser auf \cite{Alma} verwiesen.
@@ -43,7 +43,7 @@ Um die Funktionsweise des Netzwerk-Simplex-Algorithmus zu beschreiben, benötige
 \begin{restatable}{lem}{TreeUnique}\label{TreeUnique}Jede zulässige Baumlösung $(T,f)$ ist eindeutig durch den aufspannenden Baum $T$ definiert.\end{restatable}
 \begin{proof}Sei $(T,f)$ eine zulässige Baumlösung einer Instanz des Transportproblems. Wir führen eine Induktion über die Anzahl der Knoten des Baumes durch. Die zulässige Baumlösung zum leeren Baum ist offensichtlich eindeutig.
 
-Für jedes Blatt von $l\in V(T)$ sei $e_l\in E(T)$ die Kante in $T$ zwischen dem Knoten $l$ und seinem eindeutigen Nachbarknoten $k_l$. Für alle Blätter $l$ ist der Wert $f(e_l)$ nach \cref{DefMaxFlowII} eindeutig. Wir betrachten nun die eingeschränkte Knotenmenge $V'=\{v\in V(T)\mid v\text{ ist kein Blatt in }T\}$. Da jeder nichtleere Baum mindestens ein Blatt besitzt, ist $|V'|<|V(T)|$. Sei $T'=T[V']\subsetneq T$ der durch $V'$ induzierte Teilgraph von $T$. Damit ist $T'$ ein Baum und $E(T')$ sind genau die Kanten, für die $f$ noch nicht bestimmt wurde.
+Für jedes Blatt $l\in V(T)$ sei $e_l\in E(T)$ die Kante in $T$ zwischen dem Knoten $l$ und seinem eindeutigen Nachbarknoten $k_l$. Für alle Blätter $l$ ist der Wert $f(e_l)$ nach \cref{DefMaxFlowII} eindeutig. Wir betrachten nun die eingeschränkte Knotenmenge $V'=\{v\in V(T)\mid v\text{ ist kein Blatt in }T\}$. Da jeder nichtleere Baum mindestens ein Blatt besitzt, ist $|V'|<|V(T)|$. Sei $T'=T[V']\subsetneq T$ der durch $V'$ induzierte Teilgraph von $T$. Damit ist $T'$ ein Baum und $E(T')$ sind genau die Kanten, für die $f$ noch nicht bestimmt wurde.
 
 Sei $N'=(G'=G[V'],b',c_{|E(G')},u_{|E(G')})$ das auf $V'$ eingeschränkte Netzwerk $N$ mit der folgendermaßen angepassten b-Wert-Funktion $b'$, bei der nur die b-Werte von Blattnachbarn bezogen auf Blätter in $T$ angepasst werden:
 \begin{equation}\label{eq:newB}
@@ -289,7 +289,7 @@ Bei dieser wird die gegebene Instanz $N=(G,b,c,u)$ des Transportproblems zunäch
 
 Offensichtlicherweise ist $N$ genau dann lösbar, wenn $N'$ lösbar ist. Wenn $c(f')>0$ ist, so ist $N$ nicht lösbar und wir sind fertig. Andernfalls iterieren wir $(T',f')_a$ degeneriert, bis $a$ ein Blatt von $T'$ ist. Dies wird in \cref{ch:HCLC} detailliert erläutert.
 
-Damit bekommen wir die zulässige Baumlösung $(T=T'-a, f=f'_{|E(G)})$ für $N'$ und damit für $N$. Als neuen Wurzelknoten können wir den eindeutigen Nachbar $k_a$ von $a$ in $T'$ wählen; damit bekommen wir die stark zulässige Baumlösung $(T,f)_{k_a}$.
+Damit bekommen wir die zulässige Baumlösung $(T=T'-a, f=f'_{|E(G)})$ für $N'$ und damit für $N$. Als neuen Wurzelknoten können wir den eindeutigen Nachbar $k_a$ von $a$ in $T'$ wählen; damit bekommen wir die stark zulässige Baumlösung $(T,f)_{k_a}$. Nun kann eine optimale Lösung des Transportproblems für $N$ berechnet werden.
 
 \section{Erweiterung auf beschränkte Kapazitäten}\label{ch:alg2}
 Wir werden nun den Netzwerk-Simplex-Algorithmus auf das Min-Cost-Flow-Problem erweitern. Die Funktionsweise bleibt dieselbe, nur die betrachteten zulässigen Baumlösungen verändern sich leicht:

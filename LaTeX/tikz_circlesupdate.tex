@@ -15,13 +15,13 @@
       (0.75, 0.75) node (aC1) {$\tilde{C}_1$}
       (3.25, 0.75) node (aC2) {$\tilde{C}_2$};
       
-\draw[dashed] (v0) to (v1);
-\draw[dashed] (v2) to (v3);
+\draw (v0) to node[left] {$e_1$} (v1);
+\draw (v2) to node[right] {$e_2$}(v3);
 
 \begin{scope}[on background layer]
   \clip (0,-0.5) rectangle (4,2);
-  \draw (0.5,0.75) circle(1);
-  \draw (3.5,0.75) circle(1);
+  \draw[dashed] (0.5,0.75) circle(1);
+  \draw[dashed] (3.5,0.75) circle(1);
 \end{scope}
 
 \path (6, 0.75) node(b) {b)}
@@ -36,13 +36,13 @@
       (7.75,0.75) node (bC1) {$\tilde{C}_1$}
       (9.25,0.75) node (bC2) {$\tilde{C}_2$};
       
-\draw[dashed] (v4) to (v5);
-\draw (v5) to [bend left] (v7);
-\draw (v7) to (v6);
-\draw (v6) to [bend left] (v4);
-\draw[dashed] (v8) to (v9);
-\draw (v8) to [bend left] (v6);
-\draw (v7) to [bend left] (v9);
+\draw (v4) to node[left] {$e_1$} (v5);
+\draw[dashed] (v5) to [bend left] (v7);
+\draw[dashed] (v7) to (v6);
+\draw[dashed] (v6) to [bend left] (v4);
+\draw (v8) to node[right] {$e_2$} (v9);
+\draw[dashed] (v8) to [bend left] (v6);
+\draw[dashed] (v7) to [bend left] (v9);
 
 \end{tikzpicture}
 \end{document}
