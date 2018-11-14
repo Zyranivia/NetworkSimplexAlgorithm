@@ -11,7 +11,7 @@
 class Circle {
 public:
     void print() const;
-    //default constructor for the moment
+    //default constructor
     void addEdge(size_t node0, size_t node1, bool isResidual);
 
     const std::vector<std::pair<size_t, size_t>>& getEdges() const;
@@ -19,7 +19,6 @@ public:
     size_t size() const;
 
     //function is needed for Network simplex
-    //TODO: move it?
     void update(Circle& c);
     //true means reverse circle
     void rotateBy (size_t index, bool toReverse);
@@ -31,7 +30,7 @@ public:
 private:
     size_t length = 0;
     std::vector<std::pair<size_t, size_t>> edges;
-    //char vector, because bool vector is broken
+    //std::vector<char>, because std::vector<bool> is broken
     std::vector<char> isResidual;
 };
 

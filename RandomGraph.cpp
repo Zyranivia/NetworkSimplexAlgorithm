@@ -179,7 +179,6 @@ void RandomGraph::evolve (size_t steps) {
             itNum += alg.getNoOfIter();
         }
         double temp = itNum / (double) (phiIt*n.getNoOfNodes());
-        //std::cout << "temp: " << temp << std::endl;
         n.clean();
         if (temp > opt_value) {opt = n; opt_value = temp;}
     }
@@ -191,7 +190,6 @@ void RandomGraph::evolve (size_t steps) {
 void RandomGraph::smartEvolve (size_t steps, std::vector<double> distribution) {
     std::mt19937 rng;
     rng.seed(static_cast<long unsigned int>(time(0)));
-    //rng.seed(static_cast<long unsigned int>(76832163798));
     std::uniform_int_distribution<intmax_t> randNode (0, n.getNoOfNodes()-1);
 
     size_t opt_pos = 0;
@@ -211,7 +209,6 @@ void RandomGraph::smartEvolve (size_t steps, std::vector<double> distribution) {
             itNum += alg.getNoOfIter();
         }
         double temp = itNum / (double) (phiIt*n.getNoOfNodes());
-        //std::cout << "temp: " << temp << std::endl;
         n.clean();
         if (temp > opt_value) {opt_pos = takenActions.size(); opt_value = temp;}
 
@@ -308,8 +305,6 @@ void RandomGraph::smartEvolve (size_t steps, std::vector<double> distribution) {
         }
     }
 
-    //std::cout << "nodes: " << n.getNoOfNodes() << " | iterations: " << opt_value*n.getNoOfNodes() <<
-    //            " | factor: " << opt_value << std::endl;
     //recreate optimal network
     n = networkSave;
     for (size_t i = 0; i < opt_pos; i++) {
@@ -346,6 +341,6 @@ std::pair<size_t, size_t> RandomGraph::randomMissingEdge() {
         }
     }
     //shouldn’t happen
-    std::cout << "ERROR randomMissingEdge" << std::endl;
+    std::cout << "ERROR RandomGraph::randomMissingEdge" << std::endl;
     return std::make_pair(0, 0);
 }

@@ -25,16 +25,22 @@ private:
     size_t artificialNode;
     //collect circles instead of calculating all the time
     std::vector<Circle> circles;
+    //for all nodes remember which edge leads to the root node
+    std::map<size_t, size_t> strongFeasibleTree;
 
     //false if no optimization was possible
     bool optimize();
 
-    //takes (maybe empty) tree, maximizes it and creates circles;
-    void createCircles(std::vector<Node> partialTree);
+    //takes tree and creates circles;
+    void createCircles(std::vector<Node> tree);
+
+    //functions used for last-blocking-edge-approach
+    size_t findApex (Circle& c);
+    void updateStrongFeasibleTree(Circle& c, size_t i, size_t apex);
 
     //it is assumed that for no edge (i,j) in the tree
     //there is an edge (j,i)
-    Circle findCircle(size_t node0, size_t node1, bool isResidual, const std::vector<Node>& tree, const std::set<std::pair<size_t, size_t>>& treeEdges);
+    Circle findCircle(size_t node0, size_t node1, bool isResidual, const std::vector<Node>& tree);
 };
 
 #endif // ALGORITHM_H_INCLUDED

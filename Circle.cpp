@@ -16,7 +16,7 @@ void Circle::addEdge(size_t node0, size_t node1, bool _isResidual) {
     length = edges.size();
 }
 
-//see paper for details and proof (probably)
+//see paper for details and proof
 void Circle::update(Circle& c) {
     bool iR = c.getIsResidual()[0];
     std::pair<size_t, size_t> edgeSame = c.getEdges()[0];
@@ -30,7 +30,7 @@ void Circle::update(Circle& c) {
         if (iR == isResidual[index] and edges[index] == edgeSame) {break;}
         it++;
     }
-    //if edgeSame is in this->edges, reverse c, do second if-case
+    //if edgeSame is in this->edges, reverse c, do if-case
     //and reverse back
     if (it != edges.end()) {
         c.rotateBy(0, true);
@@ -46,7 +46,7 @@ void Circle::update(Circle& c) {
     }
 
     //redirect this circle over c
-    if (reversed or  it != edges.end()) {
+    if (it != edges.end()) {
         std::vector<bool> toCopy (c.length, true);
         size_t indexLeft = index - 1, indexRight = index + 1;
 
@@ -107,7 +107,7 @@ void Circle::rotateBy (size_t index, bool toReverse) {
     //the correct edge is on front
     std::rotate(edges.begin(), edges.begin() + index, edges.end());
     std::rotate(isResidual.begin(), isResidual.begin() + index, isResidual.end());
-    //all but the first entry have to be reversed in position
+    //all but the first entry might have to be reversed
     if (toReverse) {
         //change direction of all edges
         for (size_t i = 0; i < this->length; i++) {

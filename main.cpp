@@ -9,7 +9,6 @@
 #include "RandomGraph.h"
 
 //TODO private/public noch mal überdenken
-//TODO make all(?) sets unordered
 
 bool isConnected(const Network& n) {
     std::vector<bool> checked (n.largestNodeID+1, false);
@@ -80,16 +79,17 @@ int main() {
     solver.solution(true);
     n.print();*/
 
-    /*for (int i = 0; i < 10; i++) {
-        RandomGraph test = RandomGraph(Network(6));
-        test.evolve(10000);
+    for (int i = 100; i < 110; i++) {
+        RandomGraph test = RandomGraph(i, 50, 50);
+        //test.evolve(i*1000);
         Network n = test.getNetwork();
         Algorithm alg = Algorithm (n, pivotMaxRev);
-        alg.solution();
-        if (n.getFlow() != 0) {n.print();}
-        std::cout << alg.iterations / (double) n.getNoOfNodes() << std::endl;
-    }*/
-    for (size_t k = 0; k < 50; k++) {
+        alg.solution(i%2==1 ? true : false);
+        //alg.solution(true);
+        //if (n.getFlow() != 0) {n.print();}
+        std::cout << n.getCost() << " | " << n.getFlow() << std::endl;
+    }
+    /*for (size_t k = 0; k < 50; k++) {
 
     Network test2 = Network(0);
     std::vector<intmax_t> b_value = {9, -9, 0, 0, 0, 0, 0, 0};
@@ -133,15 +133,15 @@ int main() {
     }
 
     Algorithm rand = Algorithm (test2, pivotMaxRev);
-
+    */
     //rand.solution(false);
     //test.print();
 
-    test2.clean();
+    //test2.clean();
     //test2.print();
-    rand.solution(false);
+    //rand.solution(false);
     //test2.print();
-    std::cout << rand.getNoOfIter()/*/ (double) test2.getNoOfNodes() */<< std::endl;
-    }
+    //std::cout << rand.getNoOfIter()/*/ (double) test2.getNoOfNodes() */<< std::endl;
+    //}
 
 }

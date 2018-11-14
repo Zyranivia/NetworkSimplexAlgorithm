@@ -23,18 +23,17 @@ struct custComp {
         }
         return std::get<2>(edge0) < std::get<2>(edge1);
     }
-
 };
 
 struct Node {
-        size_t id;
-        intmax_t b_value;
-        //defined by (the other) nodeID
-        //always incoming and outgoing due to residual edges
-        std::set<size_t> neighbours;
+    size_t id;
+    intmax_t b_value;
+    //defined by (the other) nodeID
+    //always incoming and outgoing due to residual edges
+    std::set<size_t> neighbours;
 
-        Node (size_t _id, intmax_t _b_value) : id(_id), b_value(_b_value) {};
-    };
+    Node (size_t _id, intmax_t _b_value) : id(_id), b_value(_b_value) {};
+};
 
 //no parallel (nonresidual) edges are allowed
 class Network {
@@ -79,14 +78,15 @@ public:
     void clean();
 
     //following both functions are used to get a random entry
-    //gets the real NodeId of the nth node
+    //gets the real NodeId of the n-th node
     size_t getNode(size_t index);
-    //gets the nth Edge
+    //gets the n-th Edge
     Edge getEdge(size_t index);
 
     intmax_t getFlow() {return flow;}
     intmax_t getCost() {return cost;}
-    //TODO all of these probably should be private
+
+//private:
     intmax_t sumSource = 0, sumSink = 0;
     size_t largestNodeID;
     std::vector<size_t> sources, sinks, transit;

@@ -5,7 +5,7 @@
 Edge::Edge (size_t _node0, size_t _node1, intmax_t _cost, intmax_t _capacity, bool _isResidual) :
     node0(_node0), node1(_node1), cost(_cost), capacity(_capacity), flow(0), isResidual(_isResidual) {}
 
-//overflow (huehuehe) is handled, I think
+//overflow (huehuehe) is handled
 bool Edge::changeFlowPossible(intmax_t f) {
     intmax_t temp = flow + f;
 
@@ -24,6 +24,7 @@ bool Edge::changeFlow (intmax_t f) {
     return false;
 }
 
+//change to residuality
 void Edge::invert () {
     size_t temp = node0;
     node0 = node1;

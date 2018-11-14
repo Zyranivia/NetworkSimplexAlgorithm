@@ -41,6 +41,8 @@ void Network::randomNoise(double phi) {
         if (key.second.capacity > maxCap) {maxCap = key.second.capacity;}
     }
 
+    //change both b-values and edge capacity
+    //but additive for positive values to not restrict solution space
     for (std::pair<const std::tuple<size_t, size_t, bool>, Edge>& key : edges) {
         if (key.second.isResidual) {continue;}
         double eps0 = rand(rng), eps1 = rand(rng);
@@ -127,7 +129,7 @@ size_t Network::getNode(size_t index) {
         if (i == index) {return keyPair.first;}
         i++;
     }
-    //should  never occur
+    //should never occur
     std::cout << "ERROR Network::getNode" << std::endl;
     return 0;
 }
@@ -140,7 +142,7 @@ Edge Network::getEdge(size_t index) {
         if (i == index) {return keyPair.second;}
         i++;
     }
-    //should  never occur
+    //should never occur
     std::cout << "ERROR Network::getEdge" << std::endl;
     return edges.begin()->second;
 }
@@ -153,7 +155,6 @@ bool Network::deleteEdge(size_t node0, size_t node1) {
         deleteEdge(key);
         return true;
     }
-
     return false;
 }
 
@@ -246,6 +247,7 @@ bool Network::addFlow(std::vector<size_t>& path, intmax_t f) {
 bool Network::changeFlow(Circle& c, intmax_t f) {
     //circles have a minimal length of 2
     if (c.size() <= 1) {return false;}
+    if (0 == f) {return true;}
 
     std::map<std::tuple<size_t, size_t, bool>, Edge, custComp>::iterator it;
 
@@ -265,7 +267,6 @@ bool Network::changeFlow(Circle& c, intmax_t f) {
         it = edges.find(std::forward_as_tuple(c.getEdges()[i].second, c.getEdges()[i].first, not c.getIsResidual()[i]));
         it->second.changeFlow(-f);
     }
-
     return true;
 }
 
@@ -292,6 +293,7 @@ void Network::clean() {
     this->cost = 0;
 }
 
+//also updates cost, just in case
 void Network::toggleCost() {
     intmax_t newCost = 0;
     for (std::pair<const std::tuple<size_t, size_t, bool>, Edge>& keypair : edges) {

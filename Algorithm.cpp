@@ -4,7 +4,7 @@
 
 #include "Algorithm.h"
 
-//anonymous namespace
+//anonymous namespace for helper functions
 namespace {
 
 //return position of node or vec.size() if not a member
@@ -32,52 +32,9 @@ intmax_t Algorithm::getNoOfIter () {
     return iterations;
 }
 
-//used with the partial tree constructed around artificialNode
-void Algorithm::createCircles(std::vector<Node> partialTree) {
+//used with the tree constructed around artificialNode
+void Algorithm::createCircles(std::vector<Node> tree) {
     circles.clear();
-
-    //old tree won’t have invert edges
-    std::set<std::pair<size_t, size_t>> newTreeEdges;
-    //complete spanning tree
-    //number of edges that have to be added: nodes - partialTree.size()
-    //equals |transit|
-    //algorithm used: Randomgreedy
-    size_t added = 0, toBeAdded = n.getNoOfNodes() - partialTree.size();
-
-    for (const std::pair<const std::tuple<size_t, size_t, bool>, Edge>& keypair : n.getEdges()) {
-        if (keypair.second.isResidual) {continue;}
-        const Edge& e = keypair.second;
-        size_t node = e.node0, neigh = e.node1;
-        //if e + partialTree is still a tree
-        //invert edges to those of a tree might be checked
-        if (findCircle(node, neigh, e.isResidual, partialTree, newTreeEdges).size() < 2) {
-
-            //add edge to tree, nodes too, if not already in it
-            size_t nodePos = findNode(node, partialTree);
-            if (nodePos == partialTree.size()) {partialTree.push_back(Node(node, 0));}
-            //in either case nodePos is now exact
-            partialTree[nodePos].neighbours.insert(neigh);
-
-            size_t neighPos = findNode(neigh, partialTree);
-            if (neighPos == partialTree.size()) {partialTree.push_back(Node(neigh, 0));}
-            //in either case nodePos is now exact
-            partialTree[neighPos].neighbours.insert(node);
-
-            //keep track of added edges
-            newTreeEdges.insert(std::make_pair(node, neigh));
-
-            //if there are invert edges of those of the tree, create a trivial circle
-            if (n.getEdges().count(std::forward_as_tuple(neigh, node, false)) != 0) {
-                Circle temp = Circle();
-                temp.addEdge(neigh, node, false);
-                temp.addEdge(node, neigh, false);
-                circles.push_back(temp);
-            }
-            //std::cout << node << "-" << neigh << " added" << std::endl;
-            added++;
-        }
-        if (added == toBeAdded) {break;}
-    }
 
     //create std::vector<Circle> circles
     //e or e_invert in tree means c.size() <= 2
@@ -86,13 +43,14 @@ void Algorithm::createCircles(std::vector<Node> partialTree) {
         //don’t create circle for residual edge
         if (edge.second.isResidual) {continue;}
 
-        Circle temp = findCircle(edge.second.node0, edge.second.node1, edge.second.isResidual, partialTree, newTreeEdges);
+        Circle temp = findCircle(edge.second.node0, edge.second.node1, edge.second.isResidual, tree);
         if (temp.size() > 2) {circles.push_back(temp);}
     }
 }
 
 //true for low cost, false for high cost
 bool Algorithm::solution (bool modus) {
+    if (n.sumSource != n.sumSink) {return false;}
     //initialize iterations
     iterations = 0;
 
@@ -110,11 +68,9 @@ bool Algorithm::solution (bool modus) {
 
     maxCost = maxCost*n.getNoOfNodes() + 1;
 
-    if (n.sumSource != n.sumSink) {return false;}
-
     //add edges from sources to artNode
-    //and from artNode to sinks
-    //they are part of the underlying tree
+    //and from artNode to sinks/transit
+    //those are the edges of the underlying tree
     std::vector<Node> tree;
     tree.reserve(n.getNoOfNodes());
     artificialNode = n.addNode(0);
@@ -136,25 +92,28 @@ bool Algorithm::solution (bool modus) {
         sink_Tree.neighbours.insert(artificialNode);
         tree.push_back(sink_Tree);
     }
+    for (size_t transit : n.transit) {
+        n.addEdge(Edge(artificialNode, transit, maxCost, n.sumSink + 1));
 
-    //copy sources and sinks, since with changed flow b_values will change
-    //TODO streamline that
-    std::vector<size_t> sourcesCopy = n.sources, sinksCopy = n.sinks;
+        artNode_Tree.neighbours.insert(transit);
+        Node sink_Tree = Node(transit, 0);
+        sink_Tree.neighbours.insert(artificialNode);
+        tree.push_back(sink_Tree);
+    }
 
     //get that flow started
     //sumSources == sumSinks
-    std::vector<size_t>::iterator itSource = sourcesCopy.begin(), itSink = sinksCopy.begin();
-    while (itSource != sourcesCopy.end()) {
-        if (std::abs(n.getNodes().find(*itSource)->second.b_value) <= std::abs(n.getNodes().find(*itSink)->second.b_value)) {
-            std::vector<size_t> temp = {*itSource, artificialNode, *itSink};
-            n.addFlow(temp, std::abs(n.getNodes().find(*itSource)->second.b_value));
-            itSource++;
+    //networks updates n.sources after flow change
+    while (not n.sources.empty()) {
+        size_t source = n.sources.back(), sink = n.sinks.back();
+        if (std::abs(n.getNodes().find(source)->second.b_value) <= std::abs(n.getNodes().find(sink)->second.b_value)) {
+            std::vector<size_t> temp = {source, artificialNode, sink};
+            n.addFlow(temp, std::abs(n.getNodes().find(source)->second.b_value));
         }
-        //NOTE: could be also if, but then check for != .end() again
+        //NOTE: could be also if, but then check for not .empty() again
         else {
-            std::vector<size_t> temp = {*itSource, artificialNode, *itSink};
-            n.addFlow(temp, std::abs(n.getNodes().find(*itSink)->second.b_value));
-            itSink++;
+            std::vector<size_t> temp = {source, artificialNode, sink};
+            n.addFlow(temp, std::abs(n.getNodes().find(sink)->second.b_value));
         }
     }
 
@@ -162,6 +121,12 @@ bool Algorithm::solution (bool modus) {
 
     //complete tree and create circles
     createCircles(tree);
+    //create strongFeasibleTree
+    //use that all nodes are in n.transit now
+    strongFeasibleTree.clear();
+    for (size_t id : n.transit) {
+        strongFeasibleTree.insert(std::make_pair(id, artificialNode));
+    }
 
     //solve with artificial node
     while (optimize());
@@ -179,6 +144,7 @@ bool Algorithm::solution (bool modus) {
                     if (it->getEdges()[i].first == artificialNode or it->getEdges()[i].second == artificialNode) {break;}
                 }
                 if (i < it->size()) {
+                    updateStrongFeasibleTree(*it, i, findApex(*it));
                     //since n is feasible, one of the both cases occures
 
                     //not residual <==> flow == 0
@@ -187,8 +153,8 @@ bool Algorithm::solution (bool modus) {
                     //new first edge, but reversed direction
                     else {it->rotateBy(i, true);}
 
-                    //new first edge can’t be included by any circle before it
-                    //TODO better prove this
+                    //new first edge can’t be included by any relevant circle before it
+                    //with relevant meaning not getting deleted a few lines later
                     for (std::vector<Circle>::iterator otherCircle = it + 1; otherCircle != circles.end(); otherCircle++) {
                         otherCircle->update(*it);
                     }
@@ -213,7 +179,7 @@ bool Algorithm::solution (bool modus) {
 }
 
 //returns a (real) circle, if tree + edge is not a tree anymore
-Circle Algorithm::findCircle(size_t node0, size_t node1, bool isResidual, const std::vector<Node>& tree, const std::set<std::pair<size_t, size_t>>& treeEdges) {
+Circle Algorithm::findCircle(size_t node0, size_t node1, bool isResidual, const std::vector<Node>& tree) {
     if (tree.empty()) {return Circle();}
 
     //create map nodeId->tree for constant access
@@ -268,21 +234,17 @@ Circle Algorithm::findCircle(size_t node0, size_t node1, bool isResidual, const 
     c.addEdge(node0, node1, isResidual);
     //construct circle to return from tree edges
     for (size_t i = 2; i < path.size(); i++) {
-        //if direction is unique, it is calculated
+        //direction is unique, because it’s an artifical edge
         bool direction = n.getEdges().count(std::forward_as_tuple(path[i-1], path[i], true));
-        //otherwise it is always true and has to be changed in case
-        if (treeEdges.count(std::make_pair(path[i-1], path[i]))) {direction = false;}
         c.addEdge(path[i-1], path[i], direction);
     }
     return c;
 }
 
-//TODO optimize calculation of flow/cost for circle somehow
-//probably in update
-//make a bool whether a circle was changed
-
 //chooses a circle via pivot function and iterates flow through it
 bool Algorithm::optimize() {
+    //this is not trivial to do smarter, since even circles unchanged by update can have
+    //their value for flow changed
     for (Circle& c : circles) {
         c.costPerFlow = 0;
         Edge e = n.getEdges().find(std::forward_as_tuple(c.getEdges()[0].first, c.getEdges()[0].second, c.getIsResidual()[0]))->second;
@@ -300,30 +262,27 @@ bool Algorithm::optimize() {
     //if there is no negative circle
     if (chosenOneId == circles.size()) {return false;}
 
-    //std::cout << "(" << chosenOneId << ") " << circles[chosenOneId].flow << " --> ";
-    //std::cout << circles[chosenOneId].getEdges()[0].first << "-" << circles[chosenOneId].getEdges()[0].second;
-
     Circle& chosenOne = circles[chosenOneId];
-
     n.changeFlow(chosenOne, chosenOne.flow);
 
-    //reorder the circle such that the first edge beginning from the end
-    //which has full or zero flow is now the first edge and therefore not
+    size_t apex = findApex(chosenOne);
+
+    //traverse backwards from apex and reorder the circle such that
+    //the first edge which has full or zero flow is now the first edge and therefore not
     //part of the tree anymore. In the first case the circle is reversed
-    for (size_t i = chosenOne.size() - 1; i < chosenOne.size(); i--) {
+    for (size_t i = apex; ; i--) {
         const Edge& e = n.getEdges().find(std::forward_as_tuple(chosenOne.getEdges()[i].first, chosenOne.getEdges()[i].second,
                                                          chosenOne.getIsResidual()[i]))->second;
 
-        //new first edge, same direction
-        if (e.flow == 0) {
-            chosenOne.rotateBy(i, false);
-            break;
-        }
-        //new first edge, but reversed direction
         if (e.flow == e.capacity) {
+            updateStrongFeasibleTree(chosenOne, i, apex);
+
+            //new first edge, but reversed direction
             chosenOne.rotateBy(i, true);
             break;
         }
+        //go from first to last edge if necessary
+        if (0 == i) {i = chosenOne.size();}
     }
 
     //change all other circles which include the new first edge
@@ -332,8 +291,44 @@ bool Algorithm::optimize() {
         circles[i].update(chosenOne);
     }
 
-    //std::cout << " wird zu " << circles[chosenOneId].getEdges()[0].first << "-" << circles[chosenOneId].getEdges()[0].second << std::endl;
-
     this->iterations += 1;
     return true;
 }
+
+size_t Algorithm::findApex (Circle& c) {
+    //find apex of circle
+    size_t apex = 0;
+    for (; apex < c.size() - 1; apex++) {
+        size_t node = c.getEdges()[apex].second,
+               neighbourInCircle = c.getEdges()[apex+1].second;
+        //if the way to the root is leaving the circle, we’re done
+        if (strongFeasibleTree.find(node)->second != neighbourInCircle) {break;}
+    }
+    //just to be sure
+    if (apex == c.size() - 1 and strongFeasibleTree.find(c.getEdges().back().second) ==
+                                 strongFeasibleTree.find(c.getEdges()[0].second)) {
+        std::cout << "ERROR Algorithm::findApex" << std::endl;
+        exit(1);
+    }
+    return apex;
+}
+
+void Algorithm::updateStrongFeasibleTree(Circle& c, size_t i, size_t apex) {
+    //change direction of all edges from new first edge i to old one
+    if (i <= apex) {
+        for (size_t pos = 0; pos < i; pos++) {
+            size_t id = c.getEdges()[pos].second;
+            strongFeasibleTree.find(id)->second = c.getEdges()[pos].first;
+        }
+    }
+    //i > apex
+    else {
+        for (size_t pos = i + 1; pos < c.size(); pos++) {
+            size_t id = c.getEdges()[pos].first;
+            strongFeasibleTree.find(id)->second = c.getEdges()[pos].second;
+        }
+        size_t id = c.getEdges()[0].first;
+        strongFeasibleTree.find(id)->second = c.getEdges()[0].second;
+    }
+}
+
