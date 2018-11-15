@@ -20,7 +20,7 @@ struct Node {
 };
 \end{lstlisting}
 
-Ein Knoten wird eindeutig durch seine \lstinline|size_t id| identifiziert, weitere Eigenschaften sind sein b-Wert aus $\mathbb{Z}$ und seine Nachbarknoten. Letztere Menge differenziert nicht zwischen Nachbarn durch eingehende und ausgehende Kanten, da diese Unterscheidung im Residualgraphen entfällt.
+Ein Knoten wird eindeutig durch seine \lstinline|size_t id| identifiziert, weitere Eigenschaften sind sein b-Wert aus $\mathbb{Z}$ und seine Nachbarknoten. Letztere Menge differenziert nicht zwischen Nachbarn durch eingehende und ausgehende Kanten, da diese Unterscheidung im Residualgraph entfällt.
 
 \subsection{Kanten}
 Die Klasse \lstinline|class Edge| enthält alle Informationen über Kanten: Kosten, Kapazität, Fluss und die jeweiligen Endknoten. Residualkanten werden durch das Flag \lstinline|isResidual| gekennzeichnet. An dieser Stelle fällt auf, dass die Kapazität nicht nachträglich verändert werden kann, obwohl dies für Residualkanten notwendig wäre. Ich habe mich in meiner Implementierung dafür entschieden, auf Residualkanten Fluss zu erlauben und damit eine veränderliche Kapazität zu simulieren. Dies wird in \cref{ch:graph} näher erläutert.
@@ -62,9 +62,9 @@ private:
 };
 \end{lstlisting}
 
-Ein Netzwerk unterteilt zusätzlich seine Knoten nach ihrem b-Wert in Quellen, Senken und Transitknoten. Es kennt außerdem seinen \lstinline|intmax_t flow|, also die Anzahl an Fluss, die von den Quellen zu den Senken transportiert wird, und die dafür anfallenden Kosten \lstinline|intmax_t cost|. Für den Algorithmus ist ersteres nicht relevant, da wir nur auf maximalen Flüssen arbeiten.
+Ein Netzwerk unterteilt zusätzlich seine Knoten nach ihrem b-Wert abzüglich des aktuellen Flusses in Quellen, Senken und Transitknoten. Eine Instanz mit einem maximalen Fluss besteht dementsprechend nur aus Transitknoten. Es kennt außerdem seinen \lstinline|intmax_t flow|, also die Anzahl an Fluss, die von den Quellen zu den Senken transportiert wird, und die dafür anfallenden Kosten \lstinline|intmax_t cost|. Für den Algorithmus ist ersteres nicht relevant, da wir nur auf maximalen Flüssen arbeiten.
 
-Der Graph $G$ mit einem Fluss $f$ und der dazugehörige Residualgraph $G_{N,f}$ werden nicht als zwei verschiedene Objekte der Netzwerk-Klasse geführt, sondern in einer Instanz gemeinsam gespeichert. Um dies zu bewerkstelligen, wird bei jeder Veränderung an einer Kante gleichzeitig die eindeutige Residualkante aktualisiert. Zur Veranschaulichung folgt der Quellcode von \lstinline|Network::addEdge| ohne die Prüfung der Zulässigkeit.
+Der Graph $G$ mit einem Fluss $f$ und der dazugehörige Residualgraph $\bar{G}$ werden nicht als zwei verschiedene Objekte der Netzwerk-Klasse geführt, sondern in einer Instanz gemeinsam gespeichert. Um dies zu bewerkstelligen, wird bei jeder Veränderung an einer Kante gleichzeitig die eindeutige Residualkante aktualisiert. Zur Veranschaulichung folgt der Quellcode von \lstinline|Network::addEdge| ohne die Prüfung der Zulässigkeit.
 
 \begin{lstlisting}
 bool Network::addEdge(Edge e) {
