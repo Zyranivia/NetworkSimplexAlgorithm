@@ -1,6 +1,7 @@
 \documentclass[11pt]{standalone}
 \usepackage{pgf, tikz}
 \usetikzlibrary{arrows, automata}
+
 \begin{document}
 \begin{tikzpicture} [align=center]
 \path (0,0) node[circle, draw] (v0) {}
@@ -23,7 +24,6 @@
 \draw[dashed, <->] (v1) to (v3);
 \draw[dashed, ->] (v2) to (v5);
 \draw[dashed, ->] (v5) to (v6);
-\draw[dashed, ->] (v6) to (v3);
-	  
+\draw[dashed, ->] (v6) to (v3);  
 \end{tikzpicture}
 \end{document}

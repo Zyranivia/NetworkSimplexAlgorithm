@@ -23,7 +23,7 @@ In dieser Bachelorarbeit wird angenommen, dass $b$ auf $\mathbb{Z}$ sowie $c$ un
 
 Da die Kostenfunktion auf nicht-negative Werte eingeschränkt ist, hat kein maximaler Fluss negative Kosten und unbeschränkte Instanzen sind ausgeschlossen. Unbeschränkte Kapazitäten können somit in der konkreten Implementierung durch $1+0,5\cdot\sum_{v\in V} |b(v)|$ abgeschätzt werden, ohne dass die Lösungsmenge verändert wird. Alle Netzwerke werden als zusammenhängend angenommen, da die Zusammenhangskomponenten einer Instanz separat gelöst werden können. Der implementierte Algorithmus verlangt keinen Zusammenhang.
 
-\section{Vorbetrachtungen}\label{ch:BL}
+\section{Zulässige Baumlösungen}\label{ch:BL}
 Um die Funktionsweise des Netzwerk-Simplex-Algorithmus zu beschreiben, benötigen wir zunächst einige grundlegende Definitionen der Graphentheorie. Im Nachfolgenden sind die wichtigsten in Kürze aufgeführt, für eine vollständige Einführung sei der geneigte Leser auf \cite{Alma} verwiesen.
 
 \begin{defn}Der einem gerichteten Graphen $G=(V,E)$ \textbf{zugrundeliegende ungerichtete Graph} $G'=(V,E')$ ist definiert durch:
@@ -114,7 +114,7 @@ In der zweiten Phase wird folgende Vorgehensweise iteriert: Betrachte Iteration 
 
 \begin{restatable}{thm}{Opt}\label{opt}Sei $N$ eine Instanz des Transportproblems mit einer zulässigen Baumlösung $(T,f)$. Existiert kein negativer Kreis $\bar{C}_{T,e}$, so ist $f$ eine optimale Lösung.\end{restatable}
 
-Wir werden nun auf den Beweis von \cref{opt} hinarbeiten. Dann haben wir gezeigt, dass der Algorithmus eine optimale Lösung des Transportproblems gefunden hat, wenn Phase 2 in Ermangelung einer geeigneten Kante $e$ beendet wird. \cref{iterierbar} ist allgemeiner formuliert als notwendig, da wir in \cref{ch:alg2} darauf zurückgreifen werden.
+Wir werden nun auf den Beweis von \cref{opt} hinarbeiten. Dieses sagt aus, dass der Algorithmus eine optimale Lösung des Transportproblems gefunden hat, wenn Phase 2 in Ermangelung einer geeigneten Kante $e$ beendet wird. \cref{iterierbar} ist allgemeiner formuliert als notwendig, da wir in \cref{ch:alg2} darauf zurückgreifen werden.
 
 \begin{nota}Sei $N=(G,b,c,u)$ ein Netzwerk mit einem maximalen Fluss $f$, $T$ ein Baum von $G$ und $v,w\in V(T)$ zwei beliebige Knoten von $T$. Mit $v\xrightarrow{T}w$ bezeichnen wir den eindeutigen gerichteten Weg von $v$ nach $w$ im Residualgraph $\bar{G}$, der nur über Kanten $e\in E(T)$ oder deren Residualkanten $\varphi(e)$ verläuft. Insbesondere ist dieser Weg unabhängig von $f$ und für die Kosten gilt $c(w\xrightarrow{T}v) = -c(v\xrightarrow{T}w)$.\end{nota}
 
@@ -181,12 +181,18 @@ z(e)&\text{sonst}\end{cases}
 \end{equation*}
 Offensichtlich ist $z'$ eine Zirkulation und $\sigma_{z'}<\sigma_z$. Wir nehmen per Induktion an, dass wir für $z'$ eine Menge $\mathscr{Z}':=\{z'_1,\ldots,z'_n\}$ von Zirkulationen mit obigen Eigenschaften erhalten. \Obda sei $\bar{G}_{z'_i}\neq\bar{G}_{z'_j}$ für $i\neq j$, denn andernfalls können wir die beiden Zirkulationen vereinigen. Ist $C=\bar{G}_{z'_i}$ für eine Zirkulation $z'_i$, dann sei $\tilde{z}:=z'_i$, andernfalls sei $\tilde{z}$ die leere Zirkulation auf $\bar{G}$.
 
-In beiden Fällen definieren wir uns die Zirkulation $z_{n+1}$ mit $z_{n+1}(e)=\tilde{z}(e)+1$ für alle $e\in E(C)$ und $z_{n+1}=0$ sonst. Offensichtlich ist $\bar{G}_{z_{n+1}}=C$ ein gerichteter Kreis. Wir setzen $\mathscr{Z}:=\mathscr{Z}'\backslash\tilde{z}\cup z_{n+1}$, womit für $z$ und $\mathscr{Z}$ nach Konstruktion gilt:
-TODO HIER!
-\begin{alignat*}{1}
-\forall e\in E(\bar{G})\backslash E(C)\colon\quad &\sum_{z_i\in\mathscr{Z}} z_i(e)=\sum_{z'_i\in\mathscr{Z'}}z'_i(e)+\tilde{z}(e)-z_{n+1}(e)=\sum_{z'_i\in\mathscr{Z'}}z'_i(e)=z'(e)=z(e)\\
-\forall e\in E(C)\colon\quad &z(e)=1+z'(e)=1+\sum_{z'_i\in\mathscr{Z'}} z'_i(e)=\sum_{z_i\in\mathscr{Z}} z_i(e)\\
-&c(z)=c(C)+c(z')=c(C)+\sum_{z'_i\in\mathscr{Z'}} c(z'_i) =\sum_{z_i\in\mathscr{Z}} c(z_i)\end{alignat*}
+In beiden Fällen definieren wir die Zirkulation $z_{n+1}$ mit $z_{n+1}(e)=\tilde{z}(e)+1$ für alle $e\in E(C)$ und $z_{n+1}(e)=0$ sonst. Offensichtlich ist $\bar{G}_{z_{n+1}}=C$ ein gerichteter Kreis. Wir setzen $\mathscr{Z}:=\mathscr{Z}'\backslash\tilde{z}\cup z_{n+1}$, womit für $z$ und $\mathscr{Z}$ nach Konstruktion gilt:
+\begin{align*}
+\forall e\in E(\bar{G})\backslash E(C)\colon\quad &\sum_{\mathclap{z_i\in\mathscr{Z}}} z_i(e) = \sum_{\mathclap{z'_i\in\mathscr{Z'}}} z'_i(e) - \tilde{z}(e) + z_{n+1}(e)\\
+=&\sum_{\mathclap{z'_i\in\mathscr{Z'}}} z'_i(e) - \tilde{z}(e) + \tilde{z}(e) = \sum_{\mathclap{z'_i\in\mathscr{Z'}}} z'_i(e) = z'(e) =z (e)\\
+%
+\forall e\in E(C)\colon\quad &\sum_{\mathclap{z_i\in\mathscr{Z}}} z_i(e) = \sum_{\mathclap{z'_i\in\mathscr{Z'}}} z'_i(e) - \tilde{z}(e) + z_{n+1}(e)\\
+=&\sum_{\mathclap{z'_i\in\mathscr{Z'}}} z'_i(e) - \tilde{z}(e) + \tilde{z}(e) + 1 = \sum_{\mathclap{z'_i\in\mathscr{Z'}}} z'_i(e) + 1 = z'(e) + 1 = z(e)
+\end{align*}
+Für die Kosten gilt:
+\begin{equation*}
+\sum_{\mathclap{z_i\in\mathscr{Z}}} c(z_i) = \sum_{\mathclap{z'_i\in\mathscr{Z'}}} c(z'_i) - c(\tilde{z}) + c(z_{n+1}) = c(z') + c(C) = c(z)
+\end{equation*}
 Damit ist die Aussage für alle Zirkulationen gezeigt.\end{proof}
 
 \begin{nota}Seien $f$ und $\hat{f}$ zwei maximale Flüsse auf einem Netzwerk $(G,b,c,u)$. Mit $\hat{f}-f$ sei die folgendermaßen auf dem Residualnetzwerk $R_{N,f}$ definierte Abbildung $z\colon E(\bar{G})\rightarrow\mathbb{N}_{\geq0}$ gemeint:
@@ -195,16 +201,8 @@ Damit ist die Aussage für alle Zirkulationen gezeigt.\end{proof}
 \max\{f(\varphi(e))-\hat{f}(\varphi(e)),0\}&\text{wenn } e\in \varphi(E(G))\end{cases}
 \end{equation*}\end{nota}
 
-\begin{lem}Seien $f$ und $\hat{f}$ zwei maximale Flüsse auf einem Netzwerk $(G,b,c,u)$. Dann ist $z:=\hat{f}-f$ eine Zirkulation auf $R_{N,f}$ und für die Kosten gilt $c(z)=c(\hat{f})-c(f)$.\end{lem}
-\begin{proof}Sei $E:=E(G)$ die Menge aller Kanten des Graphen und $\bar{E}:=\varphi(E)$ die Menge ihrer Residualkanten in $\bar{G}$. Zunächst betrachten wir die Kosten von $z$:
-\begin{align*}c(z)&=\sum_{\mathclap{e\in E\amalg\bar{E}}} z(e)\cdot \bar{c}(e)\\
-&=\sum_{e\in E}\max\{\hat{f}(e)-f(e),0\}\cdot c(e) + \sum_{\bar{e}\in \bar{E}}\max\{f(\varphi(\bar{e}))-\hat{f}(\varphi(\bar{e})),0\}\cdot c_f(\bar{e})\\
-&=\sum_{e\in E}\max\{\hat{f}(e)-f(e),0\}\cdot c(e) + \sum_{\bar{e}\in \bar{E}}-\min\{\hat{f}(\varphi(\bar{e}))-f(\varphi(\bar{e})),0\}\cdot(- c(\varphi(\bar{e})))\\
-&=\sum_{e\in E}\max\{\hat{f}(e)-f(e),0\}\cdot c(e) + \sum_{e\in E}\min\{\hat{f}(e)-f(e),0\}\cdot c(e)\\
-&=\sum_{e\in E} (\hat{f}(e)-f(e))\cdot c(e) = c(\hat{f})-c(f)
-\end{align*}
-
-Nun überprüfen wir, ob $z$ alle Eigenschaften aus \cref{zirk} erfüllt. Für alle Kanten $e\in E$ ist
+\begin{lem}\label{f-f}Seien $f$ und $\hat{f}$ zwei maximale Flüsse auf einem Netzwerk $(G,b,c,u)$. Dann ist $z:=\hat{f}-f$ eine Zirkulation auf $R_{N,f}$ und für die Kosten gilt $c(z)=c(\hat{f})-c(f)$.\end{lem}
+\begin{proof}Sei $E:=E(G)$ die Menge aller Kanten des Graphen und $\bar{E}:=\varphi(E)$ die Menge ihrer Residualkanten in $\bar{G}$. Zunächst überprüfen wir, ob $z$ alle Eigenschaften aus \cref{zirk} erfüllt. Für alle Kanten $e\in E$ ist
 \begin{equation*}z(e)=\max\{\hat{f}(e)-f(e),0\}\leq\hat{f}(e)\leq u(e)=\bar{u}(e),\end{equation*}
 für Residualkanten $\bar{e}\in \bar{E}$ gilt
 \begin{equation*}z(\bar{e})=\max\{f(\varphi(\bar{e}))-\hat{f}(\varphi(\bar{e})),0\}\leq f(\varphi(\bar{e}))\leq u_f(\bar{e})\leq \bar{u}(e).\end{equation*}
@@ -214,7 +212,13 @@ für Residualkanten $\bar{e}\in \bar{E}$ gilt
 ={}&\sum_{\mathclap{(w,v)\in E}} \Big(\hat{f}((w,v)) -  f((w,v))\Big) -  \sum_{\mathclap{(v,w)\in E}} \Big(\hat{f}((v,w)) - f((v,w))\Big)\\
 ={}&b(v)-b(v)=0\end{align*}
 
-Die erste Gleichheit gilt gemäß Konstruktion von $z$, da ein theoretischer negativer Fluss auf einer Kante $e\in E(G)$ als positiver auf der Residualkante $\varphi(e)$ umgesetzt wird. Die zweite Umformung gilt gemäß \cref{DefMaxFlowII} aus \cref{DefMaxFlow}. Damit ist \cref{zirkII} erfüllt und $z$ eine Zirkulation.\end{proof}
+Die erste Gleichheit gilt gemäß Konstruktion von $z$, da ein theoretischer negativer Fluss auf einer Kante $e\in E(G)$ als positiver auf der Residualkante $\varphi(e)$ umgesetzt wird. Die zweite Umformung gilt gemäß \cref{DefMaxFlowII} aus \cref{DefMaxFlow}. Damit ist \cref{zirkII} erfüllt und $z$ eine Zirkulation. Zu guter Letzt betrachten wir die Kosten von $z$:
+\begin{align*}c(z)&=\sum_{\mathclap{e\in E\amalg\bar{E}}} z(e)\cdot \bar{c}(e)\\
+&=\sum_{e\in E}\max\{\hat{f}(e)-f(e),0\}\cdot c(e) + \sum_{\bar{e}\in \bar{E}}\max\{f(\varphi(\bar{e}))-\hat{f}(\varphi(\bar{e})),0\}\cdot c_f(\bar{e})\\
+&=\sum_{e\in E}\max\{\hat{f}(e)-f(e),0\}\cdot c(e) + \sum_{\bar{e}\in \bar{E}}-\min\{\hat{f}(\varphi(\bar{e}))-f(\varphi(\bar{e})),0\}\cdot(- c(\varphi(\bar{e})))\\
+&=\sum_{e\in E}\max\{\hat{f}(e)-f(e),0\}\cdot c(e) + \sum_{e\in E}\min\{\hat{f}(e)-f(e),0\}\cdot c(e)\\
+&=\sum_{e\in E} (\hat{f}(e)-f(e))\cdot c(e) = c(\hat{f})-c(f)\qedhere
+\end{align*}\end{proof}
 
 Bevor wir nun \cref{opt} beweisen, zeigen wir noch, wie sich mithilfe einer Zirkulation der Beweis von \cref{TreeUnique} wesentlich vereinfachen lässt. 
 
@@ -224,11 +228,11 @@ Bevor wir nun \cref{opt} beweisen, zeigen wir noch, wie sich mithilfe einer Zirk
 \Opt*
 \begin{proof}Wir werden zeigen, dass ein negativer Kreis $\bar{C}_{T,e}$ existiert, falls die betrachtete zulässige Baumlösung $(T,f)$ nicht optimal ist. Dazu finden wir einen gerichteten negativen Kreis, auf den wir \cref{iterierbar} anwenden können.
 	
-Sei $N=(G,b,c,u)$ ein Netzwerk mit einer optimalen zulässigen Baumlösung $(\hat{T},\hat{f})$ und einer zulässigen Baumlösung $(T,f)$, sodass $c(f)>c(\hat{f})$. Dann ist $z:=\hat{f}-f$ eine Zirkulation und nach \cref{zerl} sind ihre Kosten $c(z)=c(\hat{f})-c(f)<0$ negativ. Des Weiteren BLABLA zerfallen für eine Menge $\mathscr{C}=\{C_1,\ldots,C_n\}$ mit Faktoren $\lambda_1,\ldots,\lambda_n$. \Obda seien alle $\lambda_i\neq 0$.
+Sei $N=(G,b,c,u)$ ein Netzwerk mit einer optimalen zulässigen Baumlösung $(\hat{T},\hat{f})$ und einer zulässigen Baumlösung $(T,f)$, sodass $c(f)>c(\hat{f})$. Dann ist $z:=\hat{f}-f$ eine Zirkulation und nach \cref{f-f} sind ihre Kosten $c(z)=c(\hat{f})-c(f)<0$ negativ. Des Weiteren zerfällt $z$ gemäß \cref{zerl} in eine Menge $\mathscr{Z}=\{z_1,\ldots,z_n\}$ von Zirkulationen, sodass $c(z)=\sum_{i=1}^{n} c(z_i)$ gilt und $\bar{G}_{z_i}$ für alle $z_i\in\mathscr{Z}$ ein gerichteter Kreis ist.  
 
-Da $c(z)<0$ ist, gibt es mindestens einen negativen Kreis $C_j\in\mathscr{C}$. Sei $e\in E(C_j)$ eine Kante dieses Kreises. Ist $e$ eine Residualkante, so gilt $\hat{f}(\varphi(e))-f(\varphi(e))<0$, woraus $f(e)>0$ und damit $\varphi(e)\in E(T)$ folgt. Ansonsten ist $e\in E(G)$ und vom Algorithmus wählbar. Wir können also \cref{iterierbar} anwenden, das Theorem folgt.\end{proof}
+Da $c(z)<0$ ist, gibt es mindestens eine Zirkulation $z_j\in\mathscr{Z}$ mit negativen Kosten. Sei $C_j:=\bar{G}_{z_j}$ der von ihr durchflossene Kreis und $e\in E(C_j)$ eine Kante davon. Ist $e$ eine Residualkante, so gilt $\hat{f}(\varphi(e))-f(\varphi(e))<0$, woraus $f(e)>0$ und damit $\varphi(e)\in E(T)$ folgt. Ansonsten ist $e\in E(G)$ und vom Algorithmus wählbar. Wir können also auf $C_j$ \cref{iterierbar} anwenden, das Theorem folgt.\end{proof}
 
-\begin{kor}\label{korrekt}Sei $N$ eine Instanz des Transportproblems mit einer initialen zulässigen Baumlösung $(T_0,f_0)$. Determiniert der Netzwerk-Simplex-Algorithmus, so ist er korrekt.\qed\end{kor}
+\begin{kor}\label{korrekt}Sei $N$ eine Instanz des Transportproblems mit einer initialen zulässigen Baumlösung. Determiniert der Netzwerk-Simplex-Algorithmus, so ist er korrekt.\qed\end{kor}
 
 Bislang haben wir nicht gezeigt, dass der Algorithmus immer terminiert. Dies wäre offensichtlich, wenn bei jeder Iteration von $(T,f)$ zu $(T',f')$ die Kosten sinken würden, also $c(f')<c(f)$ wäre. Es gibt jedoch sogenannte \emph{degenerierte Iterationen}, in denen ein negativer Kreis $\bar{C}_{T,e}$ um $\delta=0$ augmentiert wird. Entfernt der Algorithmus danach eine Kante $e'\in E(C_{T,e})\backslash\{e\}$, verändert sich nur der Baum. Im nächsten Abschnitt lernen wir einfache Methode kennen, durch die der Algorithmus immer terminiert.
 
@@ -245,13 +249,31 @@ Bislang haben wir nicht gezeigt, dass der Algorithmus immer terminiert. Dies wä
 
 Degenerierte Iterationen entstehen, wenn bei einer zulässigen Baumlösung $(T,f)$ nicht alle Kanten von $T$ Fluss aufweisen, also $T\neq T_f$ gilt. $(T,f)$ wird dann auch als \emph{degeneriert} bezeichnet. In einer ungünstigen Konstellation der deterministischen Wahl der hinzugefügten Kante $e$ und entfernten Kante $e'$ kann es zum \emph{Cycling} kommen, also zu einer Abfolge von Bäumen, die wiederholt iteriert werden. Dies tritt sehr selten auf, für ein konstruiertes Beispiel siehe \cite[S. 303]{NSAbook}.
 
-\cite[Cunningham, 1976]{cycling} führte eine Methode ein, mit der durch eine geschickte Wahl der entfernten Kante Cycling verhindert werden kann, ohne dass die Auswahl der hinzufügbaren Kanten eingeschränkt wird. Dafür benötigen wir folgende Definition:
+In \cite{cycling} führte Cunningham 1976 eine Methode ein, mit der durch eine geschickte Wahl der entfernten Kante Cycling verhindert werden kann, ohne dass die Auswahl der hinzufügbaren Kanten eingeschränkt wird. Dafür benötigen wir folgende Definitionen:
 
 \begin{defn}Sei $N=(G,b,c,u)$ eine Instanz des Transportproblems. Ein aufspannender Baum $T$ von $G$, ein maximaler Fluss $f$ auf $N$ und ein Wurzelknoten $r\in V(T)=V(G)$ bilden eine \textbf{stark zulässige Baumlösung} $(T,f)_r$, falls $(T,f)$ eine zulässige Baumlösung ist und zusätzlich jede Kante $e=(v,w)\in E(T)$ mit $f(e)=0$ von der Wurzel wegführt, also $e$ im Weg $r\xrightarrow{T}w$ enthalten ist.\end{defn}
 
-TODO: An dieser Stelle folgt ein Absatz, der erklärt, wie genau die ausgehende Kante abhängig vom Kreis und dem Wurzelknoten gewählt werden muss. Es folgt das Lemma, dass dann der Algorithmus terminiert, für den Beweis wird auf die Literatur verwiesen. Dieser Teil fehlt momentan noch, da ich das noch mit meinem programmierten Algorithmus abgleichen muss. Außerdem stimmten die Informationen im nächsten Absatz nicht bzw. sind unvollständig.
+\begin{defn}Sei $N$ ein Netzwerk mit einer stark zulässigen Baumlösung $(T,f)_r$ und $e\in E(G)\backslash E(T)$ eine weitere Kante. Der \textbf{Apex} von $C_{T,e}$ ist der eindeutige Knoten $p\in V(C_{T,e})$, der den kürzesten Weg zu $r$ aufweist.\end{defn}
 
-Die Laufzeit des Netzwerk-Simplex-Algorithmus ist bislang ungeklärt. Für bestimmte Varianten wurden exponentielle Instanzen gefunden, die auf \emph{Stalling} basieren, also einer exponentiellen Anzahl degenerierter Iterationen. Mit diesen werden wir uns in \cref{ch:lit} näher befassen. Meine eigene, experimentelle Suche nach schlechten Instanzen findet sich in \cref{ch:erg}. Zunächst vervollständigen wir den Algorithmus um die Wahl des negativen Kreises $\bar{C}_{T,e}$ und die Erzeugung einer initialen Baumlösung.
+\begin{figure}[!ht]\centering
+    \includestandalone{tikz_lastblockingarc}
+    \caption{Grafik angelehnt an \cite[S. 372]{GNA}. Die gestrichelten Linien stellen den Baum $T$ mit Wurzelknoten $r$ dar. Die beiden blockierenden Kanten in $C_{T,e}$ sind rot gekennzeichnet, $p$ ist der Apex.}
+    \label{fig:rule}
+\end{figure}
+
+Für einen Kreis $C_{T,e}$ bezeichnen wir diejenigen Kanten, die verhindern, dass der Kreis um mehr als $\delta$ augmentiert werden kann, als \emph{blockierende Kanten}. In \cref{fig:rule} ist $\delta=2$ und die blockierenden Kanten sind rot eingefärbt. Insbesondere wird die entfernte Kante immer unter diesen gewählt.
+
+Die von Cunningham eingeführte \emph{Regel der letzten blockierenden Kante} besagt nun folgendes: Mit dem Apex von $C_{T,e}$ beginnend gehe über alle Kanten $e\in E(C_{T,e})$ in der durch $e$ bestimmten Orientierung des Kreises und wähle die letzte blockierende Kante als die zu entfernende Kante aus. In \cref{fig:rule} ist diese dementsprechend $e'$. Dank dieser Regel terminiert der Netzwerk-Simplex-Algorithmus nicht nur, er wird meistens sogar beschleunigt. 
+ 
+\begin{lem}[\protect{\cite[S. 108\,f.]{cycling}}]
+Wird eine stark zulässige Baumlösung $(T,f)_r$ um einen Kreis $\bar{C}_{T,e}$ größtmöglich augmentiert und eine Kante gemäß  der Regel der letzten blockierenden Kante entfernt, ist die entstehende Baumlösung $(T',f')$ wieder eine stark zulässige Baumlösung $(T',f')_r$.\qed\end{lem}
+
+\begin{thm}[\protect{\cite[S. 108\,f.]{cycling}}]
+Der Netzwerk-Simplex-Algorithmus mit einer initialen stark zulässigen Baumlösung, einem beliebigen Pivotalgorithmus und der Regel der letzten blockierenden Kante terminiert.\qed\end{thm}
+
+TODO: Untenstehendes Kapitel aktualisieren, nachdem die anderen Kapitel geschrieben wurden.
+
+Nach \cite[S. 359]{GNA} ist die Laufzeit des Netzwerk-Simplex-Algorithmus für bestimmte Pivotalgorithmen polynomiell in der Anzahl Knoten und Kanten sowie den höchsten Kosten einer Kante beschränkt. Für die in der Praxis verwendeten Pivotalgorithmen sind keine polynomiellen Schranken bekannt, teilweise wurden sogar exponentielle Instanzen gefunden, die auf \emph{Stalling} basieren, also einer exponentiellen Anzahl degenerierter Iterationen. Mit diesen werden wir uns in \cref{ch:lit} näher befassen. Meine eigene, experimentelle Suche nach schlechten Instanzen findet sich in \cref{ch:erg}. Zunächst vervollständigen wir den Algorithmus um die Wahl des negativen Kreises $\bar{C}_{T,e}$ und die Erzeugung einer initialen Baumlösung.
 
 \subsection{Pivotalgorithmen}\label{ch:pivot}
 Sei $N=(G,b,c,u)$ ein Netzwerk mit zulässiger Baumlösung $(T,f)$. Algorithmen, die aus der Menge $\bar{C}_T=\{\bar{C}_{T,e}\mid c(\bar{C}_{T,e})<0\}$ aller sinnvollen Iterationen eine auswählen, heißen \emph{Pivotalgorithmen}. In der Praxis wird der Pivotalgorithmus nur auf einer Teilmenge von $\bar{C}_T$ ausgeführt, um Rechenzeit zu sparen. In dieser Bachelorarbeit werden nur drei naheliegende, einfache Pivotalgorithmen betrachtet.
@@ -300,14 +322,14 @@ Offensichtlicherweise ist $N$ genau dann lösbar, wenn $N'$ lösbar ist. Wenn $c
 Damit bekommen wir die zulässige Baumlösung $(T=T'-a, f=f'_{|E(G)})$ für $N'$ und damit für $N$. Als neuen Wurzelknoten können wir den eindeutigen Nachbar $k_a$ von $a$ in $T'$ wählen; damit bekommen wir die stark zulässige Baumlösung $(T,f)_{k_a}$. Nun kann eine optimale Lösung des Transportproblems für $N$ berechnet werden.
 
 \section{Erweiterung auf beschränkte Kapazitäten}\label{ch:alg2}
-Wir werden nun den Netzwerk-Simplex-Algorithmus auf das Min-Cost-Flow-Problem erweitern. Die Funktionsweise bleibt dieselbe, nur die betrachteten zulässigen Baumlösungen verändern sich leicht:
+Bisher haben wir uns auf unbeschränkte Kapazitäten beschränkt. Wir werden nun den Netzwerk-Simplex-Algorithmus auf das allgemeinere Min-Cost-Flow-Problem erweitern. Die Funktionsweise bleibt dieselbe, nur die betrachteten zulässigen Baumlösungen verändern sich leicht:
 
 \begin{defn}Sei $N=(G,b,c,u)$ ein Netzwerk. Ein aufspannender Baum $T$ von $G$ und ein maximaler Fluss $f$ auf $N$ bilden eine \textbf{zulässige Baumlösung} $(T,f)$, wenn für alle Kanten $e\in E(G)\backslash E(T)$ außerhalb des Baums $f(e) = 0$ oder $f(e)=u(e)$ gilt.\end{defn}
 \begin{anm}Kanten, die maximal durchflossen sind, bezeichnen wir als \emph{saturiert}.\end{anm}
 
 \begin{defn}Sei $N=(G,b,c,u)$ ein Netzwerk. Ein aufspannender Baum $T$ von $G$, ein maximaler Fluss $f$ auf $N$ und ein Wurzelknoten $r\in V(T)=V(G)$ bilden eine \textbf{stark zulässige Baumlösung} $(T,f)_r$, wenn $(T,f)$ eine zulässige Baumlösung ist und folgendes gilt:
 \begin{alignat*}{2}
-\forall e=(v,w)\in E(T)\colon&(f(e)=0 \Rightarrow e\in E(r\xrightarrow{T}w))&\land\\
+\forall e=(v,w)\in E(T)\colon\quad&(f(e)=0 \Rightarrow e\in E(r\xrightarrow{T}w))&\land\\
 &(f(e)=u(e) \Rightarrow e\in E(w\xrightarrow{T}r))
 \end{alignat*}\end{defn}
 \begin{anm}An dieser Stelle sollten sämtliche Kanten $e\in E(G)$ mit $u(e)=0$ aus dem Graphen entfernt werden; sie sind für das Problem ohnehin irrelevant.\end{anm}
@@ -318,13 +340,13 @@ Wir werden nun den Netzwerk-Simplex-Algorithmus auf das Min-Cost-Flow-Problem er
 	\label{fig:NSA}
 \end{figure}
 
-Im Falle beschränkter Kapazitäten erlauben wir für eine zulässige Baumlösung $(T,f)$ auch Fluss außerhalb von $T$, insofern er die Kapazität der Kante voll ausnutzt. \cref{fig:NSA} veranschaulicht, warum dies notwendig ist. Solche saturierten Kanten $e\in E(G)\backslash E(T)$ sind als eingehende Kante keine sinnvolle Wahl mehr, stattdessen kann der Algorithmus über den Kreis $\bar{C}_{T,\bar{e}}$ der Residualkante $\bar{e}$ augmentieren, sofern er negativ ist. Für stark zulässige Baumlösungen müssen nun zusätzlich alle saturierten Kanten des Baumes zum Wurzelknoten hingerichtet sein.
+Im Falle beschränkter Kapazitäten erlauben wir für eine zulässige Baumlösung $(T,f)$ auch Fluss außerhalb von $T$, insofern er die Kapazität der Kante voll ausnutzt. \cref{fig:NSA} veranschaulicht, warum dies notwendig ist. Solche saturierten Kanten $e\in E(G)\backslash E(T)$ sind als eingehende Kante keine sinnvolle Wahl mehr, stattdessen kann der Algorithmus über den Kreis $\bar{C}_{T,\bar{e}}$ der Residualkante $\bar{e}$ augmentieren, sofern er negativ ist. Für stark zulässige Baumlösungen müssen nun zusätzlich alle saturierten Kanten des Baumes zum Wurzelknoten hinführen.
 
-Die in \cref{TreeUnique} bewiesene Eindeutigkeit von $f$ gilt nun nicht mehr, wie \cref{fig:NSA} veranschaulicht. Wir haben diese Eigenschaft bei der Initialisierung genutzt. Der Leser kann sich an dieser Stelle davon überzeugen, dass diese trotzdem komplett identisch durchführbar ist.
+\cref{fig:NSA} veranschaulicht, dass die in \cref{TreeUnique} bewiesene Eindeutigkeit von $f$ nun nicht mehr gilt. Wir haben diese Eigenschaft bei der Initialisierung genutzt. Der Leser kann sich an dieser Stelle davon überzeugen, dass diese trotzdem komplett identisch durchführbar ist.
 
-Wir werden jetzt \cref{negKreis,BLex,opt,TP} auf das Min-Cost-Flow-Problem erweitern.
+Die in \cref{ch:deg} beschriebene Regel der letzten blockierenden Kante wurde in \cite{cycling} ohnehin für den allgemeinen Fall eingeführt und lässt sich einfach übertragen. Wir werden jetzt \cref{negKreis,BLex,opt,TP} auf das Min-Cost-Flow-Problem erweitern.
 
-\begin{lem}\label{negKreis2}Sei $N$ ein Netzwerk, $R_{N,f}$ sein Residualnetzwerk und $C$ ein gerichteter Kreis im Residualgraph $\bar{G}$ mit negativen Kosten. Dann ist der größte Wert $\delta$, um den $C$ augmentiert werden kann, endlich, und nach der Augmentierung um $\delta$ zum neuen maximalen Fluss $f'$ existiert eine Residualkante $\bar{e}\in E(C)$, sodass die korrespondierende Kante einen Fluss von $f'(\varphi(e)))=0$ besitzt, oder eine Kante $e\in E(C)\cap E(G)$ mit $f'(e)=u(e)$.\end{lem}
+\begin{lem}\label{negKreis2}Sei $N$ ein Netzwerk, $R_{N,f}$ sein Residualnetzwerk und $C$ ein gerichteter Kreis im Residualgraph $\bar{G}$ mit negativen Kosten. Dann ist der größte Wert $\delta$, um den $C$ augmentiert werden kann, endlich, und nach der Augmentierung um $\delta$ zum neuen maximalen Fluss $f'$ existiert eine Residualkante $\bar{e}\in E(C)$, sodass die korrespondierende Kante einen Fluss von $f'(\varphi(e))=0$ besitzt, oder eine Kante $e\in E(C)\cap E(G)$ mit $f'(e)=u(e)$.\end{lem}
 \begin{proof}Sei $N=(G,b,c,u)$ ein Netzwerk mit maximalen Fluss $f$ und $C$ ein negativer Kreis in $\bar{G}$. Sei $\tilde{e}:=\argmin_{e\in E(C)}\{\bar{u}(e)-\bar{f}(e)\}$ und $\delta:=\bar{u}(\tilde{e})-\bar{f}(\tilde{e})$. Analog zum Beweis von \cref{negKreis} ist $\delta$ endlich.
 	
 Ist $\tilde{e}$ eine Residualkante, so besitzt $e:=\varphi(e)$ einen Fluss von
@@ -343,7 +365,7 @@ f'(\tilde{e})=f(\tilde{e})+\delta=f(\tilde{e})+\bar{u}(\tilde{e})-\bar{f}(\tilde
 \begin{thm}\label{opt2}Sei $N$ ein Netzwerk mit einer zulässigen Baumlösung $(T,f)$. Existiert kein negativer Kreis $\bar{C}_{T,e}$, so ist $f$ eine optimale Lösung.\end{thm}
 \begin{proof}Wir werden wiederum zeigen, dass ein negativer Kreis $\bar{C}_{T,e}$ existiert, wenn die betrachtete Baumlösung nicht optimal ist.
 
-Sei $N=(G,b,c,u)$ ein Netzwerk mit einer optimalen zulässigen Baumlösung $(\hat{T},\hat{f})$ und einer zulässigen Baumlösung $(T,f)$, sodass $c(f)>c(\hat{f})$ ist. Wieder betrachten wir die Zirkulation $z:=\hat{f}-f$, ihre Zerlegung in eine Menge $\mathscr{C}$ gerichteter Kreise mit Faktoren $\lambda_1,\ldots,\lambda_n$ und den negativen Kreis $C_j\in\mathscr{C}$.
+Sei $N=(G,b,c,u)$ ein Netzwerk mit einer optimalen zulässigen Baumlösung $(\hat{T},\hat{f})$ und einer zulässigen Baumlösung $(T,f)$, sodass $c(f)>c(\hat{f})$ ist. Wieder betrachten wir die Zirkulation $z:=\hat{f}-f$, ihre Zerlegung gemäß \cref{zerl} in eine Menge $\mathscr{Z}$ von Zirkulationen über gerichteten Kreisen und eine Zirkulation $z_j\in\mathscr{Z}$ mit negativen Kosten sowie den ihr zugehörigen negativen Kreis $C_j=\bar{G}_{z_j}$.
 
 Sei $e\in E(C_j)$ eine Kante dieses Kreises. Ist $e$ eine Residualkante, so gilt wie gehabt $\hat{f}(\varphi(e))-f(\varphi(e))<0$, woraus $f(e)>0$ folgt. Damit ist $\varphi(e)\in E(T)$ oder $\varphi(e)$ saturiert. Andernfalls ist $e\in E(G)$ und $f(e)<\hat{f}(e)$, womit $e$ nicht saturiert sein kann. Die Bedingungen für \cref{iterierbar} sind erneut gegeben.\end{proof}
 

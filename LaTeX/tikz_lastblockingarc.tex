@@ -1,0 +1,42 @@
+\documentclass[11pt]{standalone}
+\usepackage{pgf, tikz}
+\usetikzlibrary{arrows, automata}
+
+\begin{document}
+\begin{tikzpicture} [align=center]
+\path (0,0) node[circle, draw] (t1) {}
+      (1.5,0) node[label={above:$r$},circle, draw] (t0) {}
+      (3,0.75) node[circle, draw] (t2) {}
+      (3,-0.75) node[circle, draw] (t3) {}
+      (4.5,0) node[circle, draw] (t4) {}
+      
+      (5.25,0) node (dots) {$\ldots$}
+      
+      (6,0) node[circle, draw] (t5) {}
+      (7.5,0) node[label={right:$p$},circle, draw] (v3) {}
+      (8.5,-1) node[circle, draw] (v4) {}
+      (10,-1) node[circle, draw] (v5) {}
+      (11,-0.5) node[circle, draw] (v6) {}
+      (11,0.5) node[circle, draw] (v0) {}
+      (10,1) node[circle, draw] (v1) {}
+      (8.5,1) node[circle, draw] (v2) {}
+      
+      (9.5,0) node (C) {$C_{T,e}$};
+
+\draw[dashed, ->] (t0) to (t1);
+\draw[dashed, ->] (t0) to (t2);
+\draw[dashed, ->] (t3) to (t2);
+\draw[dashed, ->] (t4) to (t2);
+ 
+\draw[dashed, ->] (t5) to (v3);
+\draw[->] (v6) to node [right, blue] {\tiny 0} node [left] {$e$} (v0);
+\draw[dashed, ->] (v0) to node [sloped, anchor=center, above, blue] {\tiny 1} (v1);
+\draw[dashed, ->, red] (v2) to node [sloped, anchor=center, above, blue] {\tiny 2} node [below, black] {$e'$} (v1);
+\draw[dashed, ->] (v2) to node [sloped, anchor=center, above, blue] {\tiny 0} (v3);
+\draw[dashed, ->, red] (v4) to node [sloped, anchor=center, below, blue] {\tiny 2} (v3);
+\draw[dashed, ->] (v4) to node [below, blue] {\tiny 2} (v5);
+\draw[dashed, ->] (v6) to node [sloped, anchor=center, below, blue] {\tiny 4} (v5);
+      
+
+\end{tikzpicture}
+\end{document}

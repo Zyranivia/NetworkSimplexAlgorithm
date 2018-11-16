@@ -268,8 +268,8 @@ bool Algorithm::optimize() {
     size_t apex = findApex(chosenOne);
 
     //traverse backwards from apex and reorder the circle such that
-    //the first edge which has full or zero flow is now the first edge and therefore not
-    //part of the tree anymore. In the first case the circle is reversed
+    //the first edge which has full flow is now the first edge and therefore not
+    //part of the tree anymore. The circle is reversed
     for (size_t i = apex; ; i--) {
         const Edge& e = n.getEdges().find(std::forward_as_tuple(chosenOne.getEdges()[i].first, chosenOne.getEdges()[i].second,
                                                          chosenOne.getIsResidual()[i]))->second;

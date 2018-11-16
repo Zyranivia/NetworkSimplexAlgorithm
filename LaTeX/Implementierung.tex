@@ -1,5 +1,5 @@
 \chapter{Implementierung} \label{ch:prog}
-Der Programmierteil dieser Bachelorarbeit implementiert den Netzwerk-Simplex-Algorithmus wie in \cref{ch:NSA} beschrieben, wobei einzelne Strukturen verändert wurden. Der Code ist in \cpp  geschrieben und hält sich an den \cppelf-Standard. Es folgt eine vollständige Übersicht der Codebestandteile, für das Gesamtkonstrukt siehe TODO Anhang. An einigen Stellen wurden für ein besseres Layout Variablennamen angepasst, Kommentare gekürzt und Funktionsdeklarationen weggelassen.
+Im Programmierteil dieser Bachelorarbeit habe ich den Netzwerk-Simplex-Algorithmus wie in \cref{ch:NSA} beschrieben implementiert. Der Code ist in \cpp  geschrieben und hält sich an den \cppelf-Standard. Es folgt eine vollständige Übersicht der Codebestandteile, für das Gesamtkonstrukt kann die angehängte CD konsultiert werden. Im Folgenden wurden an einigen Stellen für ein besseres Layout Variablennamen angepasst, Kommentare gekürzt und Funktionsdeklarationen weggelassen.
 
 \section{Netzwerke}
 Zur Umsetzung der Graphenstruktur habe ich eine Klasse \lstinline|class Network| geschrieben, die auf \lstinline|struct Node| sowie \lstinline|class Edge| basiert und den Fluss händelt. Damit kann \lstinline|Network| beispielsweise sicherstellen, dass nie Kanten entfernt werden, die aktuell durchflossen sind.
@@ -111,7 +111,7 @@ public:
 
 Die Funktionen \lstinline|deleteEdge| und \lstinline|deleteNode| schlagen fehl, wenn auf den zu löschenden Kanten noch Fluss ist. So kann unter am Ende des Algorithmus durch Löschen des künstlichen Knotens überprüft werden, ob die Instanz lösbar ist. Für Phase 1 des Algorithmus (siehe \cref{ch:HCLC}) nutzen wir die Funktion \lstinline|addFlow|, die einen Weg von einer Quelle zu einer Senke verlangt.
 
-\lstinline|changeFlow| wird in jeder Iteration der zweiten Phase des Netzwerk-Simplex-Algorithmus aufgerufen und augmentiert den übergebenen Kreis \lstinline|Circle c| um einen beliebigen Wert, sofern dies möglich ist. Dieser Wert wird analog zu $\delta$ aus \cref{ch:NSA} der größte zulässige sein. Die hier genutzte \lstinline|class Circle| werden wir uns nun genauer anschauen.
+In jeder Iteration der zweiten Phase des Netzwerk-Simplex-Algorithmus wird die Funktion \lstinline|changeFlow| aufgerufen und augmentiert den übergebenen Kreis \lstinline|Circle c| um einen beliebigen Wert, sofern dies möglich ist. Dieser Wert wird analog zu $\delta$ aus \cref{ch:NSA} der größte zulässige sein. Die hier genutzte \lstinline|class Circle| werden wir uns nun genauer anschauen.
 
 \section{Die Klasse \emph{Circle}}
 Sei $G$ ein gerichteter Graph mit $n$ Knoten sowie $m$ Kanten und $T$ ein aufspannender Baum von $G$. In der Herleitung des Algorithmus haben wir genutzt, dass für eine Kante $e\in E(G)\backslash E(T)$ außerhalb des Baumes der Kreis $C_{T,e}$ eindeutig ist. Wird $T$ im Speicher gehalten, kann beispielsweise durch Tiefensuche in Laufzeit $\bigO(n)$ oder mit einer angepassten Datenstruktur (siehe TODO) noch schneller ein Kreis $C_{T,e}$ bzw. dessen Orientierung $\bar{C}_{T,e}$ gefunden werden.
@@ -297,7 +297,7 @@ Anschließend konstruiere ich der Einfachheit halber die beiden Vektoren \lstinl
 
 Mit diesen Datenstrukturen als Grundlage können wir nun den Algorithmus implementieren.
 
-\section{Netzwerk-Simplex-Algorithmus}
+\section{Der Algorithmus}
 Die Klasse \lstinline|class Algorithm| besteht nur aus einem Konstruktor und der Funktion \lstinline|Algorithm::solution|, die das Min-Cost-Flow-Problem entweder mit LC- oder HC-Initialisierung (siehe \cref{ch:init} für die Funktionsweise und \cref{ch:HCLC} für die Umsetzung) löst. Ein \lstinline|Algorithm a| wird mit einer konkreten Pivotfunktion erstellt, die aus einem \lstinline|std::vector<Circle>| einen Kreis auswählt und dessen Index zurückgibt.
 \begin{lstlisting}
 class Algorithm {
@@ -334,8 +334,60 @@ Der Kern der Klasse ist die Funktion \lstinline|Algorithm::optimize|, die eine I
  
 Die Funktion aktualisiert zunächst die Werte \lstinline|flow| und \lstinline|costPerFlow| für die Kreise, insofern notwendig. Dann wählt sie durch den Pivotalgorithmus einen Kreis \lstinline|Circle c| für die nächste Iteration aus oder gibt \lstinline|false| zurück, falls es keinen negativen Kreis mehr gibt. \lstinline|c| wird um \lstinline|c.flow| augmentiert und gemäß \cref{ch:deg} wird die Kante $e'$ gewählt, die den Baum verlässt. Zum Schluss wenden wir \lstinline|Circle::update| für alle anderen Kreise an. Mit unseren bisher vorgestellten Datenstrukturen und Codeschnipseln ist alles bis auf die Wahl von $e'$ leicht implementierbar. Das nächste Kapitel beschäftigt sich mit der Umsetzung dieses Teilproblems.
 
-\subsection{Stark zulässige Baumlösungen}
-TODO: Fun Fact – um stark zulässige Baumlösungen zu erhalten, muss ich vermutlich doch den Baum speichern. Na ja.
+\subsection{Stark zulässige Baumlösungen}\label{ch:szBL}
+Um die in \cref{ch:deg} erklärte Regel der letzten blockierenden Kante umzusetzen, besitzt \lstinline|class Algorithm| noch eine private Variable sowie zwei private Funktionen:
+
+\begin{lstlisting}
+class Algorithm {
+private:
+  //for all nodes remember which edge leads to the root
+  std::map<size_t, size_t> strongFeasibleTree;
+  //functions used for last-blocking-edge-approach
+  size_t findApex (Circle& c);
+  void updateTree(Circle& c, size_t i, size_t apex);
+};
+\end{lstlisting}
+
+Der Apex lässt sich schnell berechnen, wenn wir uns in einer \lstinline|std::map| für jeden Knoten merken, welcher Nachbar auf dem Weg zum Wurzelknoten liegt. Am Anfang ist dieser Nachbar für jeden Knoten der künstliche Knoten, nach jeder Iteration wird \lstinline|strongFeasibleTree| durch die Funktion \lstinline|void updateTree| aktualisiert.
+
+Beginnend mit dem zweiten Knoten eines \lstinline|Circle c| genügt es nun, den Knoten zu finden, der in \lstinline|strongFeasibleTree| einen anderen Nachbar hat als in \lstinline|c|:
+
+\begin{lstlisting}
+size_t Algorithm::findApex (Circle& c) {
+  //find apex of circle
+  size_t apex = 0;
+  for (; apex < c.size() - 1; apex++) {
+    size_t node = c.getEdges()[apex].second,
+           neighbourInCircle = c.getEdges()[apex+1].second;
+    //if the way to the root is leaving the circle
+    if (strongFeasibleTree.find(node)->second !=
+        neighbourInCircle) {break;}
+  }
+  return apex;
+}
+\end{lstlisting}
+
+Sei \lstinline|Circle chosenOne| der vom Pivotalgorithmus ausgewählte Kreis. Statt der letzten blockierenden Kante sucht meine Implementierung die erste in entgegengesetzter Richtung. Der folgende Code ist in \lstinline|Algorithm::optimize| enthalten und terminiert notwendigerweise.
+
+\begin{lstlisting}[escapechar=ß]
+  size_t apex = findApex(chosenOne);
+  for (size_t i = apex; ; i--) {
+    const Edge& e = ß\footnotemarkß;
+
+    if (e.flow == e.capacity) {
+      updateStrongFeasibleTree(chosenOne, i, apex);
+
+      //new first edge, but reversed direction
+      chosenOne.rotateBy(i, true);
+      break;
+    }
+  //go from first to last edge if necessary
+  if (0 == i) {i = chosenOne.size();}
+}
+\end{lstlisting}
+
+\footnotetext{\lstinline|n.getEdges().find(std::forward_as_tuple(chosenOne.getEdges()[i].first,|\\
+\lstinline|chosenOne.getEdges()[i].second, chosenOne.getIsResidual()[i]))->second|}
 
 \subsection{Pivotalgorithmen}
 Die Pivotalgorithmen werden in meiner Implementierung in \lstinline|PivotAlgorithms.h| gesammelt. Ein Pivotalgorithmus gibt einen ungültigen Index zurück, falls es keinen negativen Kreis gibt.
@@ -436,7 +488,7 @@ Ist \lstinline|modus = false|, dann befinden wir uns in HC und sind an dieser St
 
 Für LC wissen wir zunächst nur, ob die Instanz lösbar ist oder nicht. Wenn sie lösbar ist, können wir den künstlichen Knoten löschen, über \lstinline|Network::toggleCost| die originalen Kosten wiederherstellen und mit \lstinline|optimize| eine optimale Lösung finden.
 
-Um die dafür notwendige stark zulässige Baumlösung auf dem Netzwerk ohne künstlichen Knoten zu finden, gibt es zwei Ansätze: Ein Weg ist es, einfach auf dem Graphen einen neuen Baum $T'$ zu bestimmen, der mit dem aktuellen Fluss $f$ eine zulässige Baumlösung $(T',f)$ bildet. In meiner Umsetzung führen wir dagegen vor der Löschung des künstlichen Knoten degenerierte Iterationen durch, bis dieser ein Blatt ist. Dies schien mir der kohärente Ansatz zu sein.
+Um die dafür notwendige stark zulässige Baumlösung auf dem Netzwerk ohne künstlichen Knoten zu finden, gibt es zwei Ansätze: Ein Weg ist es, einfach auf dem Graphen einen neuen Baum $T'$ zu bestimmen, der mit dem aktuellen Fluss $f$ eine stark zulässige Baumlösung $(T',f)_{r'}$ bildet. In meiner Umsetzung führen wir dagegen vor der Löschung des künstlichen Knoten degenerierte Iterationen durch, bis dieser ein Blatt ist. Dies schien mir der kohärente Ansatz zu sein.
 
 Dafür gehen wir über den Vektor \lstinline|circles| und suchen nach Kreisen, in denen zwei Baumkanten mit dem künstlichen Knoten benachbart sind. Sei $e$ diejenige der beiden Kanten, die den Baum verlässt. $e$ kann nur in schon betrachteten Kreisen enthalten sein, wenn deren identifizierende Kante mit dem künstlichen Knoten benachbart ist; diese Kreise werden jedoch später gelöscht. Also genügt es, nur Kreise über \lstinline|update| zu aktualisieren, die noch nicht betrachtet wurden, womit folgende Subroutine terminiert.
 
