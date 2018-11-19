@@ -63,6 +63,8 @@
     deletekeywords={delete}
 }
 
+\patchcmd{\thmhead}{(#3)}{#3}{}{}
+%Removes brackets around custom names of instances of environments created with \newtheorem. This allows us to put different kinds of brackets there manually, in particular square brackets for citations.
 \crefname{thm}{Theorem}{Theoreme}
 \crefname{lem}{Lemma}{Lemmata}
 \crefname{defn}{Definition}{Definitionen}
@@ -74,6 +76,8 @@
 \newcommand{\cpp}{C\texttt{++}\xspace}
 \newcommand{\cppelf}{C\texttt{++}11\xspace}
 \newcommand{\bigO}{\mathcal{O}}
+
+\hyphenation{Code-bestand-teile}
 
 \begin{document}
 \frontmatter
