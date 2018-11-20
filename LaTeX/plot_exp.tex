@@ -1,0 +1,28 @@
+\documentclass[11pt]{standalone}
+\usepackage{pgf, tikz}
+\usepackage{pgfplotstable}
+\usepackage{pgfplots}
+\usetikzlibrary{plotmarks}
+
+\begin{document}
+\begin{tikzpicture} [align=center,
+every mark/.append style={mark size=2pt, solid}]
+\begin{axis}[
+    xlabel=$N_i$,
+    ylabel=Anzahl Iterationen,
+    xmin=0,
+    xmax=13,
+    x post scale=1.5,
+    ymin=0,
+    ymax=125,
+    tick pos=left,
+    axis lines=left,]
+\addplot[black, mark=x] table [x=N, y=MVH] {dataExp.txt} node[left, pos=0.055] {\small MaxVal HC};
+\addplot[black, mark=diamond] table [x=N, y=MVL] {dataExp.txt} node[right, pos=1] {\small MaxVal LC};
+\addplot[blue, mark=x] table [x=N, y=MRH] {dataExp.txt} node[right, pos=1] {\small MaxRev HC};
+\addplot[blue, mark=diamond] table [x=N, y=MRL] {dataExp.txt} node[right, pos=1] {\small MaxRev LC};
+\addplot[red, mark=x, dashed] table [x=N, y=RH] {dataExp.txt} node[right, pos=1] {\small Random HC};
+\addplot[red, mark=diamond, dashed] table [x=N, y=RL] {dataExp.txt} node[right, pos=1] {\small Random LC};
+\end{axis}
+\end{tikzpicture}
+\end{document}
