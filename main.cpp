@@ -2,36 +2,17 @@
 #include <random>
 #include <time.h>
 
+#include <stdio.h>
+#include <time.h>
+#include <unistd.h>
+#include <dos.h>
+#include <windows.h>
+
 #include "Network.h"
 #include "Edge.h"
 #include "Algorithm.h"
 #include "PivotAlgorithms.h"
 #include "RandomGraph.h"
-
-//TODO private/public noch mal überdenken
-
-bool isConnected(const Network& n) {
-    std::vector<bool> checked (n.largestNodeID+1, false);
-    std::set<size_t> reached_nodes;
-    std::vector<size_t> checkNext;
-
-    checkNext.push_back(n.getNodes().begin()->second.id);
-    reached_nodes.insert(checkNext[0]);
-
-    while (not checkNext.empty()) {
-        size_t temp = checkNext.back();
-        checkNext.pop_back();
-        if (checked[temp]) {continue;}
-
-        for (size_t neighbour : n.getNodes().find(temp)->second.neighbours) {
-            checkNext.push_back(neighbour);
-            reached_nodes.insert(neighbour);
-        }
-
-        checked[temp] = true;
-    }
-    return reached_nodes.size() == n.getNoOfNodes();
-}
 
 int main() {
     /*
@@ -79,7 +60,7 @@ int main() {
     solver.solution(true);
     n.print();*/
 
-    for (int i = 100; i < 110; i++) {
+    /*for (int i = 100; i < 110; i++) {
         RandomGraph test = RandomGraph(i, 50, 50);
         //test.evolve(i*1000);
         Network n = test.getNetwork();
@@ -88,60 +69,69 @@ int main() {
         //alg.solution(true);
         //if (n.getFlow() != 0) {n.print();}
         std::cout << n.getCost() << " | " << n.getFlow() << std::endl;
-    }
-    /*for (size_t k = 0; k < 50; k++) {
+    }*/
+
+    std::cout << "Random, HC:" << std::endl;
 
     Network test2 = Network(0);
-    std::vector<intmax_t> b_value = {9, -9, 0, 0, 0, 0, 0, 0};
-    //basic construct
-    //"infite" capacity
-    intmax_t u = 10000;
-    std::vector<size_t> from = {0,0,0,2,2,2,3,4,4,5,6,6,7,2,4,6,3,1,1,1};
-    std::vector<size_t> to   = {2,4,6,3,5,7,1,3,7,1,3,5,1,0,0,0,2,3,5,7};
-    std::vector<intmax_t> co = {0,0,0,0,1,3,0,1,3,0,3,3,0,0,0,0,0,0,0,0};
-    std::vector<intmax_t> ca = {1,3,5,u,u,u,2,u,u,2,u,u,5,1,3,5,u,2,2,5};
 
-    for (intmax_t b : b_value) {
-        test2.addNode(b);
-    }
+        std::vector<intmax_t> b_value = {1, -2, 3, -2, 5, -5};
+        //basic construct
+        //"infinite" capacity
+        intmax_t u = std::pow(2, 30);
+        std::vector<size_t> from = {0,1,0,0,2,2,4,4};
+        std::vector<size_t> to   = {1,0,3,5,1,5,1,3};
+        std::vector<intmax_t> co = {0,0,1,3,1,3,3,3};
+        std::vector<intmax_t> ca = {u,u,u,u,u,u,u,u};
 
-    for (size_t i = 0; i < from.size(); i++) {
-        if (not test2.addEdge(Edge(from[i], to[i], co[i], ca[i]))) {
-            std::cout << "ya failed";
-        }
-    }
-
-    //enlargen i times
-    for (size_t i = 0; i < k; i++) {
-        test2.addNode(0); //n_i*2
-        test2.addNode(0); //n_i*2 + 1
-        size_t n_i = (test2.getNoOfNodes() - 2)/2;
-        size_t newLeft = n_i*2, newRight = n_i*2 + 1;
-        intmax_t capSideEdges = std::pow(2,n_i - 1) + std::pow(2,n_i - 3);
-        intmax_t costInnerEdges = std::pow(2,n_i - 1) - 1;
-        test2.addEdge(Edge(0, newLeft, 0, capSideEdges));
-        test2.addEdge(Edge(newLeft, 0, 0, capSideEdges));
-        test2.addEdge(Edge(newRight, 1, 0, capSideEdges));
-        test2.addEdge(Edge(1, newRight, 0, capSideEdges));
-        for (size_t j = 1; j < n_i; j++) {
-            test2.addEdge(Edge(2*j, newRight, costInnerEdges, u));
-            test2.addEdge(Edge(newLeft, 2*j, costInnerEdges, u));
+        for (intmax_t b : b_value) {
+            test2.addNode(b);
         }
 
-        test2.changeBvalue(0, capSideEdges);
-        test2.changeBvalue(1, -capSideEdges);
+        for (size_t i = 0; i < from.size(); i++) {
+            if (not test2.addEdge(Edge(from[i], to[i], co[i], ca[i]))) {
+                std::cout << "ya failed";
+            }
+        }
+
+        Algorithm rand = Algorithm (test2, pivotRandom);
+
+        intmax_t sum = 0;
+        for (size_t x = 0; x < test2.getNoOfNodes(); x++) {
+        rand.solution(true);
+        //artificialNode id …
+        test2.largestNodeID--;
+        sum += rand.getNoOfIter();
+        test2.clean();
+        }
+
+        std::cout << sum / (double) test2.getNoOfNodes()<< std::endl;
+    for (size_t k = 0; k < 7; k++) {
+
+        //enlargen i times
+        //n_i equals j in paper
+            size_t n_i = test2.getNoOfNodes()/2 + 1;
+            intmax_t b_value = std::pow(2,n_i - 1) + std::pow(2,n_i - 3);
+            size_t newLeft = test2.addNode(b_value), //n_i*2 - 2
+                  newRight = test2.addNode(-b_value); //n_i*2 - 1
+
+            intmax_t costInnerEdges = std::pow(2,n_i - 1) - 1;
+            for (size_t j = 0; j < n_i - 1; j++) {
+                test2.addEdge(Edge(newLeft, 2*j + 1, costInnerEdges, u));
+                test2.addEdge(Edge(2*j, newRight, costInnerEdges, u));
+            }
+
+        Algorithm rand = Algorithm (test2, pivotRandom);
+
+        sum = 0;
+        for (size_t x = 0; x < test2.getNoOfNodes(); x++) {
+        rand.solution(true);
+        sum += rand.getNoOfIter();
+        //artificialNode id …
+        test2.largestNodeID--;
+        test2.clean();
+        }
+        std::cout << sum / (double) test2.getNoOfNodes()<< std::endl;
     }
-
-    Algorithm rand = Algorithm (test2, pivotMaxRev);
-    */
-    //rand.solution(false);
-    //test.print();
-
-    //test2.clean();
-    //test2.print();
-    //rand.solution(false);
-    //test2.print();
-    //std::cout << rand.getNoOfIter()/*/ (double) test2.getNoOfNodes() */<< std::endl;
-    //}
-
+    std::cout << std::endl;
 }

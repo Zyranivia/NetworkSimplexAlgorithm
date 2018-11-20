@@ -1,5 +1,5 @@
 #include <random>
-#include <time.h>
+#include <chrono>
 
 #include "PivotAlgorithms.h"
 
@@ -11,7 +11,7 @@ size_t pivotRandom(const std::vector<Circle>& circles) {
     if (negCircles.empty()) {return circles.size();}
 
     std::mt19937 rng;
-    rng.seed(static_cast<long unsigned int>(time(0)));
+    rng.seed(static_cast<long unsigned int>(std::chrono::high_resolution_clock::now().time_since_epoch().count()));
     std::uniform_int_distribution<size_t> rand(0, negCircles.size() - 1);
 
     return negCircles[rand(rng)];

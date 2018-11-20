@@ -1,5 +1,5 @@
 #include <random>
-#include <time.h>
+#include <chrono>
 #include <algorithm>
 #include <numeric>
 
@@ -16,7 +16,7 @@ Network RandomGraph::getNetwork() {
 RandomGraph::RandomGraph(size_t maxNoNodes, intmax_t maxFlow, intmax_t maxCost) {
     //initialize random number generator
     std::mt19937 rng;
-    rng.seed(static_cast<long unsigned int>(time(0)));
+    rng.seed(static_cast<long unsigned int>(std::chrono::high_resolution_clock::now().time_since_epoch().count()));
 
     std::uniform_int_distribution<size_t> noNodesRng(2, maxNoNodes);
     std::uniform_int_distribution<intmax_t> flowRng(1, maxFlow);
@@ -96,7 +96,7 @@ RandomGraph::RandomGraph(size_t maxNoNodes, intmax_t maxFlow, intmax_t maxCost) 
 //allows for deletion and insertion of nodes
 void RandomGraph::evolve (size_t steps) {
     std::mt19937 rng;
-    rng.seed(static_cast<long unsigned int>(time(0)));
+    rng.seed(static_cast<long unsigned int>(std::chrono::high_resolution_clock::now().time_since_epoch().count()));
 
     std::uniform_real_distribution<> choiceOfOperation(0., 1.);
 
@@ -189,7 +189,7 @@ void RandomGraph::evolve (size_t steps) {
 
 void RandomGraph::smartEvolve (size_t steps, std::vector<double> distribution) {
     std::mt19937 rng;
-    rng.seed(static_cast<long unsigned int>(time(0)));
+    rng.seed(static_cast<long unsigned int>(std::chrono::high_resolution_clock::now().time_since_epoch().count()));
     std::uniform_int_distribution<intmax_t> randNode (0, n.getNoOfNodes()-1);
 
     size_t opt_pos = 0;

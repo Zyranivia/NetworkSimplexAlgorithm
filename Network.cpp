@@ -1,7 +1,7 @@
 #include <algorithm>
 #include <iostream>
 #include <random>
-#include <time.h>
+#include <chrono>
 
 #include "Network.h"
 
@@ -31,7 +31,7 @@ void Network::print() {
 void Network::randomNoise(double phi) {
     if (phi <= 0) {return;}
     std::mt19937 rng;
-    rng.seed(static_cast<long unsigned int>(time(0)));
+    rng.seed(static_cast<long unsigned int>(std::chrono::high_resolution_clock::now().time_since_epoch().count()));
     std::uniform_real_distribution<double> rand(0, phi);
 
     //find max capacity
