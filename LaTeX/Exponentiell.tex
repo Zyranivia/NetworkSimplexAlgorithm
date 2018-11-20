@@ -1,0 +1,41 @@
+\chapter{Exponentiellen Instanzen nach Zadeh}\label{ch:lit}
+Zadeh veröffentlichte 1973 in \cite{Exponential} eine exponentielle Instanzenreihe des Transportproblems für diverse verbreitete Algorithmen. Dabei wählte er im Falle des Netzwerk-Simplex-Algorithmus eine initiale stark zulässige Baumlösung, die an den Baum der High-Cost-Initialisierung erinnert. Damit können wir rekursiv Netzwerke $N_j$ für $j\geq 3$ mit $2j$ Knoten definieren, für die der programmierte Algorithmus mit HC und MaxVal $2^j + 2^{j-1} - 2$ Iterationen benötigt. \cref{fig:N3} zeigt den Rekursionanfang $N_3$.
+\begin{figure}[!ht]\centering
+    \includestandalone{tikz_N3}
+    \caption{Grafik angelehnt an \cite[S. 261]{Exponential}, alle Kapazitäten sind unendlich. Die sechs mittleren Knoten bilden das Netzwerk $N_3$, die gestrichelten Linien stellen den initialen Baum dar, wobei die beiden Knoten $a$ identisch sein sollen. Die rekursive Erzeugung des Netzwerkes $N_j$ wird angedeutet.}
+    \label{fig:N3}
+\end{figure}
+
+Es folgt zunächst eine beispielhafte Implementierung des Netzwerkes $N_3$, bevor wir die Rekursion betrachten und umsetzen:
+
+\begin{lstlisting}
+Network n3 = Network(0);
+std::vector<intmax_t> b_value = {1, -2, 3, -2, 5, -5};
+for (intmax_t b : b_value) {n3.addNode(b);}
+
+intmax_t u = 1000; //"infinite" capacity
+std::vector<size_t> from = {0,1,0,0,2,2,4,4};
+std::vector<size_t> to   = {1,0,3,5,1,5,1,3};
+std::vector<intmax_t> co = {0,0,1,3,1,3,3,3};
+std::vector<intmax_t> ca = {u,u,u,u,u,u,u,u};
+
+for (size_t i = 0; i < from.size(); i++) {
+  n3.addEdge(Edge(from[i], to[i], co[i], ca[i]))
+}
+\end{lstlisting}
+
+Wie \cref{fig:N3} andeutet, entsteht das Netzwerk $N_j$, indem wir zu $N_{j-1}$ zwei neue Knoten $q_j$ und $s_j$ mit b-Wert $b_j:=2^{j-1} + 2^{j-3}$ und $-b_j$ hinzufügen. Wir fixieren $c_j:=2^{j-1}-1$ als Kosten. Die Quelle $q_j$ verbinden wir mit jeder Senke $s_i\neq s_j$ über eine Kante mit Kosten $c((q_j,s_i))=c_j$, die Senke ist von jeder Quelle $q_i\neq q_j$ aus mit Kosten $c((q_i,s_j))=c_j$ erreichbar.
+
+Wenn wir bereits ein \lstinline|Network n| haben, das $N_{j-1}$ entspricht, führt uns folgender Code zu $N_{j}$. Es wird davon ausgegangen, dass für eine Quelle $q_i$ \lstinline|id = 2*i| und für eine Senke $s_j$ \lstinline|id = 2*i + 1| gilt. Außerdem sollte \lstinline|intmax_t u| hinreichend groß sein.
+
+\begin{lstlisting}
+size_t j = n.getNoOfNodes()/2 + 1;
+intmax_t b_value = std::pow(2, j-1) + std::pow(2, j-3);
+size_t q_j = n.addNode(b_value), s_j = n.addNode(-b_value);
+
+intmax_t c_j = std::pow(2, j-1) - 1;
+for (size_t i = 0; i < j-1; i++) {
+  test2.addEdge(Edge(q_j, 2*i + 1, c_j, u));
+  test2.addEdge(Edge(2*i, s_j, c_j, u));
+}
+\end{lstlisting}
