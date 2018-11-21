@@ -1,0 +1,35 @@
+\chapter{Experimentelle Ergebnisse}\label{ch:erg}
+In dieser Bachelorarbeit wurde der Netzwerk-Simplex-Algorithmus mit drei verschiedenen Pivotalgorithmen und zwei Initialisierungen eingeführt. Es stellt sich nun die Frage, inwiefern sich die Laufzeit dieser sechs Varianten nach oben oder unten abschätzen lässt. Für MaxVal~HC gibt es wie in \cref{ch:lit} beschrieben exponentielle Instanzen, womit wir die Möglichkeit haben, zumindest grob die Güte der nachfolgenden Ansätze zu bewerten: Findet eine von der konkreten Variante des Algorithmus unabhängige Routine exponentielle Instanzen für MaxVal~HC, so ist die Hoffnung, dass diese für beliebige Pivotalgorithmen und Initialisierungen repräsentative Ergebnisse liefert. Leider ist keiner der implementierten Ansätze derart vielversprechend.
+
+Die Klasse \lstinline|class RandomGraph| enthält einen Konstruktor für zufällige Instanzen, die mit hoher Wahrscheinlichkeit zusammenhängend und lösbar sind, sowie die Funktionen \lstinline|void evolve| und \lstinline|void smartEvolve|. Erstere verändert ein gegebenes Netzwerk zufällig \lstinline|size_t steps| lang und speichert die Instanz mit der höchsten Iterationsanzahl, während zweitere stärker den evolutionären Ansatz betont und ihre Veränderungen umso wahrscheinlicher zurücknimmt, je kleiner die aktuelle Iterationsanzahl im Vergleich zur maximalen bisher gefundenen ist.
+
+Als experimentelles Ergebnis der zufälligen Instanzen lässt sich festhalten, dass die LC-Versionen zumeist mehr Iterationen benötigen als ihr HC-Pendant. MaxRev~HC und MaxVal~HC scheinen ebenbürtig zu sein, während Random konzeptionell bedingt auf Instanzen mit vielen Kanten und entsprechend vielen Kreisen eine schlechte Laufzeit hat. In der Teilphase, in der MaxVal LC auf den Kanten mit Kosten $0$ iteriert, haben alle negativen Kreise $\bar{C}_{T,e}$ denselben Wert von $c(\bar{C}_{T,e})=-2$. Damit verhält sich MaxVal~LC in dieser Teilphase ähnlich zu Random~LC; schlechte Instanzen für Random~LC könnten also auch schlecht für MaxVal~LC sein.
+
+Sowohl \lstinline|evolve| als auch \lstinline|smartEvolve| beginnen mit einem vorher festgelegten Netzwerk -- zumeist zufällig oder leer gewählt -- und bekommen eine Anzahl \lstinline|size_t steps| an Iterationen übergeben. Pro Iteration wird eine der folgenden Aktionen ausgeführt:
+\begin{itemize}\itemsep0em
+    \item Ergänze den Graph um eine zufällig ausgewählte Kante
+    \item Lösche eine zufällig ausgewählte Kante aus dem Graph
+    \item Ändere die Kosten einer zufällig ausgewählten Kante
+    \item Ändere die Kapazität einer zufällig ausgewählten Kante
+    \item Ändere den b-Wert von zwei unterschiedlichen, zufällig ausgewählten Knoten einmal positiv und einmal negativ um denselben Wert
+    \item Nehme eine zufällig ausgewählte Anzahl an Veränderungen zurück
+\end{itemize}
+
+Die Wahrscheinlichkeitsverteilung über den vorhandenen Aktionen wurde entweder manuell oder zufällig gesetzt. Letztere Aktion ist nur in \lstinline|smartEvolve| enthalten. Alle anderen durchgeführten Aktionen werden in dem \lstinline|struct Action| gespeichert, das sich entweder die veränderte Kante davor und danach oder die beiden Knoten sowie die b-Wert-Veränderung merkt:
+
+\begin{lstlisting}
+struct Action {
+  Action (Edge _oldE,Edge _newE) : oldE(_oldE),newE(_newE),
+                                    edgeCase(true) {};
+  Action (std::tuple<size_t, size_t, intmax_t> _b_change)
+    : b_change(_b_change), edgeCase(false) {};
+
+  Edge oldE, newE;
+  std::tuple<size_t, size_t, intmax_t> b_change;
+  bool edgeCase;
+};
+\end{lstlisting}
+
+Ich habe auf die Aktionen Knoten löschen bzw. hinzufügen verzichtet, um für eine feste Knotenanzahl eine Instanz mit möglichst vielen Iterationen zu suchen. Die Versuche haben gezeigt, dass eine Abfolge von Funktionsaufrufen, die als Startnetzwerk jeweils die schlechteste Instanz der vorherigen Iteration ergänzt um einen isolierten Knoten bekommen, die besseren Ergebnisse birgt.
+
+Insgesamt gab es keine einzige Versuchsreihe, in der wenigstens ein quadratisches Wachstum der Laufzeit beobachtet werden konnte, oft war es nicht einmal linear. Um vernünftige Ergebnisse zu erzielen, sind anscheinend wesentlich ausgetüfteltere Ansätze notwendig.

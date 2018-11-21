@@ -15,7 +15,7 @@ Wir werden im Folgenden nur endliche Graphen betrachten. Außerdem sind alle Gra
 Die \emph{Kosten} von $f$ betragen $c(f) = \sum\limits_{\mathclap{e\in E}} f(e)\cdot c(e)$.
 \end{defn}
 
-\begin{defn}Sei $N=(G,b,c,u)$ ein Netzwerk. Als \textbf{Min-Cost-Flow-Problem} bezeichnen wir die Suche nach einem maximalen Fluss $f$ auf $N$ mit minimalen Kosten. Die vereinfachte Version mit unbeschränkter Kapazitätsfunktion, bei der $u(e)=\infty$ für alle $e\in E(G)$ gilt, nennen wir \textbf{Transportproblem}.\end{defn}
+\begin{defn}\label{defMCF} Sei $N=(G,b,c,u)$ ein Netzwerk. Als \textbf{Min-Cost-Flow-Problem} bezeichnen wir die Suche nach einem maximalen Fluss $f$ auf $N$ mit minimalen Kosten. Die vereinfachte Version mit unbeschränkter Kapazitätsfunktion, bei der $u(e)=\infty$ für alle $e\in E(G)$ gilt, nennen wir \textbf{Transportproblem}.\end{defn}
 
 In dieser Bachelorarbeit wird angenommen, dass $b$ auf $\mathbb{Z}$ sowie $c$ und $u$ auf $\mathbb{N}_{\geq0}$ abbilden, um Gleitkommazahlungenauigkeit beim Programmieren zu vermeiden. Durch eine entsprechende Skalierung des Problems können Funktionen nach $\mathbb{R}$ bzw. $\mathbb{R}_{\geq 0}$ hinreichend genau angenähert werden. Es wird davon ausgegangen, dass die b-Werte der Quellen und Senken ausgeglichen sind, also $\sum_{v\in V(G)} b(v) = 0$ gilt. Sollte die Summe über die Senken überwiegen, ist die Instanz unlösbar. Der umgekehrte Fall kann durch eine Dummy-Senke\footnotemark{} abgefangen werden.
 
@@ -248,7 +248,7 @@ Bislang haben wir nicht gezeigt, dass der Algorithmus immer terminiert. Dies wä
 	\label{fig:deg}
 \end{figure}
 
-Degenerierte Iterationen entstehen, wenn bei einer zulässigen Baumlösung $(T,f)$ nicht alle Kanten von $T$ durchflossen sind, also $T\neq T_f$ gilt. $(T,f)$ wird dann auch als \emph{degenerierte} Baumlösung bezeichnet. In einer ungünstigen Konstellation der deterministischen Wahl der hinzugefügten Kante $e$ und entfernten Kante $e'$ kann es zum \emph{Cycling} kommen, also zu einer Abfolge von Bäumen, die wiederholt iteriert werden. Dies tritt sehr selten auf, für ein konstruiertes Beispiel siehe \cite[S. 303]{NSAbook}.
+Degenerierte Iterationen entstehen, wenn bei einer zulässigen Baumlösung $(T,f)$ nicht alle Kanten von $T$ durchflossen sind, also $T\neq T_f$ gilt. $(T,f)$ wird dann auch als \emph{degenerierte Baumlösung} bezeichnet. In einer ungünstigen Konstellation der deterministischen Wahl der hinzugefügten Kante $e$ und entfernten Kante $e'$ kann es zum \emph{Cycling} kommen, also zu einer Abfolge von Bäumen, die wiederholt iteriert werden. Dies tritt sehr selten auf, für ein konstruiertes Beispiel siehe \cite[S. 303]{NSAbook}.
 
 In \cite{cycling} führte Cunningham 1976 eine Methode ein, mit der durch eine geschickte Wahl der entfernten Kante Cycling verhindert werden kann, ohne dass die Auswahl der hinzufügbaren Kanten eingeschränkt wird. Dafür benötigen wir folgende Definitionen:
 
@@ -262,7 +262,7 @@ In \cite{cycling} führte Cunningham 1976 eine Methode ein, mit der durch eine g
     \label{fig:rule}
 \end{figure}
 
-In einem Kreis $C_{T,e}$ bezeichnen wir als \emph{blockierende Kanten} solche, die verhindern, dass der Kreis um mehr als $\delta$ augmentiert werden kann. Der Algorithmus wählt als zu entfernende Kante immer eine unter diesen. In \cref{fig:rule} ist $\delta=2$ und die blockierenden Kanten sind rot eingefärbt.
+In einem Kreis $C_{T,e}$ bezeichnen wir als \emph{blockierende Kanten} solche, die verhindern, dass der Kreis um mehr als $\delta$ augmentiert werden kann. Der Algorithmus wählt als zu entfernende Kante immer eine von diesen. In \cref{fig:rule} ist $\delta=2$ und die blockierenden Kanten sind rot eingefärbt.
 
 Die von Cunningham eingeführte \emph{Regel der letzten blockierenden Kante} besagt folgendes: Mit dem Apex von $C_{T,e}$ beginnend gehe über alle Kanten $e\in E(C_{T,e})$ in der durch $e$ bestimmten Orientierung des Kreises und wähle die letzte blockierende Kante als die zu entfernende Kante aus. In \cref{fig:rule} ist diese dementsprechend $e'$. Dank dieser Regel terminiert der Netzwerk-Simplex-Algorithmus und wird im Normalfall sogar beschleunigt. 
  
@@ -303,31 +303,29 @@ Nach \cref{negKreis} ist jedes $\delta_e$ endlich. Sollten nur degenerierte Iter
 In einem überraschend effektiven Ansatz, mit \emph{Random} bezeichnet, wird $\tilde{C}\in \bar{C}_T$ zufällig gewählt. Für diese Variante ist es schwierig, die erwartete Laufzeit zu bestimmen.
 
 \subsection{Initialisierung} \label{ch:init}
-Der letzte verbleibende Schritt, um einen vollständigen Algorithmus zur Lösung des Transportproblems zu erlangen, ist das Finden einer initialen, stark zulässigen Baumlösung $(T_0,f_0)_r$.
+Zu einem vollständigen Algorithmus zur Lösung des Transportproblems fehlt nur noch die initiale stark zulässige Baumlösung $(T_0,f_0)_r$. Um diese zu finden, wenden wir einen Trick an: Sei $N=(G,b,c,u)$ eine Instanz des Transportproblems. Wir fügen dem Netzwerk einen zusätzlichen Transitknoten $a$ mit $b(a)=0$ hinzu, der gemeinhin als künstlicher \textit{(artificial)} Knoten bezeichnet wird. Für alle Quellen $v\in V(G)$ mit $b(v)>0$ ergänzen wir eine künstliche Kante $(v,a)$, für alle Senken und Transitknoten $a\neq v\in V(G)$ mit $b(v)\leq0$ eine künstliche Kante $(a,v)$. Sowohl die Kapazität und die Kosten der künstlichen Kanten $e_v$ sind unendlich, letztere können in der Praxis mit $c(e_v)=|V(G)|\cdot\max_{e\in E(G)}\{c(e)\}+1$ abgeschätzt werden, da jeder Weg in $G$ geringere Kosten aufweist. Sei $G'$ der entstehende Graph.
 
-Hierfür wenden wir einen Trick an: Sei $N=(G,b,c,u)$ eine Instanz des Transportproblems. Wir fügen dem Netzwerk einen zusätzlichen Transitknoten $a$ mit $b(a)=0$ hinzu, der gemeinhin als künstlicher \textit{(artificial)} Knoten bezeichnet wird. Für alle Quellen $v\in V(G)\colon b(v)>0$ ergänzen wir eine künstliche Kante $(v,a)$, für alle Senken und Transitknoten $a\neq w\in V(G)\colon b(w)\leq0$ eine künstliche Kante $(a,w)$. Sei $G'$ der entstehende Graph.
+Ohne weitere Probleme lässt sich nun die stark zulässige Baumlösung $(T_0,f_0)_a$ finden: Wir setzen $T_0:=(V(G),\{e_v\mid v\in V(G)\})$, dann ist nach \cref{TreeUnique} $f_0$ eindeutig. Diese Art der Initialisierung wird im Folgenden mit \emph{HC} für \emph{High-Cost-Initialisierung} abkürzen.
 
-Sämtliche künstlichen Kanten $e_v$ haben eine unbegrenzte Kapazität, die Kosten sind ebenfalls unendlich und können mit $c(e_v)=|V(G)|\cdot\max_{e\in E(G)}\{c(e)\}+1$ abgeschätzt werden, da jeder Weg in $G$ geringere Kosten aufweist. Leicht finden wir nun die stark zulässige Baumlösung $(T_0,f_0)_a$, wobei $T_0=(V(G),\{e_v\mid v\in V(G)\})$ ist. Nach \cref{TreeUnique} ist $f_0$ eindeutig. Diese Art der Initialisierung werden wir im Folgenden mit \emph{HC} für \emph{High-Cost-Initialisierung} abkürzen.
-
-\begin{lem}Sei $N=(G,b,c,u)$ eine Instanz des Transportproblems und $(T,f)$ die Lösung des Netzwerk-Simplex-Algorithmus mit \emph{HC} auf dem erweiterten Graphen $G'$. Die Instanz $N$ ist genau dann lösbar, wenn $G'_f$ keine künstlichen Kanten enthält.\end{lem}
+\begin{lem}\label{Init}Sei $N=(G,b,c,u)$ eine Instanz des Transportproblems und $(T,f)$ die Lösung des Netzwerk-Simplex-Algorithmus mit \emph{HC} auf dem erweiterten Graphen $G'$. Die Instanz $N$ ist genau dann lösbar, wenn $G'_f$ keine künstlichen Kanten enthält.\end{lem}
 \begin{proof}\label{solvable}\mbox{}
 \begin{itemize}[topsep=0pt]
-	\item[\enquote{$\Rightarrow$}] Sei $\hat{f}$ ein maximaler Fluss von $N$ und $(T,f)$ die Lösung des Algorithmus. $\hat{f}$ ist auch ein maximaler Fluss des Netzwerkes $(G',b,c,u)$; damit gilt nach \cref{BLex} und \cref{korrekt} $c(f)\leq c(\hat{f})<\infty$. Da die Kosten einer künstlichen Kante unendlich sind, kann keine davon in $G'_f$ enthalten sein.
+	\item[\enquote{$\Rightarrow$}] Sei $\hat{f}$ ein maximaler Fluss auf $N$ und $(T,f)$ die Lösung des Algorithmus auf $G'$. Dann ist $\hat{f}$ auch ein maximaler Fluss des Netzwerkes $(G',b,c,u)$ und nach \cref{BLex,korrekt} gilt $c(f)\leq c(\hat{f})<\infty$. Da die Kosten einer künstlichen Kante unendlich sind, kann keine davon in $G'_f$ enthalten sein.
 	
-	\item[\enquote{$\Leftarrow$}] Sei $(T,f)$ die Lösung des Algorithmus. Wenn $G'_f$ keine künstlichen Kanten enthält, ist $f_{|E(G)}$ ein maximaler Fluss von $N$, womit diese Instanz wiederum lösbar ist.\qedhere
+	\item[\enquote{$\Leftarrow$}] Sei $(T,f)$ die Lösung des Algorithmus auf $G'$. Wenn $G'_f$ keine künstlichen Kanten enthält, ist $f_{|E(G)}$ ein maximaler Fluss von $N$, womit diese Instanz lösbar ist.\qedhere
 \end{itemize}
 \end{proof}
 
 Sollen Instanzen mit vielen Knoten oder hohen Kosten der teuersten Kante gelöst werden, so kann es passieren, dass die Kosten der künstlichen Kanten den darstellbaren Bereich der gängigen Datentypen sprengen. Unter anderem aus diesem Grund gibt es die \emph{Low-Cost-Initialisierung}, bei uns kurz \emph{LC}.
 
-Bei dieser wird die gegebene Instanz $N=(G,b,c,u)$ des Transportproblems zunächst zu $N'=(G,b,c',u)$ abgewandelt. Dabei ist $c'$ die Nullfunktion, also $c(e)=0$ für jede Kante $e\in E(G)$. Für $N'$ verwenden wir den Netzwerk-Simplex-Algorithmus mit \emph{HC} und erhalten eine stark zulässige Baumlösung $(T',f')_a$, wobei die Kosten einer künstlichen Kante $c(e_v)=|V(G)|\cdot0+1=1$ betragen.
+Bei dieser Variante wird die gegebene Instanz $N=(G,b,c,u)$ des Transportproblems zunächst zu $N'=(G,b,c',u)$ abgewandelt. Dabei ist $c'$ die Nullfunktion, also $c(e)=0$ für jede Kante $e\in E(G)$. Für $N'$ verwenden wir den Netzwerk-Simplex-Algorithmus mit \emph{HC} und erhalten eine stark zulässige Baumlösung $(T',f')_a$, wobei die Kosten einer künstlichen Kante $c(e_v)=|V(G)|\cdot0+1=1$ betragen.
 
-Offensichtlicherweise ist $N$ genau dann lösbar, wenn $N'$ lösbar ist. Wenn $c(f')>0$ ist, so ist $N$ nicht lösbar und wir sind fertig. Andernfalls iterieren wir $(T',f')_a$ degeneriert, bis $a$ ein Blatt von $T'$ ist. Dies wird in \cref{ch:HCLC} detailliert erläutert.
+Offensichtlich ist $N$ genau dann lösbar, wenn $N'$ lösbar ist. Wenn $c(f')>0$ ist, enthält $G'_{f'}$ eine künstliche Kante. Damit ist nach \cref{Init} $N'$ nicht lösbar und wir sind fertig. Andernfalls iterieren wir $(T',f')_a$ degeneriert, bis $a$ ein Blatt von $T'$ ist. Dies wird in \cref{ch:HCLC} detailliert erläutert.
 
-Damit bekommen wir die zulässige Baumlösung $(T=T'-\{a\}, f=f'_{|E(G)})$ für $N'$ und damit für $N$. Als neuen Wurzelknoten können wir den eindeutigen Nachbar $k_a$ von $a$ in $T'$ wählen; damit erhalten wir die stark zulässige Baumlösung $(T,f)_{k_a}$. Nun kann eine optimale Lösung des Transportproblems für $N$ berechnet werden.
+Dadurch erhalten wir die zulässige Baumlösung $(T=T'-\{a\}, f=f'_{|E(G)})$ für $N'$ und damit für $N$. Als neuen Wurzelknoten können wir den eindeutigen Nachbar $k_a$ von $a$ in $T'$ wählen, was uns zur stark zulässigen Baumlösung $(T,f)_{k_a}$ führt. Nun kann eine optimale Lösung des Transportproblems für $N$ berechnet werden.
 
 \section{Erweiterung auf beschränkte Kapazitäten}\label{ch:alg2}
-Bisher haben wir uns auf unbeschränkte Kapazitäten beschränkt. Wir werden nun den Netzwerk-Simplex-Algorithmus auf das allgemeinere Min-Cost-Flow-Problem erweitern. Die Funktionsweise bleibt dieselbe, nur die betrachteten zulässigen Baumlösungen verändern sich leicht:
+Bisher war nur die Kapazität von Residualkanten beschränkt. Wir werden nun den Netzwerk-Simplex-Algorithmus vom Transportproblem auf das allgemeinere Min-Cost-Flow-Problem (siehe \cref{defMCF}) erweitern. Die Funktionsweise bleibt dieselbe, nur die betrachteten zulässigen Baumlösungen verändern sich leicht:
 
 \begin{defn}Sei $N=(G,b,c,u)$ ein Netzwerk. Ein aufspannender Baum $T$ von $G$ und ein maximaler Fluss $f$ auf $N$ bilden eine \textbf{zulässige Baumlösung} $(T,f)$, wenn für alle Kanten $e\in E(G)\backslash E(T)$ außerhalb des Baums $f(e) = 0$ oder $f(e)=u(e)$ gilt.\end{defn}
 \begin{anm}Kanten, die maximal durchflossen sind, bezeichnen wir als \emph{saturiert}.\end{anm}

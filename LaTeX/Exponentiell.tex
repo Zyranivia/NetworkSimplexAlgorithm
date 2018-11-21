@@ -1,5 +1,5 @@
 \chapter{Exponentielle Instanzen nach Zadeh}\label{ch:lit}
-Zadeh veröffentlichte 1973 in \cite{Exponential} eine Familie von exponentiellen Instanzen des Transportproblems für diverse verbreitete Algorithmen. Dabei wählte er im Falle des Netzwerk-Simplex-Algorithmus eine initiale stark zulässige Baumlösung, die an den Baum der High-Cost-Initialisierung erinnert. Damit können wir rekursiv Netzwerke $N_j$ für $j\geq 3$ mit $2j$ Knoten definieren, für die der programmierte Algorithmus mit HC und MaxVal $2^j + 2^{j-1} - 2$ Iterationen benötigt. \cref{fig:N3} zeigt den Rekursionanfang $N_3$.
+Zadeh veröffentlichte 1973 in \cite{Exponential} eine Familie von exponentiellen Instanzen des Transportproblems für diverse verbreitete Algorithmen. Dabei wählte er im Falle des Netzwerk-Simplex-Algorithmus eine initiale stark zulässige Baumlösung, die an den Baum der High-Cost-Initialisierung erinnert. Damit können wir rekursiv Netzwerke $N_j$ für $j\geq 3$ mit $2j$ Knoten definieren, für die der programmierte Algorithmus mit HC und MaxVal $2^j + 2^{j-1} - 2$ Iterationen benötigt. \cref{fig:N3} zeigt den Rekursionsanfang $N_3$.
 \begin{figure}[!ht]\centering
     \includestandalone{tikz_N3}
     \caption{Grafik angelehnt an \cite[S. 261]{Exponential}. Alle Kapazitäten sind unendlich, die Kosten wie angegeben. Die sechs mittleren Knoten bilden das Netzwerk $N_3$, die gestrichelten Linien stellen den initialen Baum dar, wobei die beiden Knoten $a$ identisch sein sollen. Die rekursive Erzeugung des Netzwerkes $N_j$ wird angedeutet.}
@@ -24,7 +24,7 @@ for (size_t i = 0; i < from.size(); i++) {
 }
 \end{lstlisting}
 
-Wie \cref{fig:N3} andeutet, entsteht das Netzwerk $N_j$, indem wir zu $N_{j-1}$ zwei neue Knoten $q_j$ und $s_j$ mit b-Wert $b_j:=2^{j-1} + 2^{j-3}$ und $-b_j$ hinzufügen. Wir fixieren $c_j:=2^{j-1}-1$ als Kosten. Die Quelle $q_j$ verbinden wir mit jeder Senke $s_i\neq s_j$ über eine Kante mit Kosten $c((q_j,s_i))=c_j$, die Senke $s_j$ ist von jeder Quelle $q_i\neq q_j$ aus mit Kosten $c((q_i,s_j))=c_j$ erreichbar.
+Wie \cref{fig:N3} andeutet, entsteht das Netzwerk $N_j$, indem wir zu $N_{j-1}$ zwei neue Knoten $q_j$ und $s_j$ mit b-Wert $b_j:=2^{j-1} + 2^{j-3}$ und $-b_j$ hinzufügen. Wir fixieren $c_j:=2^{j-1}-1$ als Kosten. Die Quelle $q_j$ verbinden wir mit jeder Senke $s_i\neq s_j$ über eine Kante mit Kosten $c((q_j,s_i))=c_j$; die Senke $s_j$ ist von jeder Quelle $q_i\neq q_j$ aus mit Kosten $c((q_i,s_j))=c_j$ erreichbar.
 
 Wenn wir bereits ein \lstinline|Network n| haben, das $N_{j-1}$ entspricht, führt uns folgender Code zu $N_{j}$. Es wird davon ausgegangen, dass für eine Quelle $q_i$ \lstinline|id = 2*i| und für eine Senke $s_j$ \lstinline|id = 2*i + 1| gilt. Außerdem sollte \lstinline|intmax_t u| hinreichend groß sein.
 
@@ -35,13 +35,17 @@ size_t q_j = n.addNode(b_value), s_j = n.addNode(-b_value);
 
 intmax_t c_j = std::pow(2, j-1) - 1;
 for (size_t i = 0; i < j-1; i++) {
-test2.addEdge(Edge(q_j, 2*i + 1, c_j, u));
-test2.addEdge(Edge(2*i, s_j, c_j, u));
+  test2.addEdge(Edge(q_j, 2*i + 1, c_j, u));
+  test2.addEdge(Edge(2*i, s_j, c_j, u));
 }
 \end{lstlisting}
 
+In \cref{fig:plot_exp} ist die Laufzeit aller sechs eingeführten Varianten des Netzwerk-Simplex-Algorithmus auf den Netzwerken $N_3$ bis $N_{10}$ dargestellt. MaxVal HC steigt exponentiell, während derselbe Pivotalgorithmus mit LC-Initialisierung linear ist. Die randomisierten Versionen scheinen stärker als linear zu wachsen, jedoch nicht exponentiell.
+
+Damit lässt sich vermuten, dass Familien von exponentiellen Instanzen nicht nur einzeln pro Pivotalgorithmus, sondern zusätzlich differenziert nach der Initialisierung zu suchen sind. Im nächsten Kapitel beschäftigen wir uns mit algorithmischen Ansätzen für diese Suche. 
+
 \begin{figure}[!ht]\centering
     \includestandalone{plot_exp}
-    \caption{Anzahl der Iterationen der sechs eingeführten Algorithmusvarianten auf den Netzwerken $N_i$. Die Laufzeit von MaxValHC ist exponentiell, die der drei anderen deterministischen Varianten ist linear. Für den randomisierten Ansatz wurde der Schnitt von $|V(G)|$ Durchläufen genommen.}
+    \caption{Anzahl der Iterationen der sechs eingeführten Algorithmusvarianten auf den Netzwerken $N_i$. Die Laufzeit von MaxValHC ist exponentiell, die der drei anderen deterministischen Varianten ist linear. Für den randomisierten Ansatz wurde der Schnitt von $|V(G_i)|$ Durchläufen genommen.}
     \label{fig:plot_exp}
 \end{figure}
