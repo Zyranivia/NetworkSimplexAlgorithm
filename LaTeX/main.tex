@@ -1,13 +1,25 @@
-\documentclass[11pt,a4paper,twoside,ngerman,openany]{scrbook}
+\documentclass[11pt,a4paper,twoside,ngerman,openany,bibliography=totoc]{scrbook}
 \KOMAoptions{BCOR=6mm}
+\usepackage{BA_Titelseite}
+
 \author{Max~Kanold}
+\geburtsdatum{5. Juni 1995}
+\geburtsort{Dresden}
+\date{26. November 2018}
+\betreuer{Betreuer: Prof. Dr. Heiko R\"oglin}
+\zweitgutachter{Zweitgutachter: Priv.-Doz. Dr. Elmar Langetepe}
+\institut{Institut f\"ur Informatik}
 \title{Eine graphentheoretische Herleitung und Implementierung des Netzwerk-Simplex-Algorithmus}
+\ausarbeitungstyp{Bachelorarbeit Informatik}
 
 %\pagestyle{plain}
 \usepackage{scrhack}
 
 \usepackage[utf8]{inputenc}
 \usepackage[T1]{fontenc}
+
+\usepackage[backend=biber,style=numeric]{biblatex}
+\addbibresource{bibliography.bib}
 
 \usepackage[ngerman]{babel}
 \usepackage{csquotes}
@@ -88,8 +100,18 @@
 \begin{document}
 \frontmatter
 \maketitle
-\cleardoublepage
+\null\vfill
+\begin{quote}
+    \emph{I love deadlines. I like the whooshing sound they make as they fly by.}
+    \flushright --- Douglas Adams
+\end{quote}
+\vfill\vfill\vfill
+An dieser Stelle möchte ich mich herzlich bei Xianghui Zhong und Heiko Röglin für die hilfreichen Anregungen und die unkomplizierte Betreuung bei dieser Bachelorarbeit bedanken. Ein besonderer Dank gebührt den unermüdlichen Korrekturlesern Debbora Leip und Jonathan Gruner, sämtliche verbliebenen Fehler gehen nun auf meine Kappe. Zu guter Letzt danke ich dem zweiten und dritten Mann meiner Skatrunde dafür, dass sie zu jeder Schandtat bereit waren.
+\thispagestyle{empty}
+\clearpage
+
 \tableofcontents
+\thispagestyle{empty}
 \cleardoublepage
 
 \mainmatter
@@ -115,7 +137,14 @@ Sämtliche Bilder von Graphen im Verlauf dieser Bachelorarbeit sind nach folgend
 La la la.
 
 \backmatter
-\bibliography{bibliography}{}
-\bibliographystyle{ieeetr}
+\printbibliography[title=Literaturverzeichnis]
+
+\chapter*{Erklärung der Urheberschaft}
+
+Ich erkläre hiermit an Eides statt, dass ich die vorliegende Bachelorarbeit ohne Hilfe Dritter und ohne Benutzung anderer als der angegebenen Hilfsmittel angefertigt habe; die aus fremden Quellen direkt oder indirekt übernommenen Gedanken sind als solche kenntlich gemacht. Die Arbeit wurde bisher in gleicher oder ähnlicher Form in keiner anderen Prüfungsbehörde vorgelegt und auch noch nicht veröffentlicht.
+
+\vspace{3cm}
+\hspace{2cm} Ort, Datum \hfill Unterschrift \hspace{2cm}
+\clearpage
 
 \end{document}

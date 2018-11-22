@@ -26,7 +26,7 @@ for (size_t i = 0; i < from.size(); i++) {
 
 Wie \cref{fig:N3} andeutet, entsteht das Netzwerk $N_j$, indem wir zu $N_{j-1}$ zwei neue Knoten $q_j$ und $s_j$ mit b-Wert $b_j:=2^{j-1} + 2^{j-3}$ und $-b_j$ hinzufügen. Wir fixieren $c_j:=2^{j-1}-1$ als Kosten. Die Quelle $q_j$ verbinden wir mit jeder Senke $s_i\neq s_j$ über eine Kante mit Kosten $c((q_j,s_i))=c_j$; die Senke $s_j$ ist von jeder Quelle $q_i\neq q_j$ aus mit Kosten $c((q_i,s_j))=c_j$ erreichbar.
 
-Zadeh legt in \cite[S. 263\,f.]{Exponential} dar, dass MaxVal HC bei diesen Netzwerken in jeder nicht-degenerierten Iteration einen Kreis, der über den künstlichen Knoten verläuft, um $\delta=1$ augmentiert. Da nach Konstruktion der Durchfluss von $N_j$ exponentiell steigt, ist die Anzahl an Iterationen ebenfalls exponentiell.
+Zadeh legt in \cite[S. 263\,f.]{Exponential} dar, dass MaxVal\=/HC bei diesen Netzwerken in jeder nicht-degenerierten Iteration einen Kreis, der über den künstlichen Knoten verläuft, um $\delta=1$ augmentiert. Da nach Konstruktion der Durchfluss von $N_j$ exponentiell steigt, ist die Anzahl an Iterationen ebenfalls exponentiell.
 
 Wenn wir bereits ein \lstinline|Network n| haben, das $N_{j-1}$ entspricht, führt uns folgender Code zu $N_{j}$. Es wird davon ausgegangen, dass für eine Quelle $q_i$ \lstinline|id = 2*i| und für eine Senke $s_j$ \lstinline|id = 2*i + 1| gilt. Außerdem sollte \lstinline|intmax_t u| hinreichend groß sein.
 
@@ -42,12 +42,12 @@ for (size_t i = 0; i < j-1; i++) {
 }
 \end{lstlisting}
 
-In \cref{fig:plot_exp} ist die Laufzeit aller sechs eingeführten Varianten des Netzwerk-Simplex-Algorithmus auf den Netzwerken $N_3$ bis $N_{10}$ dargestellt. MaxVal HC steigt exponentiell, während derselbe Pivotalgorithmus mit LC-Initialisierung linear ist. Die randomisierten Versionen scheinen stärker als linear zu wachsen, jedoch nicht exponentiell.
+In \cref{fig:plot_exp} ist die Laufzeit aller sechs eingeführten Varianten des Netzwerk-Simplex-Algorithmus auf den Netzwerken $N_3$ bis $N_{10}$ dargestellt. MaxVal\=/HC steigt exponentiell, während derselbe Pivotalgorithmus mit LC linear ist. Die randomisierten Versionen scheinen stärker als linear zu wachsen, jedoch nicht exponentiell.
 
 Damit lässt sich vermuten, dass Familien von exponentiellen Instanzen nicht nur einzeln pro Pivotalgorithmus, sondern zusätzlich differenziert nach der Initialisierung zu suchen sind. Im nächsten Kapitel beschäftigen wir uns mit algorithmischen Ansätzen für diese Suche. 
 
 \begin{figure}[!ht]\centering
     \includestandalone{plot_exp}
-    \caption{Anzahl der Iterationen der sechs eingeführten Algorithmusvarianten auf den Netzwerken $N_i$. Die Laufzeit von MaxValHC ist exponentiell, die der drei anderen deterministischen Varianten ist linear. Für den randomisierten Ansatz wurde der Schnitt von $|V(G_i)|$ Durchläufen genommen.}
+    \caption{Anzahl der Iterationen der sechs eingeführten Algorithmusvarianten auf den Netzwerken $N_i$. Die Laufzeit von MaxVal\=/HC ist exponentiell, die der drei anderen deterministischen Varianten ist linear. Für den randomisierten Ansatz wurde der Schnitt von $|V(G_i)|$ Durchläufen genommen.}
     \label{fig:plot_exp}
 \end{figure}
