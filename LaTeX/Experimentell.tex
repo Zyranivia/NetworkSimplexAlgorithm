@@ -5,7 +5,7 @@ Die Klasse \lstinline|class RandomGraph| enthält einen Konstruktor für zufäll
 
 Als experimentelles Ergebnis der zufälligen Instanzen lässt sich festhalten, dass die LC-Versionen zumeist mehr Iterationen benötigen als ihr HC-Pendant. MaxRev~HC und MaxVal~HC scheinen ebenbürtig zu sein, während Random konzeptionell bedingt auf Instanzen mit vielen Kanten und entsprechend vielen Kreisen eine schlechte Laufzeit hat. In der Teilphase, in der MaxVal LC auf den Kanten mit Kosten $0$ iteriert, haben alle negativen Kreise $\bar{C}_{T,e}$ denselben Wert von $c(\bar{C}_{T,e})=-2$. Damit verhält sich MaxVal~LC in dieser Teilphase ähnlich zu Random~LC; schlechte Instanzen für Random~LC könnten also auch schlecht für MaxVal~LC sein.
 
-Sowohl \lstinline|evolve| als auch \lstinline|smartEvolve| beginnen mit einem vorher festgelegten Netzwerk -- zumeist zufällig oder leer gewählt -- und bekommen eine Anzahl \lstinline|size_t steps| an Iterationen übergeben. Pro Iteration wird eine der folgenden Aktionen ausgeführt:
+Sowohl \lstinline|evolve| als auch \lstinline|smartEvolve| beginnen mit einem vorher festgelegten Netzwerk -- beispielsweise zufällig gewählt -- und bekommen eine Anzahl \lstinline|size_t steps| an Iterationen übergeben. Pro Iteration wird eine der folgenden Aktionen ausgeführt:
 \begin{itemize}\itemsep0em
     \item Ergänze den Graph um eine zufällig ausgewählte Kante
     \item Lösche eine zufällig ausgewählte Kante aus dem Graph
@@ -15,7 +15,7 @@ Sowohl \lstinline|evolve| als auch \lstinline|smartEvolve| beginnen mit einem vo
     \item Nehme eine zufällig ausgewählte Anzahl an Veränderungen zurück
 \end{itemize}
 
-Die Wahrscheinlichkeitsverteilung über den vorhandenen Aktionen wurde entweder manuell oder zufällig gesetzt. Letztere Aktion ist nur in \lstinline|smartEvolve| enthalten. Alle anderen durchgeführten Aktionen werden in dem \lstinline|struct Action| gespeichert, das sich entweder die veränderte Kante davor und danach oder die beiden Knoten sowie die b-Wert-Veränderung merkt:
+Die Wahrscheinlichkeitsverteilung über den vorhandenen Aktionen wurde entweder manuell oder zufällig gesetzt. Die Rücknahme von Aktionen ist nur in \lstinline|smartEvolve| enthalten. Alle anderen durchgeführten Aktionen werden in dem \lstinline|struct Action| gespeichert, das sich entweder die veränderte Kante davor und danach oder die beiden Knoten sowie deren b-Wert-Veränderung merkt:
 
 \begin{lstlisting}
 struct Action {
