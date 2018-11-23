@@ -63,7 +63,9 @@ void zadeh() {
             n.addEdge(Edge(2*j, newRight, costInnerEdges, u));
         }
 
+        //Network save = n;
         Algorithm alg = Algorithm (n, pivotMaxVal);
+        //n.randomNoise(0.0001);
 
         //sum = 0;
         //for (size_t x = 0; x < n.getNoOfNodes(); x++) {
@@ -75,6 +77,8 @@ void zadeh() {
         //}
         std::cout << alg.getNoOfIter() << std::endl;
         //std::cout << sum / (double) test2.getNoOfNodes()<< std::endl;
+
+        //n = save;
     }
     std::cout << std::endl;
 }

@@ -111,7 +111,7 @@ Die Funktionen \lstinline|deleteEdge| und \lstinline|deleteNode| schlagen fehl, 
 
 In jeder Iteration der zweiten Phase des Netzwerk-Simplex-Algorithmus wird die Funktion \lstinline|changeFlow| aufgerufen und augmentiert den übergebenen Kreis \lstinline|Circle c| um einen beliebigen Wert, sofern dies möglich ist. Dieser Wert wird analog zu $\delta$ aus \cref{ch:NSA} der größte zulässige sein. Die hier genutzte \lstinline|class Circle| werden wir uns nun genauer anschauen.
 
-\section{Die Klasse \emph{Circle}}
+\section{Die Klasse \emph{Circle}}\label{ch:circle}
 Sei $G$ ein gerichteter Graph mit $n$ Knoten sowie $m$ Kanten und $T$ ein aufspannender Baum von $G$. In der Herleitung des Algorithmus haben wir genutzt, dass für eine Kante $e\in E(G)\backslash E(T)$ außerhalb des Baumes der Kreis $C_{T,e}$ eindeutig ist. Wird $T$ im Speicher gehalten, kann beispielsweise durch Tiefensuche in Laufzeit $\bigO(n)$ ein Kreis $C_{T,e}$ bzw. dessen Orientierung $\bar{C}_{T,e}$ gefunden werden.
 
 Im Normalfall verändern sich von einer Iteration auf die nächste nur ein Bruchteil der Kreise. Diese lassen sich jedoch schlecht herausfiltern, wenn nur die Veränderung der zulässigen Baumlösung betrachtet wird. Um die Kreise nicht jede Iteration neu berechnen zu müssen, habe ich mich entschieden, nach \cite{betreuer} nicht den Baum abzuspeichern, sondern alle Kreise. Die theoretische Komplexität bleibt etwa dieselbe,\footnotemark{} in der Praxis ist es schneller, nur die veränderten Kreise neu zu berechnen.
@@ -147,7 +147,7 @@ Bevor wir uns die Umsetzung anschauen, überlegen wir uns theoretisch, was die K
 
 Der Algorithmus wird nun $e_1$ zum neuen Baum $T'$ hinzufügen und eine ausgehende Kante $e_1\neq e'\in E(C_{T,e_1})$ wählen, die dafür entfernt wird. Zunächst halten wir fest, dass es vor der Iteration keinen weiteren Fall als die beiden aus \cref{fig:circles} geben kann: Wären $e_1$ und $e_2$ im Schnitt der ungerichteten Kreise $E(C_{T,e_1})\cap E(C_{T,e_2})$ enthalten, dann wäre $T$ nicht kreisfrei.
 
-Für den neuen ungerichteten Kreis gilt $C_{T',e'}=C_{T,e_1}$, zur Beibehaltung der Invariante muss \lstinline|class Circle| die gespeicherten Kanten rotieren. Für die Konstellation, dass $e_1$ im Gegensatz zu $e'$ nicht saturiert ist oder vice versa ändert sich zusätzlich die Richtung von $\bar{C}_{T',e'}$ im Vergleich zu $\bar{C}_{T,e_1}$. All dies leistet die Funktion \lstinline|Circle::rotateBy|:
+Für den neuen ungerichteten Kreis gilt $C_{T',e'}=C_{T,e_1}$, zur Beibehaltung der Invariante muss \lstinline|class Circle| die gespeicherten Kanten rotieren. Für den Fall, dass $e_1$ anders orientiert ist als $e'$, ändert sich zusätzlich die Richtung von $\bar{C}_{T',e'}$ im Vergleich zu $\bar{C}_{T,e_1}$. All dies leistet die Funktion \lstinline|Circle::rotateBy|:
 
 \begin{lstlisting}
 void Circle::rotateBy (size_t index, bool toReverse) {

@@ -81,6 +81,11 @@
     deletekeywords={delete}
 }
 
+\makeatletter
+\setlength{\@fptop}{0pt}
+\makeatother
+%floats on single page on top
+
 \patchcmd{\thmhead}{(#3)}{#3}{}{}
 %Removes brackets around custom names of instances of environments created with \newtheorem. This allows us to put different kinds of brackets there manually, in particular square brackets for citations.
 \crefname{thm}{Theorem}{Theoreme}
@@ -96,6 +101,8 @@
 \newcommand{\bigO}{\mathcal{O}}
 
 \hyphenation{Code-bestand-teile}
+\hyphenation{graphen-theo-re-tisch}
+\hyphenation{kreis-freier}
 
 \begin{document}
 \frontmatter
@@ -106,7 +113,7 @@
     \flushright --- Douglas Adams
 \end{quote}
 \vfill\vfill\vfill
-An dieser Stelle möchte ich mich herzlich bei Xianghui Zhong und Heiko Röglin für die hilfreichen Anregungen und die unkomplizierte Betreuung bei dieser Bachelorarbeit bedanken. Ein besonderer Dank gebührt den unermüdlichen Korrekturlesern Debbora Leip und Jonathan Gruner, sämtliche verbliebenen Fehler gehen nun auf meine Kappe. Zu guter Letzt danke ich dem zweiten und dritten Mann meiner Skatrunde dafür, dass sie zu jeder Schandtat bereit waren.
+An dieser Stelle möchte ich mich herzlich bei Xianghui Zhong und Heiko Röglin für die hilfreichen Anregungen und die unkomplizierte Betreuung bei der Bachelorarbeit bedanken. Ein besonderer Dank gebührt den unermüdlichen Korrekturlesern Debbora Leip und Jonathan Gruner, sämtliche verbliebenen Fehler gehen nun auf meine Kappe. Zu guter Letzt danke ich dem zweiten und dritten Mann meiner Skatrunde dafür, dass sie zu jeder Schandtat bereit waren.
 \thispagestyle{empty}
 \clearpage
 
@@ -116,11 +123,13 @@ An dieser Stelle möchte ich mich herzlich bei Xianghui Zhong und Heiko Röglin 
 
 \mainmatter
 \chapter{Einführung}
-Das Simplex-Verfahren, zu welchem eine Einführung in \cite[Chvátal, 2002]{NSAbook} gefunden werden kann, löst Lineare Programme in der Praxis sehr schnell, obwohl die Worst-Case-Laufzeit nicht polynomiell ist. Jedes Netzwerkproblem lässt sich als Lineares Programm darstellen und somit mit dem Simplex-Verfahren lösen, durch die konkrete Struktur solcher Probleme genügt jedoch der von \cite[Dantzig, 1951]{erf1} und \cite[Orden, 1956]{erf2} vereinfachte Netzwerk-Simplex-Algorithmus. Auch für diesen gibt es exponentielle Instanzen (siehe \cref{ch:lit}), in der Praxis wird er trotzdem vielfach verwendet.
+Sehr viele Probleme in der Informatik lassen sich als Lineares Programm darstellen, so auch das in \cref{ch:MCF} eingeführte Min-Cost-Flow-Problem aus dem Bereich der Graphentheorie. Logistische und kombinatorische Probleme der Praxis lassen sich wiederum durch dieses modellieren. Das Simplex-Verfahren, zu welchem eine Einführung in \cite{NSAbook} gefunden werden kann, löst Lineare Programme in der Anwendung sehr schnell, obwohl die Worst-Case-Laufzeit nicht polynomiell ist. 
 
-TODO: Die Einführung wird ohnehin ausgebaut. Irgendwie erwähne ich auch unauffällig, dass in dieser Bachelorarbeit die Laufzeit des Algorithmus als Iterationsanzahl definiert ist, obwohl in der Praxis natürlich die Gesamtgeschwindigkeit zählt.
+Dantzig und Orden vereinfachten in den 1950er Jahren mit \cite{erf1} bzw. \cite{erf2} das Simplex-Verfahren für die konkrete Struktur des Min-Cost-Flow-Problems zum Netzwerk-Simplex-Algorithmus. Gemäß \cite[S. 445]{LP&NF2010} ist diese Vereinfachung um einen Faktor von 200--300 schneller, außerdem lässt sich der Netzwerk-Simplex-Algorithmus rein graphentheoretisch definieren.
 
-Sämtliche Bilder von Graphen im Verlauf dieser Bachelorarbeit sind nach folgender Legende zu lesen. Teilweise werden nur einzelne Werte angezeigt, Ausnahme ist die Kapazität, die nie ohne Flusswerte auftritt.
+In dieser Bachelorarbeit wird in \cref{ch:NSA} die graphentheoretische Herleitung mit Beweis der Korrektheit vollzogen und anschließend in \cref{ch:prog} die Implementierung des Algorithmus in \cpp dargelegt. Insgesamt wurden sechs Varianten umgesetzt, für eine von diesen veröffentlichte Zadeh 1973 eine Familie von exponentiellen Instanzen. Diese wird in \cref{ch:lit} vorgestellt und verifiziert. \cref{ch:erg} greift die Frage auf, ob sich allgemein mit einfachen algorithmischen Ansätzen schlechte Instanzen für beliebige Versionen des Netzwerk-Simplex-Algorithmus finden lassen. Hierzu muss an dieser Stelle ein negatives Ergebnis verzeichnet werden, \cref{ch:outro} skizziert dann Vorschläge für eine Vertiefung der Gesamtthematik.
+
+Im weiteren Verlauf dieser Bachelorarbeit ist mit Laufzeit des Algorithmus nicht die tatsächlich benötigte Zeit, sondern die Anzahl an internen Iterationen gemeint, wie sie in \cref{ch:alg} eingeführt wird. Sämtliche Bilder von Graphen im Verlauf dieser Bachelorarbeit sind nach folgender Legende zu lesen. Teilweise werden nur einzelne Werte angezeigt, Ausnahme ist die Kapazität, die nie ohne Flusswerte auftritt.
 \begin{itemize}\itemsep0em
     \item b-Wert: schwarz im Knoten
     \item Fluss: \textcolor{blue}{blau} auf Kante
@@ -128,13 +137,25 @@ Sämtliche Bilder von Graphen im Verlauf dieser Bachelorarbeit sind nach folgend
     \item Kosten: \textcolor{red}{rot} auf Kante, falls notwendig mit Komma (,) abgetrennt
 \end{itemize}
 
+\begin{figure}[!ht]\centering
+    \includestandalone{tikz_legende}
+    \caption{Beispielnetzwerk mit verschiedenen Spezifikationen.}
+    \label{fig:legende}
+\end{figure}
+
 \include{Algorithmus}
 \include{Implementierung}
 \include{Exponentiell}
 \include{Experimentell}
 
-\chapter{Ausblick}
-La la la.
+\chapter{Ausblick}\label{ch:outro}
+In dieser Bachelorarbeit wurde der Netzwerk-Simplex-Algorithmus in \cref{ch:NSA} graphentheoretisch hergeleitet und anschließend in \cref{ch:prog} dessen Implementierung dargestellt. Nachdem in \cref{ch:lit} die Existenz exponentieller Instanzen für eine der sechs Varianten verifiziert wurde, stand in \cref{ch:erg} die Frage im Raum, inwiefern sich für die anderen Versionen des Algorithmus obere oder untere Schranken zeigen lassen.
+
+Die im Rahmen dieser Bachelorarbeit getesteten algorithmischen Ansätze konnten zu einer Antwort nicht viel beitragen. In einer Vertiefung dieser Thematik könnten komplexere evolutionäre Algorithmen oder andere Ansätze des maschinellen Lernens implementiert werden. Zusätzlich ist eine Erweiterung der Palette an Pivotalgorithmen oder Initialisierungen denkbar.
+
+Sollte sich eine zuverlässige Routine zur Erzeugung schlechter Instanzen finden, kann diese genutzt werden, um Ansätze zu einer \emph{Smoothed Analysis} im Sinne von \cite{Roglin} zu untersuchen. In der Klasse \lstinline|Network| ist bereits eine von \cite{betreuer} inspirierte Funktion \lstinline|void randomNoise(double phi)| enthalten, die für jede Kante $e =(v,w)\in E(G)$ zwei von \lstinline|phi| und $\max_{e'\in E(G)}\{u(e')\}$ abhängige Variablen $\varepsilon_0$ und $\varepsilon_1$ bestimmt. Sie erhöht dann $b(v)$ um $\varepsilon_0$, $b(w)$ um $-\varepsilon_0$ und $u(e)$ um $\varepsilon_0+\varepsilon_1$. Bereits für sehr kleine Werte von \lstinline|phi| weisen die Instanzen aus \cref{ch:lit} dann keine exponentielle Laufzeit mehr auf.
+
+In einer praxisnäheren Fortführung dieser Arbeit würde die tatsächliche Rechenzeit statt der Iterationsanzahl als Maß für die Laufzeit betrachtet und die Implementierung sowie Auswahl des Pivotalgorithmus diesbezüglich optimiert werden. Es wäre interessant zu erfahren, ob die in \cref{ch:circle} propagierte Beschleunigung durch die Klasse \lstinline|Circle| auch zu beobachten ist, wenn pro Iteration nur ein Teil der Kreise berechnet wird.
 
 \backmatter
 \printbibliography[title=Literaturverzeichnis]

@@ -1,21 +1,20 @@
 \chapter{Experimentelle Ergebnisse}\label{ch:erg}
-In dieser Bachelorarbeit wurde der Netzwerk-Simplex-Algorithmus mit drei verschiedenen Pivotalgorithmen und zwei Initialisierungen eingeführt. Es stellt sich nun die Frage, inwiefern sich die Laufzeit dieser sechs Varianten nach oben oder unten abschätzen lässt. Für MaxVal\=/HC gibt es wie in \cref{ch:lit} beschrieben exponentielle Instanzen, wodurch wir die Möglichkeit haben, zumindest grob die Güte der nachfolgenden Ansätze zu bewerten: Findet eine von der konkreten Variante des Algorithmus unabhängige Routine exponentielle Instanzen für MaxVal\=/HC, so besteht die Hoffnung, dass diese für beliebige Pivotalgorithmen und Initialisierungen repräsentative Ergebnisse liefert. Leider ist keiner der implementierten Ansätze derart vielversprechend.
+In \cref{ch:NSA} wurde der Netzwerk-Simplex-Algorithmus mit drei verschiedenen Pivotalgorithmen und zwei Initialisierungen eingeführt. Es stellt sich nun die Frage, inwiefern sich die Laufzeiten dieser sechs Varianten nach oben oder unten abschätzen lassen. Für MaxVal\=/HC gibt es wie in \cref{ch:lit} beschrieben exponentielle Instanzen, wodurch wir die Möglichkeit haben, zumindest grob die Güte der nachfolgenden Ansätze zu bewerten: Findet eine von der konkreten Variante des Algorithmus unabhängige Routine exponentielle Instanzen für MaxVal\=/HC, so besteht die Hoffnung, dass diese für beliebige Pivotalgorithmen und Initialisierungen repräsentative Ergebnisse liefert. Leider ist keiner der implementierten Ansätze derart vielversprechend.
 
-Die Klasse \lstinline|class RandomGraph| enthält einen Konstruktor für zufällige Instanzen, die mit hoher Wahrscheinlichkeit zusammenhängend und lösbar sind, sowie die Funktionen \lstinline|void evolve| und \lstinline|void smartEvolve|. Erstere verändert ein gegebenes Netzwerk zufällig \lstinline|size_t steps| lang und speichert die Instanz mit der höchsten Iterationsanzahl, während die zweite stärker den evolutionären Ansatz betont und ihre Veränderungen umso wahrscheinlicher zurücknimmt, je kleiner die aktuelle Iterationsanzahl im Vergleich zur maximalen bisher gefundenen ist.
+Es liegt nahe, zunächst zufällige Netzwerke zu betrachten. Der Konstruktor der Klasse \lstinline|class RandomGraph| erzeugt zufällige Instanzen, die mit hoher Wahrscheinlichkeit zusammenhängend und lösbar sind. Die Untersuchung dieser Instanzen hat ergeben, dass die LC-Versionen zumeist mehr Iterationen benötigen als ihr HC-Pendant. MaxRev\=/HC und MaxVal\=/HC scheinen einander ebenbürtig zu sein, während Random konzeptionell bedingt auf Instanzen mit vielen Kanten und entsprechend vielen Kreisen eine schlechtere Laufzeit hat. In der Teilphase, in der MaxVal\=/LC auf den Kanten mit Kosten $0$ iteriert, haben alle negativen Kreise $\bar{C}_{T,e}$ denselben Wert von $c(\bar{C}_{T,e})=-2$. Damit verhält sich MaxVal\=/LC in dieser Teilphase ähnlich zu Random\=/LC. Schlechte Instanzen für Random\=/LC könnten dementsprechend auch bei MaxVal\=/LC zu einer hohen Iterationsanzahl führen.
 
-Als experimentelles Ergebnis der zufälligen Instanzen lässt sich festhalten, dass die LC-Versionen zumeist mehr Iterationen benötigen als ihr HC-Pendant. MaxRev\=/HC und MaxVal\=/HC scheinen ebenbürtig zu sein, während Random konzeptionell bedingt auf Instanzen mit vielen Kanten und entsprechend vielen Kreisen eine schlechte Laufzeit hat. In der Teilphase, in der MaxVal\=/LC auf den Kanten mit Kosten $0$ iteriert, haben alle negativen Kreise $\bar{C}_{T,e}$ denselben Wert von $c(\bar{C}_{T,e})=-2$. Damit verhält sich MaxVal\=/LC in dieser Teilphase ähnlich zu Random\=/LC. Schlechte Instanzen für Random\=/LC könnten also auch schlecht für MaxVal\=/LC sein.
+In \lstinline|class RandomGraph| sind weiterhin die beiden Funktionen \lstinline|void evolve| und \lstinline|void smartEvolve| enthalten. Erstere verändert ein gegebenes Netzwerk zufällig und speichert die Instanz mit der höchsten Iterationsanzahl, während die zweite stärker den evolutionären Ansatz betont und ihre Veränderungen umso wahrscheinlicher zurücknimmt, je kleiner die aktuelle Iterationsanzahl im Vergleich zur maximalen bisher gefundenen ist.
 
-Sowohl \lstinline|evolve| als auch \lstinline|smartEvolve| beginnen mit einem vorher festgelegten Netzwerk -- beispielsweise zufällig oder leer gewählt -- und bekommen eine Anzahl \lstinline|steps| an Iterationen übergeben. Pro Iteration wird eine der folgenden Aktionen ausgeführt:
+Sowohl \lstinline|evolve| als auch \lstinline|smartEvolve| beginnen mit einem vorher festgelegten Netzwerk -- beispielsweise zufällig oder kantenlos gewählt -- und bekommen eine Anzahl an Iterationen \lstinline|size_t steps| übergeben. Pro Iteration wird eine der folgenden Aktionen ausgeführt:
 \begin{itemize}\itemsep0em
     \item Ergänze den Graph um eine zufällig ausgewählte Kante.
     \item Lösche eine zufällig ausgewählte Kante aus dem Graph.
     \item Ändere die Kosten einer zufällig ausgewählten Kante.
     \item Ändere die Kapazität einer zufällig ausgewählten Kante.
-    \item Ändere den b-Wert von zwei unterschiedlichen, zufällig ausgewählten Knoten einmal positiv und einmal negativ um denselben Wert.
-    \item Nimm eine zufällig ausgewählte Anzahl an Veränderungen zurück.
+    \item Ändere die b-Werte von zwei unterschiedlichen, zufällig ausgewählten Knoten um denselben Betrag mit entgegengesetzten Vorzeichen.
 \end{itemize}
 
-Die Wahrscheinlichkeitsverteilung über den vorhandenen Aktionen wurde entweder manuell oder zufällig gesetzt. Die Rücknahme von Aktionen ist nur in \lstinline|smartEvolve| enthalten. Alle anderen durchgeführten Aktionen werden in dem \lstinline|struct Action| gespeichert, das sich entweder die veränderte Kante davor und danach oder die beiden Knoten sowie deren b-Wert-Veränderung merkt:
+Alle oben aufgeführten Aktionen werden in dem \lstinline|struct Action| gespeichert, das sich entweder die veränderte Kante davor und danach oder die beiden Knoten sowie deren b-Wert-Veränderung merkt:
 
 \begin{lstlisting}
 struct Action {
@@ -30,6 +29,8 @@ struct Action {
 };
 \end{lstlisting}
 
-Ich habe auf die Aktionen Knoten löschen bzw. hinzufügen verzichtet, um für eine feste Knotenanzahl eine Instanz mit einer möglichst hohen Laufzeit zu suchen. Anfänglich waren sie noch enthalten, aber in den Versuchen hat sich das Hinzufügen eines Knoten nie bewährt. Bessere Ergebnisse erzielte eine Abfolge von Funktionsaufrufen, die jeweils mit der schlechtesten Instanz der vorherigen Iteration ergänzt um einen isolierten Knoten begannen.
+\lstinline|smartEvolve| hat zusätzlich die Option, eine zufällig bestimmte Anzahl an Veränderungen zurückzunehmen. Die Wahrscheinlichkeitsverteilung über den vorhandenen Aktionen wurde entweder manuell oder zufällig gesetzt. 
 
-Insgesamt gab es keine einzige Versuchsreihe, in der wenigstens ein quadratisches Wachstum der Laufzeit beobachtet werden konnte, oft war es nicht einmal linear. Um vernünftige Ergebnisse zu erzielen, sind anscheinend wesentlich ausgetüfteltere Ansätze notwendig.
+Anfänglich waren noch die Aktionen Knoten löschen bzw. hinzufügen enthalten, aber in den Versuchen hat sich das Hinzufügen eines Knoten nie bewährt. Bessere Ergebnisse erzielte eine Abfolge von Funktionsaufrufen, die jeweils mit der schlechtesten Instanz der vorherigen Iteration ergänzt um einen isolierten Knoten begannen.
+
+Insgesamt gab es keine einzige Versuchsreihe, in der zumindest ein quadratisches Wachstum der Laufzeit beobachtet werden konnte. In vielen Fällen stieg die Anzahl an Iterationen nicht einmal linear zur Anzahl der Knoten. Um vernünftige Ergebnisse zu erzielen, sind anscheinend wesentlich ausgetüfteltere Ansätze notwendig.
