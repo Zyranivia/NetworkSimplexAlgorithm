@@ -109,7 +109,7 @@ public:
 
 Die Funktionen \lstinline|deleteEdge| und \lstinline|deleteNode| schlagen fehl, wenn auf den zu löschenden Kanten noch Fluss ist. So kann unter anderem am Ende des Algorithmus durch Löschen des künstlichen Knotens überprüft werden, ob die Instanz lösbar ist.
 
-Für Phase 1 des Netzwerk-Simplex-Algorithmus (siehe \cref{ch:HCLC}) nutzen wir die Funktion \lstinline|addFlow|, die einen Weg von einer Quelle zu einer Senke verlangt. In jeder Iteration der zweiten Phase wird die Funktion \lstinline|changeFlow| aufgerufen und augmentiert den übergebenen Kreis \lstinline|Circle c| um einen beliebigen Wert, sofern dies möglich ist. Dieser Wert wird analog zu $\delta$ aus \cref{ch:NSA} der größte zulässige sein. Die hier genutzte \lstinline|class Circle| werden wir uns nun genauer anschauen.
+Für Phase 1 des Netzwerk-Simplex-Algorithmus nutzen wir wie in \cref{ch:HCLC} beschrieben die Funktion \lstinline|addFlow|, die einen Weg von einer Quelle zu einer Senke verlangt. In jeder Iteration der zweiten Phase wird die Funktion \lstinline|changeFlow| aufgerufen und augmentiert den übergebenen Kreis \lstinline|Circle c| um einen beliebigen Wert, sofern dies möglich ist. Dieser Wert wird analog zu $\delta$ aus \cref{ch:NSA} der größte zulässige sein. Die hier genutzte \lstinline|class Circle| werden wir uns nun genauer anschauen.
 
 \section{Die Klasse \emph{Circle}}\label{ch:circle}
 Sei $G$ ein gerichteter Graph mit $n$ Knoten sowie $m$ Kanten und $T$ ein aufspannender Baum von $G$. In der Herleitung des Algorithmus haben wir genutzt, dass für eine Kante $e\in E(G)\backslash E(T)$ außerhalb des Baumes der Kreis $C_{T,e}$ eindeutig ist. Wird $T$ im Speicher gehalten, kann beispielsweise durch Tiefensuche in Laufzeit $\bigO(n)$ der Kreis $C_{T,e}$ bzw. dessen Orientierung $\bar{C}_{T,e}$ gefunden werden.
@@ -513,7 +513,7 @@ Dafür gehen wir über den Vektor \lstinline|circles| und suchen nach Kreisen, i
     }
 \end{lstlisting}
 
-Zuletzt werden der künstliche Knoten und wie angedeutet die $|V(G)|-1$ Kreise gelöscht, die am künstlichen Knoten beginnen, bevor die finale Lösung berechnet wird. Ich benutze an dieser Stelle eine Lambdafunktion, um die entsprechenden Kreise herauszufiltern.
+Zuletzt werden der künstliche Knoten und die $|V(G)|-1$ Kreise gelöscht, die an diesem beginnen, bevor die finale Lösung berechnet wird. Ich benutze an dieser Stelle eine Lambdafunktion, um die entsprechenden Kreise herauszufiltern.
 
 \begin{lstlisting}
   //now remove all circles beginning at the artificial node
