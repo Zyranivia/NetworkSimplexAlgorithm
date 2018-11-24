@@ -1,37 +1,25 @@
-# NetworkSimplexAlgorithm
-Coding the network simplex algorithm and finding bad instances
+# A graphtheoretical implementation of the network-simplex-algorithm
+This code implements the network-simplex-algorithm on integers as well as an exponential instance and some experimental research looking for bad instances. The bachelor thesis contains a German explanation of both the algorithm and the code.
 
-## Übersicht:
-Die Network-Klasse händelt den Graphen über die Klasse Edge und die interne Klasse Node.
-Die Algorithm-Klasse implementiert den Network-Simplex-Algorithmus und nutzt dazu Circle-Klasse, um mögliche Iterationen abzuspeichern.
-Des Weiteren bekommt der Algorithmus eine Funktion aus Pivotalgorithms.h zugewiesen.
-Erste Ansätze des zweiten Teil der BA, sprich Grapherzeugung, sind implementiert. Es können momentan zufällige, „gleichverteilte“ Graphen erzeugt werden und eine Art evolutionärer Ansatz existiert.
+# Eine graphentheoretische Herleitung und Implementierung des Netzwerk-Simplex-Algorithmus
+Sehr viele Probleme in der Informatik lassen sich als Lineares Programm darstellen, so
+auch das in Abschnitt 2.1 eingeführte Min-Cost-Flow-Problem aus dem Bereich der
+Graphentheorie. Logistische und kombinatorische Fragestellungen der Praxis lassen
+sich wiederum durch dieses modellieren. Das Simplex-Verfahren löst Lineare Programme in der Anwendung
+sehr schnell, obwohl die Worst-Case-Laufzeit nicht polynomiell ist.
 
-Veränderungen am Code werden in nächster Zeit nur wenige zu beobachten sein, ich sitze gerade an der Niederschrift.
+Dantzig und Orden vereinfachten in den 1950er Jahren das Simplex-
+Verfahren für die konkrete Struktur des Min-Cost-Flow-Problems zum Netzwerk-
+Simplex-Algorithmus. Diese Vereinfachung ist um einen Faktor
+von 200–300 schneller, außerdem lässt sich der Netzwerk-Simplex-Algorithmus rein
+graphentheoretisch definieren.
 
-## To-Do-Liste
-Hohe Priorität:
-- [ ] evolutionärer Ansatz verbessern
-- [ ] exponentielle Instanz unter randomNoise begutachten
-
-Mittlere Priorität:
-- [ ] Network -> txt und zurück implementieren
-
-Niedrige Priorität:
-- [ ] Laufzeitoptimierung (vor allem Berechnung von c.costPerFlow)
-
-## Fahrplan
-1. Algorithmus vollenden und testen
-   - Veränderungen durch verschiedene Initialisierungen und Pivot-Algorithmen klassifizieren ✓   
-2. random-noise-Funktion implementieren und Auswirkungen betrachten
-   - neue Funktion überlegen, sollten die Auswirkungen nicht überzeugen
-3. schlechte Instanzen finden
-
-## Erste Ergebnisse
-### Ergebnisse über 200 Iterationen von Randomgraph (200,100,50):
-- MaxRev_LC 3.5 | MaxRev_HC 2.5 | MaxVal_LC 6.3 | MaxVal_HC 2.0 | Random_LC 12 | Random_HC 11.4
-- Erkenntnis: MaxVal_LC entspricht auf der ersten Hälfte Random (mit halb so schlechten Ergebnissen)
-
-### Ergebnisse von smartevolve
-Für bis zu fünf Knoten vermutlich optimal, danach alles andere als überzeugend. Verbesserungsideen sind existent, aber es steht zu befürchten, dass der Ansatz als Ganzes höchstens komplexer funktioniert.
-
+In dieser Bachelorarbeit wird in Kapitel 2 die graphentheoretische Herleitung mit
+Beweis der Korrektheit vollzogen und anschließend in Kapitel 3 die Implementierung
+des Algorithmus in C++ dargelegt. Insgesamt wurden sechs Varianten umgesetzt. Für
+eine von diesen veröffentlichte Zadeh 1973 eine Familie von exponentiellen
+Instanzen; diese wird in Kapitel 4 vorgestellt und verifiziert. Kapitel 5 greift die Frage
+auf, ob sich allgemein mit einfachen algorithmischen Ansätzen schlechte Instanzen für
+beliebige Versionen des Netzwerk-Simplex-Algorithmus finden lassen. Hierzu muss an
+dieser Stelle ein negatives Ergebnis verzeichnet werden. Kapitel 6 skizziert als Abschluss
+Vorschläge für eine Vertiefung der Gesamtthematik.
