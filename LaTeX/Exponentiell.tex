@@ -23,7 +23,7 @@ for (size_t i = 0; i < from.size(); i++) {
 }
 \end{lstlisting}
 
-Wie \cref{fig:N3} andeutet, entsteht das Netzwerk $N_j$, indem wir zu $N_{j-1}$ zwei neue Knoten $q_j$ und $s_j$ mit b-Wert $b_j:=2^{j-1} + 2^{j-3}$ und $-b_j$ hinzufügen. Die Quelle $q_j$ verbinden wir mit jeder Senke $s_i\neq s_j$ über eine Kante $(q_j,s_i)$; die Senke $s_j$ ist von jeder Quelle $q_i\neq q_j$ aus über $(q_i,s_j)$ erreichbar. Als Kosten für die neu hinzugefügten Kanten wählen wir $c((q_j,s_i))=c((q_i,s_j))=c_j:=2^{j-1}-1$.
+Wie \cref{fig:N3} andeutet, entsteht das Netzwerk $N_j$, indem wir zu $N_{j-1}$ zwei neue Knoten $q_j$ und $s_j$ mit b-Wert $b_j:=2^{j-1} + 2^{j-3}$ und $-b_j$ hinzufügen. Die Quelle $q_j$ verbinden wir mit jeder Senke $s_i\neq s_j$ über eine Kante $(q_j,s_i)$; die Senke $s_j$ ist von jeder Quelle $q_i\neq q_j$ aus über $(q_i,s_j)$ erreichbar. Als Kosten für die neu hinzugefügten Kanten wählen wir $c((q_j,s_i))=c((q_i,s_j)):=c_j=2^{j-1}-1$.
 
 Zadeh legt in \cite[S. 263\,f.]{Exponential} dar, dass MaxVal\=/HC bei diesen Netzwerken in jeder nicht-degenerierten Iteration einen Kreis über den künstlichen Knoten um $\delta=1$ augmentiert. Da nach Konstruktion der Durchfluss von $N_j$ exponentiell steigt, ist die Anzahl an Iterationen ebenfalls exponentiell.
 

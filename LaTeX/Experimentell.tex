@@ -14,7 +14,7 @@ Sowohl \lstinline|evolve| als auch \lstinline|smartEvolve| beginnen mit einem vo
     \item Ändere die b-Werte von zwei unterschiedlichen, zufällig ausgewählten Knoten um denselben Betrag mit entgegengesetzten Vorzeichen.
 \end{itemize}
 
-Alle oben aufgeführten Aktionen werden in dem \lstinline|struct Action| gespeichert, das sich entweder die veränderte Kante davor und danach oder die beiden Knoten sowie deren b-Wert-Veränderung merkt:
+Alle oben aufgeführten Aktionen werden in dem \lstinline|struct Action| gespeichert, das sich entweder die veränderte Kante oder die \lstinline|id| der beiden modifizierten Knoten sowie deren b-Wert-Veränderung merkt:
 
 \begin{lstlisting}
 struct Action {
